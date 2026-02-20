@@ -8,6 +8,7 @@ class CategoriesController < ApplicationController
                    .includes(:images_attachments, :category)
 
     scope = scope.in_stock if params[:in_stock] == "1"
+    scope = scope.price_range(params[:min_price], params[:max_price])
     scope = case params[:sort]
             when "price_asc"  then scope.order(selling_price: :asc)
             when "price_desc" then scope.order(selling_price: :desc)

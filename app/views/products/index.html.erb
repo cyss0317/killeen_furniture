@@ -21,7 +21,8 @@
             <%= f.select :category_id,
                 options_for_select([["All Categories", ""]] + @categories.map { |c| [c.name, c.id] }, params[:category_id]),
                 {},
-                class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+                class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                onchange: "this.form.submit()" %>
           </div>
 
           <!-- Price Range -->
@@ -38,7 +39,7 @@
           <!-- In Stock Only -->
           <div class="mb-6">
             <label class="flex items-center gap-2 cursor-pointer">
-              <%= f.check_box :in_stock, checked: params[:in_stock] == "1", class: "rounded border-gray-300 text-amber-700 focus:ring-amber-500" %>
+              <%= f.check_box :in_stock, checked: params[:in_stock] == "1", class: "rounded border-gray-300 text-amber-700 focus:ring-amber-500", onchange: "this.form.submit()" %>
               <span class="text-sm text-gray-700">In Stock Only</span>
             </label>
           </div>
@@ -54,7 +55,8 @@
                   ["Price: High to Low", "price_desc"]
                 ], params[:sort]),
                 {},
-                class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+                class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                onchange: "this.form.submit()" %>
           </div>
 
           <%= f.submit "Apply Filters", class: "w-full bg-amber-800 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-amber-900 transition-colors cursor-pointer" %>

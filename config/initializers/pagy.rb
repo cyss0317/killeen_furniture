@@ -1,2 +1,2 @@
 Pagy.options[:limit] = 24
-Pagy.options[:size]  = 7
+Pagy.options[:slots] = 9
