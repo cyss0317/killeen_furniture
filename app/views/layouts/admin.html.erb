@@ -19,13 +19,13 @@
       <!-- Sidebar -->
       <div class="w-64 bg-gray-900 text-white flex flex-col flex-shrink-0">
         <div class="h-16 flex items-center px-6 border-b border-gray-700">
-          <%= link_to admin_root_path, class: "text-white font-bold text-lg tracking-wide" do %>
+          <%= link_to admin_dashboard_path, class: "text-white font-bold text-lg tracking-wide" do %>
             KF Admin
           <% end %>
         </div>
 
         <nav class="flex-1 py-4 overflow-y-auto">
-          <%= link_to admin_root_path,
+          <%= link_to admin_dashboard_path,
               class: admin_nav_link_class("dashboard"),
               data: { turbo_prefetch: false } do %>
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

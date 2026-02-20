@@ -106,46 +106,7 @@ unless Category.exists?
   puts "  ✓ Categories created"
 end
 
-# === Sample Products (for development) ===
-if Rails.env.development? && Product.count < 5
-  sofas = Category.find_by(name: "Sofas & Sectionals")
-  beds  = Category.find_by(name: "Beds & Headboards")
-
-  if sofas && beds
-    Product.create!([
-      {
-        name:              "Darcy Sofa",
-        brand:             "Ashley Furniture",
-        sku:               "AF-3840138",
-        category:          sofas,
-        short_description: "Classic loveseat sofa in java brown microfiber with plush cushions.",
-        base_cost:         320.00,
-        markup_percentage: 35.0,
-        stock_quantity:    4,
-        status:            :published,
-        featured:          true,
-        weight:            105.0,
-        color:             "Java",
-        material:          "Microfiber"
-      },
-      {
-        name:              "Maier Queen Bed",
-        brand:             "Ashley Furniture",
-        sku:               "AF-B680-54",
-        category:          beds,
-        short_description: "Contemporary upholstered queen bed with button tufting in charcoal.",
-        base_cost:         440.00,
-        markup_percentage: 35.0,
-        stock_quantity:    2,
-        status:            :published,
-        featured:          true,
-        weight:            88.0,
-        color:             "Charcoal",
-        material:          "Polyester"
-      }
-    ])
-    puts "  ✓ Sample products created"
-  end
-end
+# === Ashley Furniture Product Catalog ===
+load Rails.root.join("db/seeds/ashley_products.rb")
 
 puts "\nSeeding complete!"

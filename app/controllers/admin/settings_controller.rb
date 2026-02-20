@@ -18,7 +18,7 @@ module Admin
 
     def require_super_admin!
       unless current_user.super_admin?
-        redirect_to admin_root_path, alert: "Super admin access required."
+        redirect_to admin_dashboard_path, alert: "Super admin access required."
       end
     end
   end
