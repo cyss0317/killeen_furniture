@@ -1,7 +1,7 @@
 module Account
   class OrdersController < BaseController
     def index
-      @pagy, @orders = pagy(current_user.orders.recent, items: 10)
+      @pagy, @orders = pagy(:offset, current_user.orders.recent, limit: 10)
     end
 
     def show

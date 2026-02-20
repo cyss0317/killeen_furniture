@@ -12,7 +12,7 @@ module Admin
         scope = scope.where("order_number ILIKE ? OR guest_email ILIKE ? OR guest_name ILIKE ?", q, q, q)
       end
 
-      @pagy, @orders = pagy(scope, items: 25)
+      @pagy, @orders = pagy(:offset, scope, limit: 25)
       @status_counts = Order.group(:status).count
     end
 

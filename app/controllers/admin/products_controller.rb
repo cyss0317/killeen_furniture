@@ -9,7 +9,7 @@ module Admin
       scope = scope.where(status: params[:status]) if params[:status].present?
       scope = scope.by_category(params[:category_id]) if params[:category_id].present?
 
-      @pagy, @products = pagy(scope.order(created_at: :desc), items: 25)
+      @pagy, @products = pagy(:offset, scope.order(created_at: :desc), limit: 25)
       @categories = Category.ordered
     end
 

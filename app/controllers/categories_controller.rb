@@ -14,7 +14,7 @@ class CategoriesController < ApplicationController
             else scope.order(featured: :desc, created_at: :desc)
             end
 
-    @pagy, @products = pagy(scope, items: 24)
+    @pagy, @products = pagy(:offset, scope)
     @categories = Category.root_categories.includes(:subcategories)
   rescue ActiveRecord::RecordNotFound, FriendlyId::SlugNotFoundException
     redirect_to products_path, alert: "Category not found."

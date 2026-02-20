@@ -14,7 +14,7 @@ class ProductsController < ApplicationController
             else scope.order(featured: :desc, created_at: :desc)
             end
 
-    @pagy, @products = pagy(scope, items: 24)
+    @pagy, @products = pagy(:offset, scope)
     @categories = Category.root_categories.includes(:subcategories)
   end
 
