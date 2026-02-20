@@ -1,4 +1,6 @@
 class ProductsController < ApplicationController
+  before_action :no_store, only: :index
+
   def index
     scope = Product.published.includes(:category, :images_attachments)
 

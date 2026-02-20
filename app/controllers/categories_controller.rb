@@ -1,7 +1,9 @@
 class CategoriesController < ApplicationController
+  before_action :no_store
+
   def show
     @category = Category.friendly.find(params[:slug])
-    category_ids = [@category.id] + @category.subcategories.pluck(:id)
+    category_ids = [ @category.id ] + @category.subcategories.pluck(:id)
 
     scope = Product.published
                    .where(category_id: category_ids)
@@ -13,7 +15,7 @@ class CategoriesController < ApplicationController
             when "price_asc"  then scope.order(selling_price: :asc)
             when "price_desc" then scope.order(selling_price: :desc)
             else scope.order(featured: :desc, created_at: :desc)
-            end
+    end
 
     @pagy, @products = pagy(:offset, scope)
     @categories = Category.root_categories.includes(:subcategories)
