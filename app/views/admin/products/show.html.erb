@@ -136,3 +136,36 @@
     </div>
   </div>
 </div>
+
+<%# QR Code Label Section %>
+<% if @product.qr_token.present? %>
+  <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-gray-900">Product QR Code Label</h2>
+      <%= link_to "Open Label Page ↗", qr_product_path(@product.qr_token),
+          target: "_blank",
+          class: "text-sm text-amber-700 hover:underline" %>
+    </div>
+    <div class="flex gap-8 items-start">
+      <div class="border border-gray-200 rounded-lg p-3 bg-white shrink-0">
+        <%== RQRCode::QRCode.new(qr_product_url(@product.qr_token)).as_svg(
+          viewbox: true,
+          use_path: true,
+          svg_attributes: {
+            width:  "140",
+            height: "140",
+            class:  "block"
+          }
+        ) %>
+      </div>
+      <div class="space-y-2 text-sm">
+        <p class="text-gray-500">Scan this QR code to view the product label. Only signed-in admin users will see full product details.</p>
+        <div class="font-mono text-xs text-gray-400 break-all"><%= qr_product_url(@product.qr_token) %></div>
+        <button onclick="window.open('<%= qr_product_url(@product.qr_token) %>', '_blank').print()"
+                class="inline-block bg-gray-800 text-white text-xs px-3 py-1.5 rounded-md hover:bg-gray-900 mt-2">
+          Print Label
+        </button>
+      </div>
+    </div>
+  </div>
+<% end %>

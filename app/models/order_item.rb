@@ -9,4 +9,14 @@ class OrderItem < ApplicationRecord
   def line_total
     unit_price * quantity
   end
+
+  def margin
+    return nil if unit_cost.blank?
+    unit_price - unit_cost
+  end
+
+  def margin_percentage
+    return nil if unit_cost.blank? || unit_cost.zero?
+    (margin / unit_cost * 100).round(1)
+  end
 end

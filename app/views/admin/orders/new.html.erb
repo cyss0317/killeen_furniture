@@ -1,0 +1,306 @@
+<% content_for :title, "New Manual Order — Admin" %>
+
+<div class="flex items-center gap-4 mb-6">
+  <%= link_to "← Orders", admin_orders_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+  <h1 class="text-2xl font-bold text-gray-900">Create Manual Order</h1>
+</div>
+
+<%# Embed product data for Stimulus controller %>
+<script type="application/json" id="products-data">
+  <%= raw(@products.each_with_object({}) { |p, h|
+    h[p.id.to_s] = {
+      name:              p.name,
+      sku:               p.sku,
+      base_cost:         p.base_cost.to_f,
+      markup_percentage: p.markup_percentage.to_f,
+      selling_price:     p.selling_price.to_f,
+      stock_quantity:    p.stock_quantity
+    }
+  }.to_json) %>
+</script>
+
+<%# Embed user data with default addresses for auto-fill %>
+<script type="application/json" id="users-data">
+  <%= raw(@users.each_with_object({}) { |u, h|
+    default_addr = u.addresses.find(&:is_default?) || u.addresses.first
+    h[u.id.to_s] = {
+      name:  u.full_name,
+      email: u.email,
+      phone: u.phone,
+      default_address: default_addr ? {
+        full_name:      default_addr.full_name,
+        street_address: default_addr.street_address,
+        city:           default_addr.city,
+        state:          default_addr.state,
+        zip_code:       default_addr.zip_code
+      } : nil
+    }
+  }.to_json) %>
+</script>
+
+<%# Tax rate for JS calculations %>
+<script type="application/json" id="tax-rate-data"><%= GlobalSetting.tax_rate %></script>
+
+<%= form_with url: admin_orders_path, method: :post,
+    data: {
+      controller: "admin-order",
+      "admin-order-calculate-shipping-url-value": calculate_shipping_admin_orders_path
+    },
+    class: "space-y-6" do |f| %>
+
+  <%# Flash errors %>
+  <% if flash[:alert] %>
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+    <%# ── LEFT COLUMN: Customer + Address + Products ── %>
+    <div class="xl:col-span-2 space-y-6">
+
+      <%# Order Source %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">Order Source</h2>
+        <%= f.select :source,
+            options_for_select([
+              ["Admin — Manual Entry", "admin_manual"],
+              ["Phone Order", "phone"],
+              ["In Store", "in_store"]
+            ]),
+            {},
+            class: "w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+
+      <%# Customer Section %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">Customer</h2>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Customer Type</label>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="customer_type" value="existing"
+                     data-admin-order-target="customerType"
+                     data-action="change->admin-order#customerTypeChanged"
+                     checked class="text-amber-700">
+              <span class="text-sm text-gray-700">Existing User</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="customer_type" value="guest"
+                     data-admin-order-target="customerType"
+                     data-action="change->admin-order#customerTypeChanged"
+                     class="text-amber-700">
+              <span class="text-sm text-gray-700">Guest / New Customer</span>
+            </label>
+          </div>
+        </div>
+
+        <%# Existing user dropdown %>
+        <div data-admin-order-target="userSection" class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Select User</label>
+          <%= f.select :user_id,
+              options_for_select([["— Select a customer —", ""]] + @users.map { |u| ["#{u.full_name} (#{u.email})", u.id] }),
+              {},
+              class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+              data: { "admin-order-target": "userSelect", action: "change->admin-order#userChanged" } %>
+        </div>
+
+        <%# Guest fields %>
+        <div data-admin-order-target="guestSection" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+            <%= f.text_field :guest_name, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "John Smith" %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+            <%= f.email_field :guest_email, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "john@example.com" %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <%= f.telephone_field :guest_phone, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "(254) 555-0100" %>
+          </div>
+        </div>
+      </div>
+
+      <%# Delivery Address %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">Delivery Address</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+            <%= f.fields_for :shipping_address do |af| %>
+              <%= af.text_field :full_name,
+                  class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  data: { "admin-order-target": "addressFullName" } %>
+            <% end %>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Street Address <span class="text-red-500">*</span></label>
+            <%= f.fields_for :shipping_address do |af| %>
+              <%= af.text_field :street_address,
+                  class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  data: { "admin-order-target": "addressStreet" } %>
+            <% end %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-red-500">*</span></label>
+            <%= f.fields_for :shipping_address do |af| %>
+              <%= af.text_field :city, value: "Killeen",
+                  class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  data: { "admin-order-target": "addressCity" } %>
+            <% end %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">State <span class="text-red-500">*</span></label>
+            <%= f.fields_for :shipping_address do |af| %>
+              <%= af.text_field :state, value: "TX",
+                  class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  data: { "admin-order-target": "addressState" } %>
+            <% end %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code <span class="text-red-500">*</span></label>
+            <%= f.fields_for :shipping_address do |af| %>
+              <%= af.text_field :zip_code,
+                  class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  placeholder: "76541",
+                  data: { "admin-order-target": "addressZip" } %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%# Product Line Items %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+           data-admin-order-target="lineItemsContainer">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <h2 class="font-semibold text-gray-900">Products</h2>
+          <button type="button"
+                  data-action="click->admin-order#addProduct"
+                  class="inline-flex items-center gap-1.5 bg-amber-800 text-white text-sm font-medium px-3 py-1.5 rounded-md hover:bg-amber-900 transition-colors">
+            + Add Product
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-100">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-80">Product</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase w-20">Qty</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Base Cost</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Markup</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Sell Price</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Line Total</th>
+                <th class="px-4 py-3 w-10"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100" data-admin-order-target="lineItems">
+              <%# Rows injected by Stimulus %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="px-6 py-8 text-center text-gray-400 text-sm" data-admin-order-target="emptyState">
+          No products added yet. Click "+ Add Product" to start.
+        </div>
+      </div>
+
+      <%# Notes %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Order Notes <span class="text-gray-400">(optional)</span></label>
+        <%= f.text_area :notes, rows: 3,
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+            placeholder: "Delivery instructions, special requests..." %>
+      </div>
+
+    </div>
+
+    <%# ── RIGHT COLUMN: Shipping + Summary ── %>
+    <div class="space-y-6">
+
+      <%# Shipping Calculator %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">Shipping</h2>
+        <p class="text-xs text-gray-500 mb-3">Enter the delivery ZIP above, then calculate.</p>
+
+        <%= f.hidden_field :shipping_amount, value: "0", data: { "admin-order-target": "shippingAmount" } %>
+        <%= f.hidden_field :delivery_zone_id, value: "", data: { "admin-order-target": "deliveryZoneId" } %>
+
+        <button type="button"
+                data-admin-order-target="calculateShippingBtn"
+                data-action="click->admin-order#calculateShipping"
+                class="w-full bg-gray-800 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-gray-900 transition-colors disabled:opacity-50">
+          Calculate Shipping
+        </button>
+        <p class="text-xs text-red-500 mt-1 min-h-[1rem]" data-admin-order-target="shippingError"></p>
+      </div>
+
+      <%# Order Summary %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">Order Summary</h2>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between text-gray-600">
+            <span>Subtotal</span>
+            <span data-admin-order-target="subtotal">$0.00</span>
+          </div>
+          <div class="flex justify-between text-gray-600">
+            <span>Shipping</span>
+            <span data-admin-order-target="shipping">—</span>
+          </div>
+          <div class="flex justify-between text-gray-600">
+            <span>Tax (<%= GlobalSetting.tax_rate %>%)</span>
+            <span data-admin-order-target="tax">$0.00</span>
+          </div>
+          <div class="flex justify-between text-base font-bold border-t border-gray-200 pt-2 mt-2">
+            <span>Total</span>
+            <span data-admin-order-target="grandTotal">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <%# Submit %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <%= f.submit "Create Order",
+            class: "w-full bg-amber-800 text-white font-semibold py-3 px-4 rounded-lg hover:bg-amber-900 transition-colors cursor-pointer text-sm" %>
+        <%= link_to "Cancel", admin_orders_path, class: "block text-center text-sm text-gray-500 hover:text-gray-700 mt-3" %>
+      </div>
+
+    </div>
+  </div>
+<% end %>
+
+<%# Line item row template (cloned by Stimulus) %>
+<template id="line-item-template">
+  <tr data-admin-order-target="lineItemRow">
+    <td class="px-4 py-3">
+      <select data-idx="product_id"
+              data-action="change->admin-order#productChanged"
+              class="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        <option value="">— Select product —</option>
+        <% @products.each do |product| %>
+          <option value="<%= product.id %>"><%= product.name %> (<%= product.sku %>)</option>
+        <% end %>
+      </select>
+      <p class="text-xs text-gray-400 mt-0.5" data-cell="stock"></p>
+    </td>
+    <td class="px-4 py-3">
+      <input type="number" data-idx="quantity" data-qty
+             data-action="input->admin-order#quantityChanged"
+             value="1" min="1" max="999"
+             class="w-16 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-500">
+    </td>
+    <td class="px-4 py-3 text-right text-sm text-gray-500 tabular-nums" data-cell="base-cost">—</td>
+    <td class="px-4 py-3 text-right text-sm text-gray-500" data-cell="markup">—</td>
+    <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 tabular-nums" data-cell="sell-price">—</td>
+    <td class="px-4 py-3 text-right text-sm font-semibold text-amber-800 tabular-nums" data-cell="line-total">—</td>
+    <td class="px-4 py-3 text-center">
+      <button type="button" data-action="click->admin-order#removeItem"
+              class="text-gray-400 hover:text-red-500 transition-colors" title="Remove">
+        ✕
+      </button>
+    </td>
+  </tr>
+</template>

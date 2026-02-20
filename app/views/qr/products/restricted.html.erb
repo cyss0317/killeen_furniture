@@ -1,0 +1,14 @@
+<% content_for :title, "Product Label — Restricted" %>
+
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 w-full max-w-sm p-10 text-center">
+    <div class="text-gray-300 text-6xl mb-6">🔒</div>
+    <h1 class="text-xl font-bold text-gray-900 mb-2">Admin-Only Content</h1>
+    <p class="text-sm text-gray-500 mb-6">
+      This product label is for authorized personnel only.
+      Please sign in with an admin account to view product details.
+    </p>
+    <%= link_to "Sign In", new_user_session_path,
+        class: "inline-block bg-amber-800 text-white text-sm font-semibold px-6 py-3 rounded-lg hover:bg-amber-900 transition-colors" %>
+  </div>
+</div>

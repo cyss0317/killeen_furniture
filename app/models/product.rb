@@ -5,8 +5,8 @@ class Product < ApplicationRecord
   belongs_to :category
   has_rich_text :description
   has_many_attached :images
-  has_many :cart_items, dependent: :destroy
-  has_many :order_items, dependent: :nullify
+  has_many :cart_items,        dependent: :destroy
+  has_many :order_items,       dependent: :nullify
   has_many :stock_adjustments, dependent: :destroy
 
   enum :status, { draft: 0, published: 1, archived: 2 }, default: :draft
@@ -19,15 +19,16 @@ class Product < ApplicationRecord
   validates :weight, numericality: { greater_than: 0 }, allow_nil: true
 
   before_validation :normalize_sku
-  before_save :calculate_selling_price
+  before_create     :generate_qr_token
+  before_save       :calculate_selling_price
   before_validation :set_markup_from_global, if: :markup_percentage_blank?
 
-  scope :published,  -> { where(status: :published) }
-  scope :featured,   -> { where(featured: true) }
-  scope :in_stock,   -> { where("stock_quantity > 0") }
-  scope :low_stock,  -> { where("stock_quantity > 0 AND stock_quantity <= 5") }
+  scope :published,    -> { where(status: :published) }
+  scope :featured,     -> { where(featured: true) }
+  scope :in_stock,     -> { where("stock_quantity > 0") }
+  scope :low_stock,    -> { where("stock_quantity > 0 AND stock_quantity <= 5") }
   scope :out_of_stock, -> { where(stock_quantity: 0) }
-  scope :search_by,  ->(query) {
+  scope :search_by,    ->(query) {
     return all unless query.present?
     where("name ILIKE :q OR brand ILIKE :q OR sku ILIKE :q OR short_description ILIKE :q",
           q: "%#{sanitize_sql_like(query)}%")
@@ -61,6 +62,10 @@ class Product < ApplicationRecord
   end
 
   private
+
+  def generate_qr_token
+    self.qr_token ||= SecureRandom.urlsafe_base64(16)
+  end
 
   def calculate_selling_price
     return unless base_cost.present? && markup_percentage.present?

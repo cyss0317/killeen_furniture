@@ -1,0 +1,426 @@
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public[0m
+  [1m[35m (56.8ms)[0m  [1m[35mDROP DATABASE IF EXISTS "killeen_furniture_test"[0m
+  [1m[35m (98.8ms)[0m  [1m[35mCREATE DATABASE "killeen_furniture_test" ENCODING = 'unicode'[0m
+  [1m[35mSQL (6.8ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "action_text_rich_texts" CASCADE[0m
+  [1m[35m (9.0ms)[0m  [1m[35mCREATE TABLE "action_text_rich_texts" ("id" bigserial primary key, "name" character varying NOT NULL, "body" text, "record_type" character varying NOT NULL, "record_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (6.9ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_action_text_rich_texts_uniqueness" ON "action_text_rich_texts" ("record_type", "record_id", "name")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_attachments" CASCADE[0m
+  [1m[35m (4.9ms)[0m  [1m[35mCREATE TABLE "active_storage_attachments" ("id" bigserial primary key, "name" character varying NOT NULL, "record_type" character varying NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_blobs" CASCADE[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "active_storage_blobs" ("id" bigserial primary key, "key" character varying NOT NULL, "filename" character varying NOT NULL, "content_type" character varying, "metadata" text, "service_name" character varying NOT NULL, "byte_size" bigint NOT NULL, "checksum" character varying, "created_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_blobs_on_key" ON "active_storage_blobs" ("key")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_variant_records" CASCADE[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "active_storage_variant_records" ("id" bigserial primary key, "blob_id" bigint NOT NULL, "variation_digest" character varying NOT NULL)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "addresses" CASCADE[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "addresses" ("id" bigserial primary key, "user_id" bigint, "full_name" character varying NOT NULL, "street_address" character varying NOT NULL, "city" character varying NOT NULL, "state" character varying NOT NULL, "zip_code" character varying NOT NULL, "is_default" boolean DEFAULT FALSE NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_addresses_on_user_id_and_is_default" ON "addresses" ("user_id", "is_default")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_addresses_on_user_id" ON "addresses" ("user_id")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_items" CASCADE[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "carts" CASCADE[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "user_id" bigint, "session_id" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_carts_on_session_id" ON "carts" ("session_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_carts_on_user_id" ON "carts" ("user_id")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "categories" CASCADE[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "categories" ("id" bigserial primary key, "name" character varying NOT NULL, "slug" character varying NOT NULL, "parent_id" integer, "position" integer DEFAULT 0, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_categories_on_parent_id" ON "categories" ("parent_id")[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_categories_on_slug" ON "categories" ("slug")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "delivery_events" CASCADE[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "delivery_events" ("id" bigserial primary key, "order_id" bigint NOT NULL, "status" integer DEFAULT 0 NOT NULL, "note" text, "created_by_id" bigint, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_delivery_events_on_created_by_id" ON "delivery_events" ("created_by_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_delivery_events_on_order_id" ON "delivery_events" ("order_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_delivery_events_on_status" ON "delivery_events" ("status")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "delivery_zones" CASCADE[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "delivery_zones" ("id" bigserial primary key, "name" character varying NOT NULL, "zip_codes" character varying[] DEFAULT '{}', "base_rate" decimal(8,2) DEFAULT 0.0 NOT NULL, "per_item_fee" decimal(8,2) DEFAULT 0.0 NOT NULL, "large_item_surcharge" decimal(8,2) DEFAULT 0.0 NOT NULL, "active" boolean DEFAULT TRUE, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_delivery_zones_on_active" ON "delivery_zones" ("active")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_delivery_zones_on_zip_codes" ON "delivery_zones" USING gin ("zip_codes")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "global_settings" CASCADE[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE TABLE "global_settings" ("id" bigserial primary key, "key" character varying NOT NULL, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_global_settings_on_key" ON "global_settings" ("key")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "order_items" CASCADE[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "order_items" ("id" bigserial primary key, "order_id" bigint NOT NULL, "product_id" bigint, "quantity" integer DEFAULT 1 NOT NULL, "unit_price" decimal(10,2) NOT NULL, "product_name" character varying NOT NULL, "product_sku" character varying NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, "unit_cost" decimal(10,2), "markup_percentage" decimal(5,2))[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_order_id" ON "order_items" ("order_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_product_id" ON "order_items" ("product_id")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "orders" CASCADE[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "order_number" character varying NOT NULL, "user_id" bigint, "guest_email" character varying, "guest_name" character varying, "guest_phone" character varying, "status" integer DEFAULT 0 NOT NULL, "shipping_address" jsonb DEFAULT '{}' NOT NULL, "subtotal" decimal(10,2) DEFAULT 0.0 NOT NULL, "tax_amount" decimal(10,2) DEFAULT 0.0 NOT NULL, "shipping_amount" decimal(10,2) DEFAULT 0.0 NOT NULL, "grand_total" decimal(10,2) DEFAULT 0.0 NOT NULL, "stripe_payment_intent_id" character varying, "delivery_zone_id" bigint, "notes" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, "source" integer DEFAULT 0 NOT NULL, "assigned_to_id" bigint, "delivered_by_id" bigint, "delivered_at" timestamp(6))[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_orders_on_assigned_to_id" ON "orders" ("assigned_to_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_orders_on_created_at" ON "orders" ("created_at")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_orders_on_delivered_at" ON "orders" ("delivered_at")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_orders_on_delivery_zone_id" ON "orders" ("delivery_zone_id")[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE INDEX "index_orders_on_guest_email" ON "orders" ("guest_email")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_orders_on_order_number" ON "orders" ("order_number")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_orders_on_status" ON "orders" ("status")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_orders_on_stripe_payment_intent_id" ON "orders" ("stripe_payment_intent_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_orders_on_user_id" ON "orders" ("user_id")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "products" CASCADE[0m
+  [1m[35m (1.7ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "brand" character varying, "sku" character varying NOT NULL, "slug" character varying NOT NULL, "category_id" bigint NOT NULL, "short_description" text, "base_cost" decimal(10,2) NOT NULL, "markup_percentage" decimal(5,2) DEFAULT 0.0 NOT NULL, "selling_price" decimal(10,2) DEFAULT 0.0 NOT NULL, "stock_quantity" integer DEFAULT 0 NOT NULL, "status" integer DEFAULT 0 NOT NULL, "featured" boolean DEFAULT FALSE, "weight" decimal(8,2), "dimensions" jsonb DEFAULT '{}', "material" character varying, "color" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, "qr_token" character varying)[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_products_on_category_id" ON "products" ("category_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_products_on_dimensions" ON "products" USING gin ("dimensions")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_products_on_featured" ON "products" ("featured")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_products_on_qr_token" ON "products" ("qr_token")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_products_on_selling_price" ON "products" ("selling_price")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_products_on_sku" ON "products" ("sku")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_products_on_slug" ON "products" ("slug")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_products_on_status" ON "products" ("status")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "stock_adjustments" CASCADE[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE TABLE "stock_adjustments" ("id" bigserial primary key, "product_id" bigint NOT NULL, "quantity_change" integer NOT NULL, "reason" character varying NOT NULL, "admin_user_id" bigint, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_stock_adjustments_on_admin_user_id" ON "stock_adjustments" ("admin_user_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_stock_adjustments_on_created_at" ON "stock_adjustments" ("created_at")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_stock_adjustments_on_product_id" ON "stock_adjustments" ("product_id")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mDROP TABLE IF EXISTS "users" CASCADE[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "users" ("id" bigserial primary key, "email" character varying DEFAULT '' NOT NULL, "encrypted_password" character varying DEFAULT '' NOT NULL, "reset_password_token" character varying, "reset_password_sent_at" timestamp(6), "remember_created_at" timestamp(6), "first_name" character varying DEFAULT '' NOT NULL, "last_name" character varying DEFAULT '' NOT NULL, "phone" character varying, "role" integer DEFAULT 0 NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, "admin_kind" integer)[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_email" ON "users" ("email")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_reset_password_token" ON "users" ("reset_password_token")[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "active_storage_attachments" ADD CONSTRAINT "fk_rails_c3b3935057"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "active_storage_variant_records" ADD CONSTRAINT "fk_rails_993965df05"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "addresses" ADD CONSTRAINT "fk_rails_48c9e0c5a2"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.7ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "carts" ADD CONSTRAINT "fk_rails_ea59a35211"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (1.2ms)[0m  [1m[35mALTER TABLE "delivery_events" ADD CONSTRAINT "fk_rails_718d1c3a08"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+[0m
+  [1m[35m (0.6ms)[0m  [1m[35mALTER TABLE "delivery_events" ADD CONSTRAINT "fk_rails_b1765d8668"
+FOREIGN KEY ("created_by_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.6ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_e3cb28f071"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+[0m
+  [1m[35m (0.6ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_f1a29ddd47"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_2540dc0df6"
+FOREIGN KEY ("delivery_zone_id")
+  REFERENCES "delivery_zones" ("id")
+[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_f868b47f6a"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_c599ac4cad"
+FOREIGN KEY ("assigned_to_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_3500ef1d16"
+FOREIGN KEY ("delivered_by_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "products" ADD CONSTRAINT "fk_rails_fb915499a4"
+FOREIGN KEY ("category_id")
+  REFERENCES "categories" ("id")
+[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "stock_adjustments" ADD CONSTRAINT "fk_rails_49bc36f82a"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "stock_adjustments" ADD CONSTRAINT "fk_rails_fac7031e27"
+FOREIGN KEY ("admin_user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY)[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20260220200818)[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES
+(20260220200817),
+(20260220200816),
+(20260220200815),
+(20260220200814),
+(20260220042834),
+(20260220042833),
+(20260220042832),
+(20260220042831),
+(20260220042830),
+(20260220042829),
+(20260220042828),
+(20260220042827),
+(20260220042826),
+(20260220042825),
+(20260220042824),
+(20260220042760),
+(20260220042759);[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::InternalMetadata Create (0.1ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'test', '2026-02-20 20:36:35.365066', '2026-02-20 20:36:35.365067') RETURNING "key"[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', '64253baa2e22381852d04004f26516d7e6e49f80', '2026-02-20 20:36:35.366065', '2026-02-20 20:36:35.366066') RETURNING "key"[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+[dotenv] Saved a snapshot of [32mENV[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (1.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.8ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Edgar"], ["last_name", "Smitham"], ["phone", "+19138286261"], ["role", 0], ["created_at", "2026-02-20 20:36:35.557057"], ["updated_at", "2026-02-20 20:36:35.557057"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (1.7ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-RTZL1G4B"], ["LIMIT", 1]]
+  [1m[36mOrder Create (1.8ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-RTZL1G4B"], ["user_id", 1], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Edgar Smitham\",\"street_address\":\"2245 Kristie Path\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "2998.43"], ["tax_amount", "0.0"], ["shipping_amount", "176.81"], ["grand_total", "3175.24"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:36:35.560217"], ["updated_at", "2026-02-20 20:36:35.560217"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Kandra"], ["last_name", "Hirthe"], ["phone", "+663928184472"], ["role", 0], ["created_at", "2026-02-20 20:36:35.566868"], ["updated_at", "2026-02-20 20:36:35.566868"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-SLFUM7H9"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.3ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-SLFUM7H9"], ["user_id", 2], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Kandra Hirthe\",\"street_address\":\"25870 Joline Summit\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "1013.15"], ["tax_amount", "0.0"], ["shipping_amount", "163.4"], ["grand_total", "1176.55"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:36:35.568198"], ["updated_at", "2026-02-20 20:36:35.568198"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mOrder Count (0.6ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mOrder Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Morgan"], ["last_name", "Willms"], ["phone", "+301338777481"], ["role", 0], ["created_at", "2026-02-20 20:36:35.583458"], ["updated_at", "2026-02-20 20:36:35.583458"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-OVZMH8QJ"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.5ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-OVZMH8QJ"], ["user_id", 3], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Morgan Willms\",\"street_address\":\"201 Little Grove\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "2028.22"], ["tax_amount", "0.0"], ["shipping_amount", "195.56"], ["grand_total", "2223.78"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:36:35.584474"], ["updated_at", "2026-02-20 20:36:35.584474"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mOrder Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mOrder Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Yael"], ["last_name", "Cormier"], ["phone", "+205857197319"], ["role", 1], ["created_at", "2026-02-20 20:36:35.590812"], ["updated_at", "2026-02-20 20:36:35.590812"], ["admin_kind", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.4ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Tiffaney"], ["last_name", "Spencer"], ["phone", "+846033934172"], ["role", 0], ["created_at", "2026-02-20 20:36:35.595017"], ["updated_at", "2026-02-20 20:36:35.595017"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-RU5K0BWS"], ["LIMIT", 1]]
+  [1m[36mOrder Create (1.9ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-RU5K0BWS"], ["user_id", 5], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Tiffaney Spencer\",\"street_address\":\"390 Larry Avenue\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "1304.12"], ["tax_amount", "0.0"], ["shipping_amount", "145.32"], ["grand_total", "1449.44"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:36:35.596091"], ["updated_at", "2026-02-20 20:36:35.596091"], ["source", 0], ["assigned_to_id", 1003], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK TO SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-PQEYUUHB"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.5ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-PQEYUUHB"], ["user_id", 1004], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Helene Christiansen\",\"street_address\":\"80340 Julius Knolls\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "1661.71"], ["tax_amount", "0.0"], ["shipping_amount", "151.03"], ["grand_total", "1812.74"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:36:35.602079"], ["updated_at", "2026-02-20 20:36:35.602079"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK TO SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mActiveRecord::InternalMetadata Load (2.0ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.8ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+[dotenv] Saved a snapshot of [32mENV[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (1.6ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.4ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Stacy"], ["last_name", "Lockman"], ["phone", "+928945538139"], ["role", 2], ["created_at", "2026-02-20 20:38:23.805802"], ["updated_at", "2026-02-20 20:38:23.805802"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Jack"], ["last_name", "Gutkowski"], ["phone", "+623032966538"], ["role", 1], ["created_at", "2026-02-20 20:38:23.809065"], ["updated_at", "2026-02-20 20:38:23.809065"], ["admin_kind", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Loris"], ["last_name", "Schneider"], ["phone", "+551680870917"], ["role", 1], ["created_at", "2026-02-20 20:38:23.811776"], ["updated_at", "2026-02-20 20:38:23.811776"], ["admin_kind", 0]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Virgina"], ["last_name", "Kiehn"], ["phone", "+627625496854"], ["role", 0], ["created_at", "2026-02-20 20:38:23.814403"], ["updated_at", "2026-02-20 20:38:23.814403"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Dorinda"], ["last_name", "Baumbach"], ["phone", "+77896463896"], ["role", 0], ["created_at", "2026-02-20 20:38:23.830201"], ["updated_at", "2026-02-20 20:38:23.830201"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (3.0ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-OO4BTZKT"], ["LIMIT", 1]]
+  [1m[36mOrder Create (1.0ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-OO4BTZKT"], ["user_id", 10], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Dorinda Baumbach\",\"street_address\":\"41380 Hoppe Rest\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "508.72"], ["tax_amount", "0.0"], ["shipping_amount", "85.42"], ["grand_total", "594.14"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:38:23.832232"], ["updated_at", "2026-02-20 20:38:23.832232"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.7ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Danette"], ["last_name", "Abernathy"], ["phone", "+654106050468"], ["role", 0], ["created_at", "2026-02-20 20:38:23.838864"], ["updated_at", "2026-02-20 20:38:23.838864"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-DM4OZGX4"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.3ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-DM4OZGX4"], ["user_id", 11], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Danette Abernathy\",\"street_address\":\"64493 Corwin Square\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "1511.94"], ["tax_amount", "0.0"], ["shipping_amount", "91.01"], ["grand_total", "1602.95"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:38:23.840496"], ["updated_at", "2026-02-20 20:38:23.840496"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mOrder Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mOrder Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Francie"], ["last_name", "Senger"], ["phone", "+415355560478"], ["role", 2], ["created_at", "2026-02-20 20:38:23.850601"], ["updated_at", "2026-02-20 20:38:23.850601"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Sherwood"], ["last_name", "Mertz"], ["phone", "+17198320071"], ["role", 1], ["created_at", "2026-02-20 20:38:23.852937"], ["updated_at", "2026-02-20 20:38:23.852937"], ["admin_kind", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Frederica"], ["last_name", "Russel"], ["phone", "+552772120327"], ["role", 1], ["created_at", "2026-02-20 20:38:23.855179"], ["updated_at", "2026-02-20 20:38:23.855179"], ["admin_kind", 0]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Aida"], ["last_name", "Klocko"], ["phone", "+654332793512"], ["role", 0], ["created_at", "2026-02-20 20:38:23.857589"], ["updated_at", "2026-02-20 20:38:23.857589"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Mark"], ["last_name", "Sipes"], ["phone", "+626781896907"], ["role", 0], ["created_at", "2026-02-20 20:38:23.860021"], ["updated_at", "2026-02-20 20:38:23.860021"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-14QKRMEB"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.5ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-14QKRMEB"], ["user_id", 16], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Mark Sipes\",\"street_address\":\"27255 Bev Stream\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "908.99"], ["tax_amount", "0.0"], ["shipping_amount", "139.11"], ["grand_total", "1048.1"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:38:23.860961"], ["updated_at", "2026-02-20 20:38:23.860961"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mOrder Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mOrder Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "orders"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Eddy"], ["last_name", "Breitenberg"], ["phone", "+813838184050"], ["role", 2], ["created_at", "2026-02-20 20:38:23.865650"], ["updated_at", "2026-02-20 20:38:23.865650"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Alena"], ["last_name", "Waters"], ["phone", "+413293251272"], ["role", 1], ["created_at", "2026-02-20 20:38:23.868118"], ["updated_at", "2026-02-20 20:38:23.868118"], ["admin_kind", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Jessie"], ["last_name", "Corkery"], ["phone", "+444088230794"], ["role", 1], ["created_at", "2026-02-20 20:38:23.870735"], ["updated_at", "2026-02-20 20:38:23.870735"], ["admin_kind", 0]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Woodrow"], ["last_name", "Medhurst"], ["phone", "+336892815030"], ["role", 0], ["created_at", "2026-02-20 20:38:23.873173"], ["updated_at", "2026-02-20 20:38:23.873173"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Renato"], ["last_name", "Marvin"], ["phone", "+336415804862"], ["role", 1], ["created_at", "2026-02-20 20:38:23.875581"], ["updated_at", "2026-02-20 20:38:23.875581"], ["admin_kind", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Scott"], ["last_name", "Fay"], ["phone", "+864314190946"], ["role", 0], ["created_at", "2026-02-20 20:38:23.877980"], ["updated_at", "2026-02-20 20:38:23.877980"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-FQWEFQSH"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.6ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-FQWEFQSH"], ["user_id", 22], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Scott Fay\",\"street_address\":\"887 Haag Court\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "2518.02"], ["tax_amount", "0.0"], ["shipping_amount", "156.13"], ["grand_total", "2674.15"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:38:23.878914"], ["updated_at", "2026-02-20 20:38:23.878914"], ["source", 0], ["assigned_to_id", 18], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Shavonda"], ["last_name", "Kiehn"], ["phone", "+13405673609"], ["role", 0], ["created_at", "2026-02-20 20:38:23.882301"], ["updated_at", "2026-02-20 20:38:23.882301"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-0MAOTWU5"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.5ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-0MAOTWU5"], ["user_id", 23], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Shavonda Kiehn\",\"street_address\":\"22823 Tristan Path\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "2562.19"], ["tax_amount", "0.0"], ["shipping_amount", "106.75"], ["grand_total", "2668.94"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:38:23.883260"], ["updated_at", "2026-02-20 20:38:23.883260"], ["source", 0], ["assigned_to_id", 21], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mOrder Load (0.5ms)[0m  [1m[34mSELECT "orders".* FROM "orders" WHERE "orders"."assigned_to_id" = $1[0m  [["assigned_to_id", 18]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Frida"], ["last_name", "Lubowitz"], ["phone", "+846930708961"], ["role", 2], ["created_at", "2026-02-20 20:38:23.888013"], ["updated_at", "2026-02-20 20:38:23.888013"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Porfirio"], ["last_name", "Walter"], ["phone", "+551165261290"], ["role", 1], ["created_at", "2026-02-20 20:38:23.890409"], ["updated_at", "2026-02-20 20:38:23.890409"], ["admin_kind", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Val"], ["last_name", "Reichel"], ["phone", "+926701036300"], ["role", 1], ["created_at", "2026-02-20 20:38:23.892759"], ["updated_at", "2026-02-20 20:38:23.892759"], ["admin_kind", 0]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Mathew"], ["last_name", "Mitchell"], ["phone", "+861251638199"], ["role", 0], ["created_at", "2026-02-20 20:38:23.895160"], ["updated_at", "2026-02-20 20:38:23.895160"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-QVPHVOKB"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.3ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-QVPHVOKB"], ["user_id", 27], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Mathew Mitchell\",\"street_address\":\"67016 Audrea Gateway\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "2516.61"], ["tax_amount", "0.0"], ["shipping_amount", "102.13"], ["grand_total", "2618.74"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:38:23.896618"], ["updated_at", "2026-02-20 20:38:23.896618"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = $1 LIMIT $2[0m  [["email", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("email", "encrypted_password", "reset_password_token", "reset_password_sent_at", "remember_created_at", "first_name", "last_name", "phone", "role", "created_at", "updated_at", "admin_kind") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["email", "[FILTERED]"], ["encrypted_password", "[FILTERED]"], ["reset_password_token", "[FILTERED]"], ["reset_password_sent_at", "[FILTERED]"], ["remember_created_at", nil], ["first_name", "Wanetta"], ["last_name", "Bartell"], ["phone", "+339592567496"], ["role", 0], ["created_at", "2026-02-20 20:38:23.899774"], ["updated_at", "2026-02-20 20:38:23.899774"], ["admin_kind", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mOrder Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "orders" WHERE "orders"."order_number" = $1 LIMIT $2[0m  [["order_number", "KF-2026-EI8XOE43"], ["LIMIT", 1]]
+  [1m[36mOrder Create (0.2ms)[0m  [1m[32mINSERT INTO "orders" ("order_number", "user_id", "guest_email", "guest_name", "guest_phone", "status", "shipping_address", "subtotal", "tax_amount", "shipping_amount", "grand_total", "stripe_payment_intent_id", "delivery_zone_id", "notes", "created_at", "updated_at", "source", "assigned_to_id", "delivered_by_id", "delivered_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING "id"[0m  [["order_number", "KF-2026-EI8XOE43"], ["user_id", 28], ["guest_email", "[FILTERED]"], ["guest_name", nil], ["guest_phone", nil], ["status", 0], ["shipping_address", "{\"full_name\":\"Wanetta Bartell\",\"street_address\":\"720 Clair Trace\",\"city\":\"Killeen\",\"state\":\"TX\",\"zip_code\":\"76541\"}"], ["subtotal", "815.47"], ["tax_amount", "0.0"], ["shipping_amount", "184.29"], ["grand_total", "999.76"], ["stripe_payment_intent_id", nil], ["delivery_zone_id", nil], ["notes", nil], ["created_at", "2026-02-20 20:38:23.900614"], ["updated_at", "2026-02-20 20:38:23.900614"], ["source", 0], ["assigned_to_id", nil], ["delivered_by_id", nil], ["delivered_at", nil]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mOrder Load (0.2ms)[0m  [1m[34mSELECT "orders".* FROM "orders" WHERE "orders"."user_id" = $1[0m  [["user_id", 27]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m

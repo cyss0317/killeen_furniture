@@ -56,6 +56,21 @@ gem "pagy", "~> 43.2"
 # URL-friendly slugs
 gem "friendly_id", "~> 5.5"
 
+# QR code generation
+gem "rqrcode", "~> 2.2"
+
+group :development, :test do
+  # Testing
+  gem "rspec-rails", "~> 7.0"
+  gem "factory_bot_rails", "~> 6.4"
+  gem "faker", "~> 3.4"
+end
+
+group :test do
+  gem "capybara"
+  gem "selenium-webdriver"
+end
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

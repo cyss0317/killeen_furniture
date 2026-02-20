@@ -3,6 +3,7 @@
   <head>
     <title>Admin — <%= content_for(:title) || "Killeen Furniture" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="turbo-prefetch" content="false">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -50,6 +51,14 @@
             Orders
           <% end %>
 
+          <%= link_to delivery_orders_path,
+              class: "flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors" do %>
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            Delivery Queue
+          <% end %>
+
           <%= link_to admin_categories_path,
               class: admin_nav_link_class("categories") do %>
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +100,10 @@
           <div class="flex items-center">
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-white truncate"><%= current_user.full_name %></p>
-              <p class="text-xs text-gray-400 truncate"><%= current_user.role.humanize %></p>
+              <p class="text-xs text-gray-400 truncate">
+                <%= current_user.role.humanize %>
+                <% if current_user.admin_kind.present? %>(<%= current_user.admin_kind %>)<% end %>
+              </p>
             </div>
             <%= link_to destroy_user_session_path,
                 data: { turbo_method: :delete },

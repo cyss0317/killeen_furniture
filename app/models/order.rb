@@ -1,7 +1,10 @@
 class Order < ApplicationRecord
-  belongs_to :user, optional: true
+  belongs_to :user,         optional: true
   belongs_to :delivery_zone, optional: true
-  has_many   :order_items, dependent: :destroy
+  belongs_to :assigned_to,  class_name: "User", optional: true
+  belongs_to :delivered_by, class_name: "User", optional: true
+  has_many   :order_items,    dependent: :destroy
+  has_many   :delivery_events, dependent: :destroy
 
   enum :status, {
     pending:                0,
@@ -13,15 +16,23 @@ class Order < ApplicationRecord
     refunded:               6
   }, default: :pending
 
+  enum :source, {
+    web_customer: 0,
+    admin_manual: 1,
+    phone:        2,
+    in_store:     3
+  }, default: :web_customer, prefix: :source
+
   before_create :generate_order_number
 
   validates :shipping_address, presence: true
   validates :grand_total, numericality: { greater_than_or_equal_to: 0 }
   validate  :guest_or_user_present
 
-  scope :recent,  -> { order(created_at: :desc) }
-  scope :today,   -> { where(created_at: Time.current.beginning_of_day..) }
-  scope :revenue, -> { where(status: [:paid, :scheduled_for_delivery, :out_for_delivery, :delivered]) }
+  scope :recent,      -> { order(created_at: :desc) }
+  scope :today,       -> { where(created_at: Time.current.beginning_of_day..) }
+  scope :revenue,     -> { where(status: [:paid, :scheduled_for_delivery, :out_for_delivery, :delivered]) }
+  scope :undelivered, -> { where.not(status: :delivered) }
 
   STATUS_TRANSITIONS = {
     pending:                %i[paid canceled],

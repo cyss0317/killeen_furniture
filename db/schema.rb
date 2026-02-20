@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_20_042834) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_20_200818) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -97,6 +97,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_20_042834) do
     t.index ["slug"], name: "index_categories_on_slug", unique: true
   end
 
+  create_table "delivery_events", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.integer "status", default: 0, null: false
+    t.text "note"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_delivery_events_on_created_by_id"
+    t.index ["order_id"], name: "index_delivery_events_on_order_id"
+    t.index ["status"], name: "index_delivery_events_on_status"
+  end
+
   create_table "delivery_zones", force: :cascade do |t|
     t.string "name", null: false
     t.string "zip_codes", default: [], array: true
@@ -127,6 +139,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_20_042834) do
     t.string "product_sku", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "unit_cost", precision: 10, scale: 2
+    t.decimal "markup_percentage", precision: 5, scale: 2
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
   end
@@ -148,7 +162,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_20_042834) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "source", default: 0, null: false
+    t.bigint "assigned_to_id"
+    t.bigint "delivered_by_id"
+    t.datetime "delivered_at"
+    t.index ["assigned_to_id"], name: "index_orders_on_assigned_to_id"
     t.index ["created_at"], name: "index_orders_on_created_at"
+    t.index ["delivered_at"], name: "index_orders_on_delivered_at"
     t.index ["delivery_zone_id"], name: "index_orders_on_delivery_zone_id"
     t.index ["guest_email"], name: "index_orders_on_guest_email"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
@@ -176,9 +196,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_20_042834) do
     t.string "color"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "qr_token"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["dimensions"], name: "index_products_on_dimensions", using: :gin
     t.index ["featured"], name: "index_products_on_featured"
+    t.index ["qr_token"], name: "index_products_on_qr_token", unique: true
     t.index ["selling_price"], name: "index_products_on_selling_price"
     t.index ["sku"], name: "index_products_on_sku", unique: true
     t.index ["slug"], name: "index_products_on_slug", unique: true
@@ -209,6 +231,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_20_042834) do
     t.integer "role", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "admin_kind"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
@@ -219,10 +242,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_20_042834) do
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "products"
   add_foreign_key "carts", "users"
+  add_foreign_key "delivery_events", "orders"
+  add_foreign_key "delivery_events", "users", column: "created_by_id"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "delivery_zones"
   add_foreign_key "orders", "users"
+  add_foreign_key "orders", "users", column: "assigned_to_id"
+  add_foreign_key "orders", "users", column: "delivered_by_id"
   add_foreign_key "products", "categories"
   add_foreign_key "stock_adjustments", "products"
   add_foreign_key "stock_adjustments", "users", column: "admin_user_id"

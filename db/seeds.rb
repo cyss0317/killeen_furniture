@@ -110,3 +110,158 @@ end
 load Rails.root.join("db/seeds/ashley_products.rb")
 
 puts "\nSeeding complete!"
+
+# === Delivery Admin User ===
+delivery_user = User.find_or_initialize_by(email: "delivery@killeenfurniture.com")
+unless delivery_user.persisted?
+  delivery_user.assign_attributes(
+    first_name: "Delivery",
+    last_name:  "Driver",
+    password:   "changeme123!",
+    role:       :admin,
+    admin_kind: :delivery
+  )
+  delivery_user.save!
+  puts "  ✓ Delivery admin created (delivery@killeenfurniture.com / changeme123!)"
+else
+  delivery_user.update!(role: :admin, admin_kind: :delivery)
+  puts "  ✓ Delivery admin already exists"
+end
+
+# === Backfill QR tokens for existing products ===
+without_tokens = Product.where(qr_token: nil).count
+if without_tokens > 0
+  Product.where(qr_token: nil).find_each do |product|
+    product.update_column(:qr_token, SecureRandom.urlsafe_base64(16))
+  end
+  puts "  ✓ QR tokens backfilled for #{without_tokens} products"
+end
+
+# === 30 Sample Orders (uses FactoryBot) ===
+require "factory_bot_rails"
+include FactoryBot::Syntax::Methods
+
+if Order.count < 30
+  # Get existing products and customers
+  products = Product.published.to_a
+  customers = User.where(role: :customer).to_a
+  zone = DeliveryZone.first
+
+  # Create some sample customers if none exist
+  if customers.empty?
+    5.times do |i|
+      customers << User.create!(
+        first_name: Faker::Name.first_name,
+        last_name:  Faker::Name.last_name,
+        email:      "customer#{i + 1}@example.com",
+        password:   "password123!",
+        role:       :customer
+      )
+    end
+    puts "  ✓ Sample customers created"
+  end
+
+  def build_shipping_address(name)
+    {
+      "full_name"      => name,
+      "street_address" => Faker::Address.street_address,
+      "city"           => "Killeen",
+      "state"          => "TX",
+      "zip_code"       => ["76541", "76542", "76543"].sample
+    }
+  end
+
+  def add_items_to_order(order, products)
+    items = products.sample(rand(1..3))
+    items.each do |product|
+      qty = rand(1..2)
+      order.order_items.create!(
+        product:           product,
+        quantity:          qty,
+        unit_price:        product.selling_price,
+        unit_cost:         product.base_cost,
+        markup_percentage: product.markup_percentage,
+        product_name:      product.name,
+        product_sku:       product.sku
+      )
+    end
+    subtotal = order.order_items.sum { |i| i.unit_price * i.quantity }
+    order.update_columns(
+      subtotal:    subtotal,
+      grand_total: subtotal + order.shipping_amount + order.tax_amount
+    )
+  end
+
+  # 10 orders: pending/assigned (future deliveries)
+  10.times do |i|
+    customer = customers.sample
+    order = Order.create!(
+      user:             customer,
+      status:           :scheduled_for_delivery,
+      source:           [:admin_manual, :phone, :web_customer].sample,
+      shipping_address: build_shipping_address(customer.full_name),
+      subtotal:         0,
+      shipping_amount:  75.00,
+      tax_amount:       0,
+      grand_total:      75.00,
+      delivery_zone:    zone,
+      assigned_to:      delivery_user
+    )
+    add_items_to_order(order, products)
+    order.delivery_events.create!(
+      status:     :assigned,
+      created_by: admin,
+      note:       "Assigned to #{delivery_user.full_name}"
+    )
+  end
+
+  # 10 orders: delivered
+  10.times do |i|
+    customer = customers.sample
+    order = Order.create!(
+      user:             customer,
+      status:           :delivered,
+      source:           :web_customer,
+      shipping_address: build_shipping_address(customer.full_name),
+      subtotal:         0,
+      shipping_amount:  85.00,
+      tax_amount:       0,
+      grand_total:      85.00,
+      delivery_zone:    zone,
+      assigned_to:      delivery_user,
+      delivered_by:     delivery_user,
+      delivered_at:     Faker::Time.backward(days: 30, period: :day),
+      created_at:       Faker::Time.backward(days: 45, period: :day)
+    )
+    add_items_to_order(order, products)
+    order.delivery_events.create!(status: :assigned,   created_by: admin, note: "Assigned to #{delivery_user.full_name}")
+    order.delivery_events.create!(status: :delivered,  created_by: delivery_user, note: "Delivered successfully")
+  end
+
+  # 10 orders: mixed statuses (paid, out_for_delivery, canceled, admin_manual)
+  statuses = [:paid, :paid, :out_for_delivery, :out_for_delivery, :canceled,
+              :paid, :scheduled_for_delivery, :paid, :out_for_delivery, :canceled]
+  statuses.each do |status|
+    customer = customers.sample
+    assigned = status.in?(%i[out_for_delivery]) ? delivery_user : nil
+    order = Order.create!(
+      user:             customer,
+      status:           status,
+      source:           status == :paid ? :admin_manual : :web_customer,
+      shipping_address: build_shipping_address(customer.full_name),
+      subtotal:         0,
+      shipping_amount:  95.00,
+      tax_amount:       0,
+      grand_total:      95.00,
+      delivery_zone:    zone,
+      assigned_to:      assigned
+    )
+    add_items_to_order(order, products)
+    if assigned
+      order.delivery_events.create!(status: :assigned, created_by: admin, note: "Assigned")
+      order.delivery_events.create!(status: :out_for_delivery, created_by: delivery_user, note: "Out for delivery")
+    end
+  end
+
+  puts "  ✓ 30 sample orders created"
+end

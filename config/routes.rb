@@ -31,11 +31,24 @@ Rails.application.routes.draw do
   # Stripe webhooks
   post "webhooks/stripe", to: "webhooks#stripe"
 
+  # QR code product scans (public, but access-controlled in controller)
+  get "qr/products/:token", to: "qr/products#show", as: :qr_product
+
   # === Customer account area ===
   namespace :account do
     resource  :profile,   only: [:show, :edit, :update]
     resources :orders,    only: [:index, :show]
     resources :addresses, only: [:index, :new, :create, :edit, :update, :destroy]
+  end
+
+  # === Delivery portal (admin + delivery admins) ===
+  namespace :delivery do
+    root "orders#index"
+    resources :orders, only: [:index, :show] do
+      member do
+        patch :mark_delivered
+      end
+    end
   end
 
   # === Admin panel ===
@@ -57,6 +70,10 @@ Rails.application.routes.draw do
     resources :orders do
       member do
         patch :update_status
+        patch :assign_delivery
+      end
+      collection do
+        post :calculate_shipping
       end
     end
 
