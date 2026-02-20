@@ -1,0 +1,104 @@
+<% content_for :title, "Products" %>
+
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Products</h1>
+  <%= link_to "Add Product", new_admin_product_path, class: "inline-flex items-center px-4 py-2 bg-amber-800 text-white text-sm font-medium rounded-md hover:bg-amber-900 transition-colors" %>
+</div>
+
+<!-- Filters -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+  <%= form_with url: admin_products_path, method: :get, data: { turbo: false } do |f| %>
+    <div class="flex flex-wrap gap-3 items-end">
+      <div>
+        <%= f.search_field :q, value: params[:q], placeholder: "Search name, SKU, brand...",
+            class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 w-64" %>
+      </div>
+      <div>
+        <%= f.select :status,
+            options_for_select([["All Statuses", ""], ["Draft", "draft"], ["Published", "published"], ["Archived", "archived"]], params[:status]),
+            {},
+            class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+      <div>
+        <%= f.select :category_id,
+            options_for_select([["All Categories", ""]] + @categories.map { |c| [c.name, c.id] }, params[:category_id]),
+            {},
+            class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+      <%= f.submit "Filter", class: "bg-gray-800 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer" %>
+      <%= link_to "Clear", admin_products_path, class: "text-sm text-gray-500 hover:text-gray-700 px-2 py-2" %>
+    </div>
+  <% end %>
+</div>
+
+<!-- Products Table -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
+        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Stock</th>
+        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @products.each do |product| %>
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                <% if product.primary_image %>
+                  <%= image_tag product.primary_image.variant(resize_to_fill: [40, 40]), class: "w-full h-full object-cover" %>
+                <% end %>
+              </div>
+              <div>
+                <%= link_to product.name, admin_product_path(product), class: "text-sm font-medium text-gray-900 hover:text-amber-800 line-clamp-1" %>
+                <% if product.featured? %>
+                  <span class="text-xs text-amber-600">★ Featured</span>
+                <% end %>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm font-mono text-gray-600"><%= product.sku %></td>
+          <td class="px-6 py-4 text-sm text-gray-600"><%= product.category.name %></td>
+          <td class="px-6 py-4 text-sm font-semibold text-right"><%= number_to_currency(product.selling_price) %></td>
+          <td class="px-6 py-4 text-center" id="stock-display-<%= product.id %>">
+            <%= render "admin/products/stock_display", product: product %>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium
+              <%= product.published? ? 'bg-green-100 text-green-700' : product.draft? ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600' %>">
+              <%= product.status.humanize %>
+            </span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <div class="flex justify-end gap-2">
+              <%= link_to "Edit", edit_admin_product_path(product), class: "text-xs text-amber-700 hover:underline font-medium" %>
+              <% if product.draft? || product.archived? %>
+                <%= button_to "Publish", publish_admin_product_path(product), method: :patch,
+                    class: "text-xs text-green-700 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0" %>
+              <% end %>
+              <% unless product.archived? %>
+                <%= button_to "Archive", archive_admin_product_path(product), method: :patch,
+                    class: "text-xs text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0",
+                    form: { data: { turbo_confirm: "Archive '#{product.name}'?" } } %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @products.empty? %>
+    <div class="py-12 text-center text-gray-400 text-sm">No products found</div>
+  <% end %>
+</div>
+
+<% if @pagy.pages > 1 %>
+  <div class="mt-6 flex justify-center"><%== pagy_nav(@pagy) %></div>
+<% end %>

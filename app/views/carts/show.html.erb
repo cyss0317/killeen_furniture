@@ -1,0 +1,103 @@
+<% content_for :title, "Shopping Cart — Killeen Furniture" %>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <h1 class="text-2xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+
+  <% if @cart_items.empty? %>
+    <div class="text-center py-16 bg-white rounded-xl border border-gray-100">
+      <svg class="mx-auto w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      <h3 class="text-lg font-medium text-gray-500 mb-2">Your cart is empty</h3>
+      <p class="text-sm text-gray-400 mb-6">Start shopping to add items to your cart.</p>
+      <%= link_to "Browse Products", products_path, class: "inline-block bg-amber-800 text-white px-6 py-3 rounded-md font-medium hover:bg-amber-900 transition-colors" %>
+    </div>
+  <% else %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Cart Items -->
+      <div class="lg:col-span-2 space-y-4">
+        <% @cart_items.each do |item| %>
+          <div id="cart-item-<%= item.id %>" class="bg-white rounded-xl border border-gray-100 p-4 flex gap-4">
+            <!-- Product Image -->
+            <div class="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+              <% if item.product.primary_image %>
+                <%= image_tag item.product.primary_image.variant(resize_to_fill: [100, 100]),
+                    class: "w-full h-full object-cover", alt: item.product.name %>
+              <% else %>
+                <div class="w-full h-full flex items-center justify-center text-gray-300">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
+                  </svg>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Item Details -->
+            <div class="flex-1 min-w-0">
+              <%= link_to item.product.name, product_path(item.product),
+                  class: "font-semibold text-gray-900 hover:text-amber-800 transition-colors text-sm line-clamp-2" %>
+              <p class="text-xs text-gray-400 mt-0.5">SKU: <%= item.product.sku %></p>
+              <p class="text-sm font-bold text-gray-900 mt-1"><%= number_to_currency(item.product.selling_price) %></p>
+
+              <!-- Quantity + Remove -->
+              <div class="flex items-center gap-4 mt-3">
+                <%= form_with url: update_item_cart_path, method: :patch, data: { turbo: false } do |f| %>
+                  <%= f.hidden_field :id, value: item.id %>
+                  <div class="flex items-center border border-gray-300 rounded-md">
+                    <button type="submit" name="quantity" value="<%= [1, item.quantity - 1].max %>"
+                            class="px-2 py-1 text-gray-600 hover:text-gray-900 text-sm">−</button>
+                    <span class="px-3 py-1 text-sm font-medium"><%= item.quantity %></span>
+                    <button type="submit" name="quantity" value="<%= [item.quantity + 1, item.product.stock_quantity].min %>"
+                            class="px-2 py-1 text-gray-600 hover:text-gray-900 text-sm">+</button>
+                  </div>
+                <% end %>
+
+                <%= button_to remove_item_cart_path, method: :delete,
+                    params: { id: item.id },
+                    class: "text-sm text-red-500 hover:text-red-700 font-medium transition-colors bg-transparent border-0 cursor-pointer p-0",
+                    form: { data: { turbo_confirm: "Remove this item?" } } do %>
+                  Remove
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Line Total -->
+            <div class="text-right flex-shrink-0">
+              <span class="font-bold text-gray-900"><%= number_to_currency(item.line_total) %></span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl border border-gray-100 p-6 sticky top-20">
+          <h2 class="font-bold text-gray-900 mb-4">Order Summary</h2>
+
+          <div class="space-y-2 text-sm mb-4">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Subtotal</span>
+              <span id="cart-subtotal" class="font-medium"><%= number_to_currency(current_cart.subtotal) %></span>
+            </div>
+            <div class="flex justify-between text-gray-400">
+              <span>Shipping</span>
+              <span>Calculated at checkout</span>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-100 pt-4 mb-6">
+            <div class="flex justify-between font-bold text-base">
+              <span>Estimated Total</span>
+              <span><%= number_to_currency(current_cart.subtotal) %></span>
+            </div>
+          </div>
+
+          <%= link_to "Proceed to Checkout", checkout_path,
+              class: "w-full block text-center bg-amber-800 text-white font-semibold py-3 px-6 rounded-md hover:bg-amber-900 transition-colors" %>
+          <%= link_to "Continue Shopping", products_path,
+              class: "w-full block text-center text-sm text-gray-600 hover:text-gray-900 mt-3 transition-colors" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

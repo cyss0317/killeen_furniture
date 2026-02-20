@@ -1,0 +1,98 @@
+<% content_for :title, "Dashboard" %>
+
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+  <p class="text-sm text-gray-400"><%= Date.current.strftime("%A, %B %d, %Y") %></p>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-sm font-medium text-gray-500 mb-1">Today's Orders</p>
+    <p class="text-3xl font-bold text-gray-900"><%= @today_orders %></p>
+    <%= link_to "View orders →", admin_orders_path, class: "text-xs text-amber-700 hover:underline mt-1 block" %>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-sm font-medium text-gray-500 mb-1">Today's Revenue</p>
+    <p class="text-3xl font-bold text-gray-900"><%= number_to_currency(@today_revenue) %></p>
+    <p class="text-xs text-gray-400 mt-1">Paid orders only</p>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-sm font-medium text-gray-500 mb-1">Pending Orders</p>
+    <p class="text-3xl font-bold text-yellow-600"><%= @pending_orders %></p>
+    <%= link_to "Review →", admin_orders_path(status: "pending"), class: "text-xs text-amber-700 hover:underline mt-1 block" %>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-sm font-medium text-gray-500 mb-1">Low Stock Items</p>
+    <p class="text-3xl font-bold <%= @low_stock.any? ? 'text-red-600' : 'text-gray-900' %>"><%= @low_stock.count %></p>
+    <%= link_to "View products →", admin_products_path, class: "text-xs text-amber-700 hover:underline mt-1 block" %>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <!-- Recent Orders -->
+  <div class="xl:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-900">Recent Orders</h2>
+      <%= link_to "View all", admin_orders_path, class: "text-sm text-amber-700 hover:underline" %>
+    </div>
+    <% if @recent_orders.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Order</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Customer</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Total</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @recent_orders.each do |order| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3">
+                <%= link_to order.order_number, admin_order_path(order), class: "text-sm font-mono text-amber-700 hover:underline" %>
+                <p class="text-xs text-gray-400"><%= order.created_at.strftime("%b %d, %I:%M %p") %></p>
+              </td>
+              <td class="px-6 py-3 text-sm text-gray-900"><%= order.customer_name %></td>
+              <td class="px-6 py-3 text-sm font-semibold"><%= number_to_currency(order.grand_total) %></td>
+              <td class="px-6 py-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_badge_class(order.status) %>">
+                  <%= order.status.humanize %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="py-12 text-center text-gray-400 text-sm">No orders yet</div>
+    <% end %>
+  </div>
+
+  <!-- Low Stock Alert -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-900">Low Stock Alert</h2>
+      <% if @low_stock.any? %>
+        <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium"><%= @low_stock.count %> items</span>
+      <% end %>
+    </div>
+    <% if @low_stock.any? %>
+      <ul class="divide-y divide-gray-100">
+        <% @low_stock.each do |product| %>
+          <li class="px-6 py-3 hover:bg-gray-50">
+            <%= link_to admin_product_path(product), class: "flex items-center justify-between" do %>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate"><%= product.name %></p>
+                <p class="text-xs text-gray-400">SKU: <%= product.sku %></p>
+              </div>
+              <span class="ml-2 text-sm font-bold text-red-600 flex-shrink-0"><%= product.stock_quantity %> left</span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <div class="py-8 text-center text-gray-400 text-sm">All products well-stocked</div>
+    <% end %>
+  </div>
+</div>

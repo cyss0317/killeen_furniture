@@ -1,0 +1,59 @@
+<% content_for :title, "Delivery Zones" %>
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Delivery Zones</h1>
+    <p class="text-sm text-gray-400 mt-1">Customers can only checkout if their ZIP code is in an active zone.</p>
+  </div>
+  <%= link_to "Add Zone", new_admin_delivery_zone_path, class: "px-4 py-2 bg-amber-800 text-white text-sm font-medium rounded-md hover:bg-amber-900 transition-colors" %>
+</div>
+
+<div class="space-y-4">
+  <% @zones.each do |zone| %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            <h3 class="font-semibold text-gray-900"><%= zone.name %></h3>
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium <%= zone.active? ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+              <%= zone.active? ? "Active" : "Inactive" %>
+            </span>
+          </div>
+          <div class="grid grid-cols-3 gap-4 text-sm mb-4">
+            <div>
+              <span class="text-gray-500">Base Rate:</span>
+              <span class="font-medium ml-1"><%= number_to_currency(zone.base_rate) %></span>
+            </div>
+            <div>
+              <span class="text-gray-500">Per Item Fee:</span>
+              <span class="font-medium ml-1"><%= number_to_currency(zone.per_item_fee) %></span>
+            </div>
+            <div>
+              <span class="text-gray-500">Large Item:</span>
+              <span class="font-medium ml-1"><%= number_to_currency(zone.large_item_surcharge) %></span>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 mb-1">Covered ZIP Codes (<%= zone.zip_codes.count %>):</p>
+            <div class="flex flex-wrap gap-1">
+              <% zone.zip_codes.each do |zip| %>
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono"><%= zip %></span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-2 ml-4">
+          <%= link_to "Edit", edit_admin_delivery_zone_path(zone), class: "text-sm text-amber-700 hover:underline font-medium" %>
+          <%= button_to "Delete", admin_delivery_zone_path(zone), method: :delete,
+              class: "text-sm text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0",
+              form: { data: { turbo_confirm: "Delete '#{zone.name}'?" } } %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <% if @zones.empty? %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center text-gray-400">
+      No delivery zones configured. Add a zone to enable checkout.
+    </div>
+  <% end %>
+</div>

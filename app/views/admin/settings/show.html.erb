@@ -1,0 +1,53 @@
+<% content_for :title, "Settings" %>
+
+<h1 class="text-2xl font-bold text-gray-900 mb-6">Global Settings</h1>
+
+<div class="max-w-lg">
+  <%= form_with url: admin_settings_path, method: :patch, class: "space-y-6" do |f| %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
+      <h2 class="font-semibold text-gray-900">Pricing</h2>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Global Markup Percentage</label>
+        <div class="relative">
+          <input type="number" name="settings[global_markup_percentage]"
+                 value="<%= @settings['global_markup_percentage']&.value %>"
+                 step="0.1" min="0"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <span class="absolute right-3 top-2 text-gray-500 text-sm">%</span>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Default markup applied to new products with no custom markup.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tax Rate</label>
+        <div class="relative">
+          <input type="number" name="settings[tax_rate]"
+                 value="<%= @settings['tax_rate']&.value %>"
+                 step="0.01" min="0"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <span class="absolute right-3 top-2 text-gray-500 text-sm">%</span>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Set to 0 for tax-exempt sales.</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
+      <h2 class="font-semibold text-gray-900">Notifications</h2>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Admin Notification Email</label>
+        <input type="email" name="settings[admin_notification_email]"
+               value="<%= @settings['admin_notification_email']&.value %>"
+               class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        <p class="text-xs text-gray-400 mt-1">New order notifications are sent to this address.</p>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button type="submit" class="bg-amber-800 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-amber-900 cursor-pointer text-sm">
+        Save Settings
+      </button>
+    </div>
+  <% end %>
+</div>

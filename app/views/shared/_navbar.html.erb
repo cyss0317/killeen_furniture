@@ -1,0 +1,72 @@
+<header class="bg-white shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <%= link_to root_path, class: "flex items-center" do %>
+          <span class="text-2xl font-bold text-amber-800 tracking-tight">Killeen Furniture</span>
+        <% end %>
+      </div>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center space-x-6">
+        <%= link_to "Shop All", products_path, class: "text-sm font-medium text-gray-700 hover:text-amber-800 transition-colors" %>
+        <% Category.root_categories.limit(4).each do |category| %>
+          <%= link_to category.name, category_path(category), class: "text-sm font-medium text-gray-700 hover:text-amber-800 transition-colors" %>
+        <% end %>
+      </nav>
+
+      <!-- Right actions -->
+      <div class="flex items-center space-x-4">
+        <!-- Search -->
+        <%= link_to products_path, class: "text-gray-600 hover:text-amber-800 transition-colors" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        <% end %>
+
+        <!-- Cart -->
+        <%= link_to cart_path, class: "relative text-gray-600 hover:text-amber-800 transition-colors" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <% count = current_cart.total_items %>
+          <% if count > 0 %>
+            <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              <%= count %>
+            </span>
+          <% else %>
+            <span id="cart-count" class="hidden absolute -top-2 -right-2 bg-amber-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"></span>
+          <% end %>
+        <% end %>
+
+        <!-- Auth -->
+        <% if user_signed_in? %>
+          <div class="relative" data-controller="dropdown">
+            <button data-action="click->dropdown#toggle" class="flex items-center text-sm font-medium text-gray-700 hover:text-amber-800 transition-colors">
+              <%= current_user.first_name %>
+              <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-100 py-1 z-50">
+              <%= link_to "My Account", account_profile_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
+              <%= link_to "My Orders", account_orders_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
+              <% if current_user.admin_or_above? %>
+                <div class="border-t border-gray-100 my-1"></div>
+                <%= link_to "Admin Panel", admin_root_path, class: "block px-4 py-2 text-sm text-amber-800 font-medium hover:bg-gray-50" %>
+              <% end %>
+              <div class="border-t border-gray-100 my-1"></div>
+              <%= link_to "Sign Out", destroy_user_session_path,
+                  data: { turbo_method: :delete },
+                  class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
+            </div>
+          </div>
+        <% else %>
+          <%= link_to "Sign In", new_user_session_path, class: "text-sm font-medium text-gray-700 hover:text-amber-800 transition-colors" %>
+          <%= link_to "Create Account", new_user_registration_path, class: "ml-2 text-sm font-medium bg-amber-800 text-white px-4 py-2 rounded-md hover:bg-amber-900 transition-colors" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</header>

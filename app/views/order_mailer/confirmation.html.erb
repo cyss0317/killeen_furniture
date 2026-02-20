@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; background: #f9fafb; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: #fff; }
+    .header { background: #7c2d12; color: #fff; padding: 32px; text-align: center; }
+    .header h1 { margin: 0; font-size: 24px; font-weight: bold; }
+    .body { padding: 32px; }
+    .section { margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+    .total-row td { border-top: 2px solid #e5e7eb; border-bottom: none; font-weight: bold; font-size: 16px; padding-top: 12px; }
+    .footer { background: #f3f4f6; padding: 20px 32px; text-align: center; font-size: 12px; color: #6b7280; }
+    .badge { display: inline-block; background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Killeen Furniture</h1>
+      <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">Order Confirmation</p>
+    </div>
+
+    <div class="body">
+      <div class="section">
+        <p>Hi <%= @order.customer_name %>,</p>
+        <p>Thank you for your order! We've received your payment and your order is confirmed.</p>
+        <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <p style="margin: 0; font-size: 13px; color: #713f12;"><strong>Order Number:</strong> <%= @order.order_number %></p>
+          <p style="margin: 4px 0 0; font-size: 13px; color: #713f12;"><strong>Date:</strong> <%= @order.created_at.strftime("%B %d, %Y") %></p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 style="margin: 0 0 12px; font-size: 16px;">Order Summary</h3>
+        <table>
+          <% @order_items.each do |item| %>
+            <tr>
+              <td>
+                <strong><%= item.product_name %></strong>
+                <span style="color: #6b7280; font-size: 12px; display: block;">SKU: <%= item.product_sku %> × <%= item.quantity %></span>
+              </td>
+              <td style="text-align: right; font-weight: 600;"><%= number_to_currency(item.line_total) %></td>
+            </tr>
+          <% end %>
+          <tr>
+            <td style="color: #6b7280; border-bottom: none; padding-top: 8px;">Subtotal</td>
+            <td style="text-align: right; border-bottom: none; padding-top: 8px;"><%= number_to_currency(@order.subtotal) %></td>
+          </tr>
+          <tr>
+            <td style="color: #6b7280; border-bottom: none;">Shipping</td>
+            <td style="text-align: right; border-bottom: none;"><%= number_to_currency(@order.shipping_amount) %></td>
+          </tr>
+          <% if @order.tax_amount > 0 %>
+            <tr>
+              <td style="color: #6b7280; border-bottom: none;">Tax</td>
+              <td style="text-align: right; border-bottom: none;"><%= number_to_currency(@order.tax_amount) %></td>
+            </tr>
+          <% end %>
+          <tr class="total-row">
+            <td>Total</td>
+            <td style="text-align: right; color: #92400e;"><%= number_to_currency(@order.grand_total) %></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h3 style="margin: 0 0 12px; font-size: 16px;">Delivery Address</h3>
+        <p style="margin: 0; color: #374151; font-size: 14px; line-height: 1.6;">
+          <%= @order.shipping_address["full_name"] %><br>
+          <%= @order.shipping_address["street_address"] %><br>
+          <%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %> <%= @order.shipping_address["zip_code"] %>
+        </p>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280;">
+        We'll be in touch with delivery updates. If you have questions, please reply to this email.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>Killeen Furniture — Serving the Killeen, TX area</p>
+      <p style="margin: 4px 0 0;">© <%= Time.current.year %> Killeen Furniture. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

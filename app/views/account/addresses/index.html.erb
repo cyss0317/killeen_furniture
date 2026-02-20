@@ -1,0 +1,44 @@
+<div class="max-w-3xl mx-auto py-10 px-4">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Saved Addresses</h1>
+    <%= link_to "Add new address", new_account_address_path,
+        class: "bg-amber-700 hover:bg-amber-800 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm" %>
+  </div>
+
+  <% if @addresses.any? %>
+    <div class="space-y-4">
+      <% @addresses.each do |address| %>
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <p class="font-semibold text-gray-900"><%= address.full_name %></p>
+              <% if address.is_default? %>
+                <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">Default</span>
+              <% end %>
+            </div>
+            <p class="text-gray-600 text-sm"><%= address.street_address %></p>
+            <p class="text-gray-600 text-sm"><%= address.city %>, <%= address.state %> <%= address.zip_code %></p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <%= link_to "Edit", edit_account_address_path(address),
+                class: "text-sm text-amber-700 hover:text-amber-900 font-medium" %>
+            <%= button_to "Remove", account_address_path(address),
+                method: :delete,
+                data: { turbo_confirm: "Remove this address?" },
+                class: "text-sm text-red-600 hover:text-red-800 font-medium bg-transparent border-0 p-0 cursor-pointer" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+      <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <p class="text-gray-500 mb-4">No saved addresses yet.</p>
+      <%= link_to "Add your first address", new_account_address_path,
+          class: "text-amber-700 hover:text-amber-900 font-medium" %>
+    </div>
+  <% end %>
+</div>

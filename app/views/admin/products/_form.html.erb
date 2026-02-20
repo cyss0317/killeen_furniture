@@ -1,0 +1,155 @@
+<%= form_with model: [:admin, product], multipart: true, class: "space-y-6" do |f| %>
+  <%= render "shared/form_errors", object: product %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Product Info -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Basic Info -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Product Information</h3>
+        <div class="space-y-4">
+          <div>
+            <%= f.label :name, "Product Name *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :name, required: true, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <%= f.label :brand, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :brand, placeholder: "Ashley Furniture", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
+            <div>
+              <%= f.label :sku, "SKU / Model # *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :sku, required: true, placeholder: "AF12345", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase" %>
+            </div>
+          </div>
+          <div>
+            <%= f.label :category_id, "Category *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.collection_select :category_id, @categories, :id, :name, { prompt: "Select category..." },
+                { required: true, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" } %>
+          </div>
+          <div>
+            <%= f.label :short_description, "Short Description", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_area :short_description, rows: 2, placeholder: "Brief summary shown on product cards...",
+                class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          </div>
+          <div>
+            <%= f.label :description, "Full Description", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.rich_text_area :description, class: "block w-full" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attributes -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Physical Attributes</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= f.label :color, class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :color, placeholder: "Charcoal, Oak, etc.", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          </div>
+          <div>
+            <%= f.label :material, class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :material, placeholder: "Solid wood, Fabric, etc.", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          </div>
+          <div>
+            <%= f.label :weight, "Weight (lbs)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.number_field :weight, step: 0.1, min: 0, placeholder: "85", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            <p class="text-xs text-gray-400 mt-1">Items ≥ 50 lbs incur a large item delivery surcharge</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Dimensions (inches)</label>
+            <div class="grid grid-cols-3 gap-1">
+              <%= f.number_field "dimensions[width]", value: product.dimensions&.dig("width"), step: 0.1, placeholder: "W", class: "border border-gray-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+              <%= f.number_field "dimensions[height]", value: product.dimensions&.dig("height"), step: 0.1, placeholder: "H", class: "border border-gray-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+              <%= f.number_field "dimensions[depth]", value: product.dimensions&.dig("depth"), step: 0.1, placeholder: "D", class: "border border-gray-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Images -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Product Images</h3>
+        <% if product.images.attached? %>
+          <div class="grid grid-cols-4 gap-2 mb-4">
+            <% product.images.each do |image| %>
+              <div class="aspect-square bg-gray-100 rounded-md overflow-hidden">
+                <%= image_tag image.variant(resize_to_fill: [120, 120]), class: "w-full h-full object-cover" %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+        <%= f.file_field :images, multiple: true, accept: "image/*",
+            class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" %>
+        <p class="text-xs text-gray-400 mt-2">Upload multiple images. First image will be used as the primary image.</p>
+      </div>
+    </div>
+
+    <!-- Pricing & Inventory Sidebar -->
+    <div class="space-y-6">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Pricing</h3>
+        <div class="space-y-4">
+          <div>
+            <%= f.label :base_cost, "Base Cost (your cost) *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <div class="relative">
+              <span class="absolute left-3 top-2 text-gray-500 text-sm">$</span>
+              <%= f.number_field :base_cost, step: 0.01, min: 0, required: true,
+                  class: "w-full border border-gray-300 rounded-md pl-7 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
+          </div>
+          <div>
+            <%= f.label :markup_percentage, "Markup %", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <div class="relative">
+              <%= f.number_field :markup_percentage, step: 0.1, min: 0,
+                  placeholder: GlobalSetting.global_markup.to_s,
+                  class: "w-full border border-gray-300 rounded-md px-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+              <span class="absolute right-3 top-2 text-gray-500 text-sm">%</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Global default: <%= GlobalSetting.global_markup %>%. Leave 0 to use global.</p>
+          </div>
+          <div class="bg-amber-50 rounded-md p-3">
+            <p class="text-xs text-gray-600 font-medium">Estimated Selling Price</p>
+            <p class="text-lg font-bold text-amber-800" id="price-preview">
+              <%= number_to_currency(product.selling_price || 0) %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Inventory</h3>
+        <div class="space-y-4">
+          <div>
+            <%= f.label :stock_quantity, "Stock Quantity", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.number_field :stock_quantity, min: 0, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Publishing</h3>
+        <div class="space-y-3">
+          <div>
+            <%= f.label :status, class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.select :status, options_for_select([["Draft", "draft"], ["Published", "published"], ["Archived", "archived"]], product.status),
+                {},
+                class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          </div>
+          <div>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <%= f.check_box :featured, class: "rounded border-gray-300 text-amber-700 focus:ring-amber-500" %>
+              <span class="text-sm text-gray-700">Feature on homepage</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <%= f.submit product.new_record? ? "Create Product" : "Save Changes",
+            class: "flex-1 bg-amber-800 text-white text-sm font-semibold py-2.5 px-4 rounded-md hover:bg-amber-900 transition-colors cursor-pointer text-center" %>
+        <%= link_to "Cancel", admin_products_path, class: "flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 px-4 rounded-md hover:bg-gray-50 transition-colors text-center" %>
+      </div>
+    </div>
+  </div>
+<% end %>

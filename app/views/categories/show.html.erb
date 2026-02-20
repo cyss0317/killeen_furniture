@@ -1,0 +1,55 @@
+<% content_for :title, "#{@category.name} — Killeen Furniture" %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <nav class="text-sm text-gray-400 mb-2">
+      <%= link_to "Home", root_path, class: "hover:text-gray-600" %>
+      <span class="mx-2">/</span>
+      <% if @category.parent %>
+        <%= link_to @category.parent.name, category_path(@category.parent), class: "hover:text-gray-600" %>
+        <span class="mx-2">/</span>
+      <% end %>
+      <span class="text-gray-900 font-medium"><%= @category.name %></span>
+    </nav>
+    <h1 class="text-3xl font-bold text-gray-900"><%= @category.name %></h1>
+    <% if @category.subcategories.any? %>
+      <div class="flex flex-wrap gap-2 mt-3">
+        <% @category.subcategories.ordered.each do |sub| %>
+          <%= link_to sub.name, category_path(sub),
+              class: "text-sm px-3 py-1 bg-amber-50 text-amber-800 rounded-full hover:bg-amber-100 border border-amber-200 transition-colors" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <p class="text-sm text-gray-500"><%= @pagy.count %> products</p>
+    <%= form_with url: category_path(@category), method: :get, data: { turbo: false } do |f| %>
+      <div class="flex gap-2 items-center">
+        <%= f.check_box :in_stock, checked: params[:in_stock] == "1", class: "rounded border-gray-300 text-amber-700" %>
+        <label class="text-sm text-gray-700">In Stock Only</label>
+        <%= f.select :sort,
+            options_for_select([["Featured", ""], ["Price: Low to High", "price_asc"], ["Price: High to Low", "price_desc"]], params[:sort]),
+            {},
+            class: "text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+        <%= f.submit "Apply", class: "text-sm bg-amber-800 text-white px-4 py-1.5 rounded-md hover:bg-amber-900 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @products.empty? %>
+    <div class="text-center py-16 bg-white rounded-xl border border-gray-100">
+      <h3 class="text-gray-500 font-medium">No products in this category yet</h3>
+      <%= link_to "Browse All Products", products_path, class: "mt-4 inline-block text-amber-800 hover:underline" %>
+    </div>
+  <% else %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <% @products.each do |product| %>
+        <%= render "products/product_card", product: product %>
+      <% end %>
+    </div>
+    <% if @pagy.pages > 1 %>
+      <div class="mt-8 flex justify-center"><%== pagy_nav(@pagy) %></div>
+    <% end %>
+  <% end %>
+</div>

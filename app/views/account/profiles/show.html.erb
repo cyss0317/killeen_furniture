@@ -1,0 +1,28 @@
+<% content_for :title, "My Account" %>
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <h1 class="text-2xl font-bold text-gray-900 mb-8">My Account</h1>
+  <div class="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+    <div class="flex justify-between items-start">
+      <h2 class="font-semibold text-gray-900">Profile</h2>
+      <%= link_to "Edit", edit_account_profile_path, class: "text-sm text-amber-700 hover:underline" %>
+    </div>
+    <dl class="space-y-3 text-sm">
+      <div class="flex">
+        <dt class="w-32 text-gray-500">Name</dt>
+        <dd class="font-medium"><%= current_user.full_name %></dd>
+      </div>
+      <div class="flex">
+        <dt class="w-32 text-gray-500">Email</dt>
+        <dd><%= current_user.email %></dd>
+      </div>
+      <div class="flex">
+        <dt class="w-32 text-gray-500">Phone</dt>
+        <dd><%= current_user.phone.presence || "Not set" %></dd>
+      </div>
+    </dl>
+  </div>
+  <div class="mt-6 flex gap-4">
+    <%= link_to "My Orders", account_orders_path, class: "text-sm font-medium text-amber-800 hover:underline" %>
+    <%= link_to "My Addresses", account_addresses_path, class: "text-sm font-medium text-amber-800 hover:underline" %>
+  </div>
+</div>

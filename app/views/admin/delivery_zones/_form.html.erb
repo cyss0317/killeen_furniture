@@ -1,0 +1,45 @@
+<%= form_with model: [:admin, zone], class: "space-y-5 max-w-2xl" do |f| %>
+  <%= render "shared/form_errors", object: zone %>
+
+  <div>
+    <%= f.label :name, "Zone Name *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.text_field :name, required: true, placeholder: "Zone A – Local", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+  </div>
+
+  <div class="grid grid-cols-3 gap-4">
+    <div>
+      <%= f.label :base_rate, "Base Rate ($)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.number_field :base_rate, step: 0.01, min: 0, required: true, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+    </div>
+    <div>
+      <%= f.label :per_item_fee, "Per Item Fee ($)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.number_field :per_item_fee, step: 0.01, min: 0, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+    </div>
+    <div>
+      <%= f.label :large_item_surcharge, "Large Item Fee ($)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.number_field :large_item_surcharge, step: 0.01, min: 0, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      <p class="text-xs text-gray-400 mt-1">Applied per item ≥ 50 lbs</p>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :zip_codes_text, "ZIP Codes (comma or space separated)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.text_area :zip_codes_text, value: zone.zip_codes_text, rows: 4,
+        placeholder: "76541, 76542, 76543, 76544, 76548",
+        class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+    <p class="text-xs text-gray-400 mt-1">Enter 5-digit ZIP codes separated by commas or spaces.</p>
+  </div>
+
+  <div>
+    <label class="flex items-center gap-2 cursor-pointer">
+      <%= f.check_box :active, class: "rounded border-gray-300 text-amber-700 focus:ring-amber-500" %>
+      <span class="text-sm text-gray-700 font-medium">Active (customers can checkout to this zone)</span>
+    </label>
+  </div>
+
+  <div class="flex gap-3 pt-2">
+    <%= f.submit zone.new_record? ? "Create Zone" : "Save Changes",
+        class: "bg-amber-800 text-white text-sm font-semibold py-2 px-6 rounded-md hover:bg-amber-900 cursor-pointer" %>
+    <%= link_to "Cancel", admin_delivery_zones_path, class: "border border-gray-300 text-gray-700 text-sm font-medium py-2 px-6 rounded-md hover:bg-gray-50" %>
+  </div>
+<% end %>
