@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_21_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_21_143755) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -209,6 +209,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_000000) do
     t.index ["status"], name: "index_products_on_status"
   end
 
+  create_table "purchase_order_items", force: :cascade do |t|
+    t.bigint "purchase_order_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "quantity_ordered", default: 1, null: false
+    t.integer "quantity_received", default: 0, null: false
+    t.decimal "unit_cost", precision: 10, scale: 2, null: false
+    t.string "product_name", null: false
+    t.string "product_sku", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_purchase_order_items_on_product_id"
+    t.index ["purchase_order_id"], name: "index_purchase_order_items_on_purchase_order_id"
+  end
+
+  create_table "purchase_orders", force: :cascade do |t|
+    t.string "reference_number", null: false
+    t.integer "status", default: 0, null: false
+    t.date "ordered_at"
+    t.text "notes"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_purchase_orders_on_created_by_id"
+    t.index ["reference_number"], name: "index_purchase_orders_on_reference_number", unique: true
+    t.index ["status"], name: "index_purchase_orders_on_status"
+  end
+
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
     t.bigint "job_id", null: false
     t.string "queue_name", null: false
@@ -374,6 +401,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_000000) do
   add_foreign_key "orders", "users", column: "assigned_to_id"
   add_foreign_key "orders", "users", column: "delivered_by_id"
   add_foreign_key "products", "categories"
+  add_foreign_key "purchase_order_items", "products"
+  add_foreign_key "purchase_order_items", "purchase_orders"
+  add_foreign_key "purchase_orders", "users", column: "created_by_id"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -82,5 +82,9 @@ Rails.application.routes.draw do
     end
 
     resource :settings, only: [:show, :update]
+
+    resources :purchase_orders, only: [:index, :show, :new, :create] do
+      member { patch :receive }
+    end
   end
 end

@@ -1,0 +1,83 @@
+<% content_for :title, "Purchase Orders" %>
+
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+  <h1 class="text-2xl font-bold text-gray-900">Purchase Orders</h1>
+  <%= link_to "New Purchase Order", new_admin_purchase_order_path,
+        class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 font-medium" %>
+</div>
+
+<%# Status filter pills %>
+<div class="flex gap-2 flex-wrap mb-6 text-sm">
+  <% statuses = [nil, "draft", "submitted", "partially_received", "received", "canceled"] %>
+  <% labels   = { nil => "All", "draft" => "Draft", "submitted" => "Submitted",
+                  "partially_received" => "Partially Received", "received" => "Received",
+                  "canceled" => "Canceled" } %>
+  <% statuses.each do |s| %>
+    <% count = s ? (@status_counts[s] || 0) : @status_counts.values.sum %>
+    <%= link_to admin_purchase_orders_path(status: s),
+          class: "px-3 py-1.5 rounded-full font-medium #{params[:status].to_s == s.to_s ? 'bg-amber-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+      <%= labels[s] %> (<%= count %>)
+    <% end %>
+  <% end %>
+</div>
+
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <% if @purchase_orders.any? %>
+    <table class="min-w-full divide-y divide-gray-100">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <%= sort_link("Reference #", "reference_number", current_sort: @sort, current_direction: @direction) %>
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <%= sort_link("Date Ordered", "ordered_at", current_sort: @sort, current_direction: @direction) %>
+          </th>
+          <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Items</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Cost</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <%= sort_link("Status", "status", current_sort: @sort, current_direction: @direction) %>
+          </th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @purchase_orders.each do |po| %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4">
+              <span class="font-mono text-sm font-medium text-gray-900"><%= po.reference_number %></span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-600">
+              <%= po.ordered_at&.strftime("%b %d, %Y") || "—" %>
+            </td>
+            <td class="px-6 py-4 text-center text-sm text-gray-600">
+              <%= po.purchase_order_items.size %>
+            </td>
+            <td class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+              <%= number_to_currency(po.total_cost) %>
+            </td>
+            <td class="px-6 py-4">
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium <%= status_badge_class(po.status) %>">
+                <%= po.status.humanize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <%= link_to "View", admin_purchase_order_path(po),
+                    class: "text-sm text-amber-800 hover:underline font-medium" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if @pagy.pages > 1 %>
+      <div class="px-6 py-4 border-t border-gray-100">
+        <%= @pagy.series_nav %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="px-6 py-16 text-center text-gray-400">
+      <p class="text-lg font-medium">No purchase orders yet</p>
+      <p class="text-sm mt-1">Create your first order from Ashley Furniture.</p>
+    </div>
+  <% end %>
+</div>

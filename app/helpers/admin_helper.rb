@@ -39,7 +39,12 @@ module AdminHelper
       "out_for_delivery"       => "bg-indigo-100 text-indigo-800",
       "delivered"              => "bg-gray-100 text-gray-700",
       "canceled"               => "bg-red-100 text-red-800",
-      "refunded"               => "bg-orange-100 text-orange-800"
+      "refunded"               => "bg-orange-100 text-orange-800",
+      # Purchase order statuses
+      "draft"              => "bg-gray-100 text-gray-600",
+      "submitted"          => "bg-blue-100 text-blue-800",
+      "partially_received" => "bg-yellow-100 text-yellow-800",
+      "received"           => "bg-green-100 text-green-800"
     }.fetch(status.to_s, "bg-gray-100 text-gray-700")
   end
 end
