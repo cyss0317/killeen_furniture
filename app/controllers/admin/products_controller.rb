@@ -10,6 +10,7 @@ module Admin
       scope = scope.search_by(params[:q]) if params[:q].present?
       scope = scope.where(status: params[:status]) if params[:status].present?
       scope = scope.by_category(params[:category_id]) if params[:category_id].present?
+      scope = scope.by_color(params[:color]) if params[:color].present?
 
       @sort      = SORTABLE_COLUMNS.include?(params[:sort]) ? params[:sort] : "created_at"
       @direction = params[:direction] == "asc" ? "asc" : "desc"
@@ -17,6 +18,7 @@ module Admin
 
       @pagy, @products = pagy(:offset, scope, limit: 25)
       @categories = Category.ordered
+      @colors     = Product.where.not(color: [nil, ""]).distinct.pluck(:color).sort
     end
 
     def show

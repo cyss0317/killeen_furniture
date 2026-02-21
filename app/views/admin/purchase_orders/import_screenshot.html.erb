@@ -1,0 +1,114 @@
+<% content_for :title, "Import from Screenshot" %>
+
+<div class="flex items-center gap-4 mb-6">
+  <%= link_to "← Purchase Orders", admin_purchase_orders_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+  <h1 class="text-2xl font-bold text-gray-900">Import from Screenshot</h1>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+  <%# ── LEFT: Upload form ── %>
+  <div class="xl:col-span-2 space-y-6">
+
+    <% if flash[:alert] %>
+      <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <%= form_with url: import_screenshot_admin_purchase_orders_path, method: :post,
+          html: { enctype: "multipart/form-data" },
+          class: "space-y-5" do |f| %>
+
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
+        <h2 class="font-semibold text-gray-900">Upload Screenshot</h2>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Order Screenshot <span class="text-red-500">*</span>
+          </label>
+          <input type="file" name="file" accept="image/jpeg,image/png,image/webp,image/gif"
+                 class="block w-full text-sm text-gray-700
+                        file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+                        file:text-sm file:font-medium file:bg-amber-50 file:text-amber-800
+                        hover:file:bg-amber-100 cursor-pointer" required>
+          <p class="mt-1 text-xs text-gray-400">
+            JPEG, PNG, WebP, or GIF. Screenshot of an Ashley order confirmation, invoice, or dealer portal page.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Ashley Reference # <span class="text-red-500">*</span>
+          </label>
+          <input type="text" name="reference_number"
+                 placeholder="e.g. ASH-2026-001"
+                 value="<%= params[:reference_number] %>"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                 required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date Ordered</label>
+          <input type="date" name="ordered_at"
+                 value="<%= params[:ordered_at] || Date.current.iso8601 %>"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <textarea name="notes" rows="3"
+                    placeholder="Delivery instructions, lead time, etc."
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"><%= params[:notes] %></textarea>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-amber-800 text-white py-2.5 px-4 rounded-md hover:bg-amber-900 font-medium text-sm cursor-pointer">
+          Read Screenshot &amp; Create Purchase Order
+        </button>
+      </div>
+    <% end %>
+  </div>
+
+  <%# ── RIGHT: How it works ── %>
+  <div class="space-y-6">
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="font-semibold text-gray-900 mb-3">How it works</h3>
+      <ol class="text-sm text-gray-600 space-y-3 list-none">
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center">1</span>
+          <span>Upload a screenshot of your Ashley order — confirmation email, dealer portal, or invoice.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center">2</span>
+          <span>Claude AI reads the image and extracts every line item: SKU, name, series, color, qty, and price.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center">3</span>
+          <span>Existing products are updated. New SKUs are created as <em>draft</em> products in the Ashley Furniture category.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center">4</span>
+          <span>For each product, additional details (description, weight) are fetched from ashleyfurniture.com and saved automatically.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center">5</span>
+          <span>A purchase order is created in <em>Submitted</em> status, ready to record receipts when inventory arrives.</span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+      <p class="font-semibold mb-1">Tips for best results</p>
+      <ul class="space-y-1 text-amber-700 text-xs">
+        <li>• Make sure the item codes (e.g. B1190-31) and prices are clearly visible</li>
+        <li>• Full-page screenshots work better than partial crops</li>
+        <li>• PDF → screenshot often gives cleaner results than a phone photo</li>
+        <li>• Stock and costs are updated later via "Record Receipt" when items arrive</li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>

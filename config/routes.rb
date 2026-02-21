@@ -85,6 +85,12 @@ Rails.application.routes.draw do
 
     resources :purchase_orders, only: [:index, :show, :new, :create] do
       member { patch :receive }
+      collection do
+        get  :import_csv
+        post :import_csv
+        get  :import_screenshot
+        post :import_screenshot
+      end
     end
   end
 end

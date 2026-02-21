@@ -2,7 +2,9 @@ class PurchaseOrderPolicy < ApplicationPolicy
   def index?  = super_admin?
   def show?   = super_admin?
   def new?    = super_admin?
-  def create? = super_admin?
+  def create?     = super_admin?
+  def import_csv?        = super_admin?
+  def import_screenshot? = super_admin?
 
   def receive?
     super_admin? && record.receivable?

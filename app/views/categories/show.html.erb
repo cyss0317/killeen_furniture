@@ -59,6 +59,18 @@
               onchange: "this.form.submit()" %>
         </div>
 
+        <%# Color — auto-submits on change %>
+        <% if @colors.any? %>
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Color / Finish</label>
+            <%= f.select :color,
+                options_for_select([["All Colors", ""]] + @colors.map { |c| [c, c] }, params[:color]),
+                {},
+                class: "text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                onchange: "this.form.submit()" %>
+          </div>
+        <% end %>
+
         <%# Price Range — submit via button %>
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1">Price range</label>
@@ -72,7 +84,7 @@
           </div>
         </div>
 
-        <% active_filters = params.permit(:in_stock, :sort, :min_price, :max_price).values.any?(&:present?) %>
+        <% active_filters = params.permit(:in_stock, :sort, :min_price, :max_price, :color).values.any?(&:present?) %>
         <% if active_filters %>
           <%= link_to "Clear filters", category_path(@category),
               class: "text-sm text-gray-400 hover:text-gray-600 py-2 underline underline-offset-2" %>

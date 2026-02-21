@@ -1,0 +1,117 @@
+<% content_for :title, "Import Ashley Furniture CSV" %>
+
+<div class="flex items-center gap-4 mb-6">
+  <%= link_to "← Purchase Orders", admin_purchase_orders_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+  <h1 class="text-2xl font-bold text-gray-900">Import from Ashley Furniture</h1>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+  <%# ── LEFT: Upload form ── %>
+  <div class="xl:col-span-2 space-y-6">
+
+    <% if flash[:alert] %>
+      <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <%= form_with url: import_csv_admin_purchase_orders_path, method: :post,
+          html: { enctype: "multipart/form-data" },
+          class: "space-y-5" do |f| %>
+
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
+        <h2 class="font-semibold text-gray-900">Upload File</h2>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Ashley CSV / TSV File <span class="text-red-500">*</span>
+          </label>
+          <input type="file" name="file" accept=".csv,.tsv,.txt"
+                 class="block w-full text-sm text-gray-700
+                        file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+                        file:text-sm file:font-medium file:bg-amber-50 file:text-amber-800
+                        hover:file:bg-amber-100 cursor-pointer" required>
+          <p class="mt-1 text-xs text-gray-400">
+            Export the order from Ashley's dealer portal. Tab-separated (.tsv) and comma-separated (.csv) are both supported.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Ashley Reference # <span class="text-red-500">*</span>
+          </label>
+          <input type="text" name="reference_number"
+                 placeholder="e.g. ASH-2026-001"
+                 value="<%= params[:reference_number] %>"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                 required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date Ordered</label>
+          <input type="date" name="ordered_at"
+                 value="<%= params[:ordered_at] || Date.current.iso8601 %>"
+                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <textarea name="notes" rows="3"
+                    placeholder="Delivery instructions, lead time, etc."
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"><%= params[:notes] %></textarea>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-amber-800 text-white py-2.5 px-4 rounded-md hover:bg-amber-900 font-medium text-sm cursor-pointer">
+          Import & Create Purchase Order
+        </button>
+      </div>
+    <% end %>
+  </div>
+
+  <%# ── RIGHT: Instructions ── %>
+  <div class="space-y-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="font-semibold text-gray-900 mb-3">Expected Format</h3>
+      <p class="text-sm text-gray-600 mb-3">
+        The file should be the tab-separated export from Ashley's dealer portal with these columns:
+      </p>
+      <ul class="text-xs text-gray-500 space-y-1 font-mono">
+        <li class="font-semibold text-gray-700">Item Code</li>
+        <li>Description</li>
+        <li>Series</li>
+        <li>Color</li>
+        <li>UOM</li>
+        <li class="font-semibold text-gray-700">Qty</li>
+        <li>Box Qty</li>
+        <li>Order Shipped Qty</li>
+        <li class="font-semibold text-gray-700">Price</li>
+        <li>Disc</li>
+        <li>Freight Adj</li>
+        <li>Ext. Price</li>
+        <li>Currency</li>
+      </ul>
+      <p class="text-xs text-gray-400 mt-3">Bold columns are required. Other columns are read if present.</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="font-semibold text-gray-900 mb-3">What happens on import</h3>
+      <ul class="text-sm text-gray-600 space-y-2">
+        <li class="flex gap-2">
+          <span class="text-green-600 font-bold mt-0.5">✓</span>
+          <span><strong>Existing products</strong> (matched by SKU) have their name and brand updated.</span>
+        </li>
+        <li class="flex gap-2">
+          <span class="text-blue-600 font-bold mt-0.5">+</span>
+          <span><strong>New SKUs</strong> are created as <em>draft</em> products in the "Ashley Furniture" category. Publish them manually once you've added photos and descriptions.</span>
+        </li>
+        <li class="flex gap-2">
+          <span class="text-amber-600 font-bold mt-0.5">→</span>
+          <span>Stock and costs are <strong>not</strong> updated here — use "Record Receipt" on the PO when items arrive.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>

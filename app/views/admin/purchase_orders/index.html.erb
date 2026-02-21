@@ -2,8 +2,14 @@
 
 <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
   <h1 class="text-2xl font-bold text-gray-900">Purchase Orders</h1>
-  <%= link_to "New Purchase Order", new_admin_purchase_order_path,
-        class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 font-medium" %>
+  <div class="flex gap-2 flex-wrap">
+    <%= link_to "Import from Screenshot", import_screenshot_admin_purchase_orders_path,
+          class: "bg-white border border-amber-800 text-amber-800 text-sm px-4 py-2 rounded-md hover:bg-amber-50 font-medium" %>
+    <%= link_to "Import from CSV", import_csv_admin_purchase_orders_path,
+          class: "bg-white border border-amber-800 text-amber-800 text-sm px-4 py-2 rounded-md hover:bg-amber-50 font-medium" %>
+    <%= link_to "New Purchase Order", new_admin_purchase_order_path,
+          class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 font-medium" %>
+  </div>
 </div>
 
 <%# Status filter pills %>

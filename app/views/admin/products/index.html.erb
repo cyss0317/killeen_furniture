@@ -25,6 +25,14 @@
             {},
             class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
       </div>
+      <% if @colors.any? %>
+        <div>
+          <%= f.select :color,
+              options_for_select([["All Colors", ""]] + @colors.map { |c| [c, c] }, params[:color]),
+              {},
+              class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+        </div>
+      <% end %>
       <%= f.submit "Filter", class: "bg-gray-800 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer" %>
       <%= link_to "Clear", admin_products_path, class: "text-sm text-gray-500 hover:text-gray-700 px-2 py-2" %>
     </div>

@@ -34,6 +34,7 @@ class Product < ApplicationRecord
           q: "%#{sanitize_sql_like(query)}%")
   }
   scope :by_category, ->(cat_id) { where(category_id: cat_id) if cat_id.present? }
+  scope :by_color,    ->(color)  { where(color: color) if color.present? }
   scope :price_range, ->(min, max) {
     scope = all
     scope = scope.where("selling_price >= ?", min.to_f) if min.present?

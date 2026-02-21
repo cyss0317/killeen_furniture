@@ -87,6 +87,78 @@ class Admin::PurchaseOrdersController < Admin::BaseController
     end
   end
 
+  def import_csv
+    authorize PurchaseOrder, :import_csv?
+    return if request.get?
+
+    unless params[:file].present?
+      flash.now[:alert] = "Please select a CSV/TSV file to import."
+      return render :import_csv, status: :unprocessable_entity
+    end
+
+    unless params[:reference_number].present?
+      flash.now[:alert] = "Reference number is required."
+      return render :import_csv, status: :unprocessable_entity
+    end
+
+    result = PurchaseOrders::ImportCsv.call(
+      file:             params[:file],
+      reference_number: params[:reference_number],
+      ordered_at:       params[:ordered_at].presence,
+      notes:            params[:notes].presence,
+      created_by:       current_user
+    )
+
+    if result.success?
+      parts = []
+      parts << "#{result.created_products.size} new product(s) created as draft" if result.created_products.any?
+      parts << "#{result.updated_products.size} product(s) updated"               if result.updated_products.any?
+      parts << "#{result.skipped_rows.size} row(s) skipped"                       if result.skipped_rows.any?
+
+      notice = "PO #{result.purchase_order.reference_number} imported — #{result.purchase_order.purchase_order_items.size} items. #{parts.join(', ')}."
+      redirect_to admin_purchase_order_path(result.purchase_order), notice: notice
+    else
+      flash.now[:alert] = result.error
+      render :import_csv, status: :unprocessable_entity
+    end
+  end
+
+  def import_screenshot
+    authorize PurchaseOrder, :import_screenshot?
+    return if request.get?
+
+    unless params[:file].present?
+      flash.now[:alert] = "Please select an image file."
+      return render :import_screenshot, status: :unprocessable_entity
+    end
+
+    unless params[:reference_number].present?
+      flash.now[:alert] = "Reference number is required."
+      return render :import_screenshot, status: :unprocessable_entity
+    end
+
+    result = PurchaseOrders::ImportScreenshot.call(
+      file:             params[:file],
+      reference_number: params[:reference_number],
+      ordered_at:       params[:ordered_at].presence,
+      notes:            params[:notes].presence,
+      created_by:       current_user
+    )
+
+    if result.success?
+      parts = []
+      parts << "#{result.created_products.size} new product(s) created as draft" if result.created_products.any?
+      parts << "#{result.updated_products.size} product(s) updated"               if result.updated_products.any?
+      parts << "#{result.skipped_rows.size} row(s) skipped"                       if result.skipped_rows.any?
+
+      notice = "PO #{result.purchase_order.reference_number} imported — #{result.purchase_order.purchase_order_items.size} items. #{parts.join(', ')}."
+      redirect_to admin_purchase_order_path(result.purchase_order), notice: notice
+    else
+      flash.now[:alert] = result.error
+      render :import_screenshot, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_purchase_order

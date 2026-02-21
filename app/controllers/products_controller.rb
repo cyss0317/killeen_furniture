@@ -6,6 +6,7 @@ class ProductsController < ApplicationController
 
     scope = scope.search_by(params[:q])
     scope = scope.by_category(params[:category_id])
+    scope = scope.by_color(params[:color])
     scope = scope.price_range(params[:min_price], params[:max_price])
     scope = scope.in_stock if params[:in_stock] == "1"
 
@@ -18,6 +19,7 @@ class ProductsController < ApplicationController
 
     @pagy, @products = pagy(:offset, scope)
     @categories = Category.root_categories.includes(:subcategories)
+    @colors     = Product.published.where.not(color: [nil, ""]).distinct.pluck(:color).sort
   end
 
   def show

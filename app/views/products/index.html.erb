@@ -26,6 +26,18 @@
                 onchange: "this.form.submit()" %>
           </div>
 
+          <!-- Color / Finish -->
+          <% if @colors.any? %>
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Color / Finish</label>
+              <%= f.select :color,
+                  options_for_select([["All Colors", ""]] + @colors.map { |c| [c, c] }, params[:color]),
+                  {},
+                  class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  onchange: "this.form.submit()" %>
+            </div>
+          <% end %>
+
           <!-- Price Range -->
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>

@@ -137,6 +137,22 @@ if without_tokens > 0
   puts "  ✓ QR tokens backfilled for #{without_tokens} products"
 end
 
+# === Backfill colors for products without a color ===
+FURNITURE_COLORS = %w[
+  White Black Brown Charcoal Gray Beige Natural Walnut Oak Espresso Navy
+  Blue Ivory Taupe Rustic\ Brown Dark\ Brown Warm\ Brown Chipped\ White
+  Antique\ White Light\ Brown Dark\ Charcoal Gray\ Wash Medium\ Brown
+  Cobblestone Coral Fog Alloy Nickel Slate Bisque Stone\ Gray Java Quartz
+].freeze
+
+colorless_count = Product.where(color: [nil, ""]).count
+if colorless_count > 0
+  Product.where(color: [nil, ""]).find_each do |product|
+    product.update_column(:color, FURNITURE_COLORS.sample)
+  end
+  puts "  ✓ Random colors assigned to #{colorless_count} products"
+end
+
 # === 30 Sample Orders (uses FactoryBot) ===
 require "factory_bot_rails"
 include FactoryBot::Syntax::Methods
