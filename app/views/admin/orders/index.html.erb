@@ -30,7 +30,7 @@
           <%= sort_link("Order", :order_number, current_sort: @sort, current_direction: @direction) %>
         </th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Zone</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivery Address</th>
         <th class="px-6 py-3 text-right text-xs font-medium uppercase">
           <%= sort_link("Total", :grand_total, current_sort: @sort, current_direction: @direction) %>
         </th>
@@ -52,8 +52,11 @@
           <td class="px-6 py-4">
             <p class="text-sm font-medium text-gray-900"><%= order.customer_name %></p>
             <p class="text-xs text-gray-400"><%= order.customer_email %></p>
+            <% if order.customer_phone.present? %>
+              <p class="text-xs text-gray-400"><%= order.customer_phone %></p>
+            <% end %>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-600"><%= order.delivery_zone&.name || "—" %></td>
+          <td class="px-6 py-4 text-sm text-gray-600"><%= order.shipping_address_line %></td>
           <td class="px-6 py-4 text-sm font-semibold text-right"><%= number_to_currency(order.grand_total) %></td>
           <td class="px-6 py-4 text-center">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_badge_class(order.status) %>">
