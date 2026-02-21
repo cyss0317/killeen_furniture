@@ -36,9 +36,6 @@ module KilleenFurniture
     config.time_zone = "Central Time (US & Canada)"
     config.autoload_paths << Rails.root.join("app/services")
 
-    # Active Job: use Solid Queue (Rails 8 default)
-    config.active_job.queue_adapter = :solid_queue
-
     # Don't generate system test files.
     config.generators.system_tests = nil
   end

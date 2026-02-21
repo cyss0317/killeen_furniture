@@ -48,7 +48,12 @@
           <% @order_items.each do |item| %>
             <tr>
               <td class="px-6 py-4">
-                <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
+                <% if item.product %>
+                  <%= link_to item.product_name, admin_product_path(item.product),
+                        class: "text-sm font-medium text-amber-800 hover:underline" %>
+                <% else %>
+                  <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
+                <% end %>
                 <p class="text-xs text-gray-400 font-mono">SKU: <%= item.product_sku %></p>
               </td>
               <td class="px-6 py-4 text-center text-sm"><%= item.quantity %></td>

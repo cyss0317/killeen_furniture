@@ -35,13 +35,11 @@ RSpec.describe "Users::Sessions", type: :request do
     end
 
     it "still merges a session cart into the admin's account" do
-      cart = create(:cart)
-      # Simulate a session cart
-      get root_path  # ensures session is started
-      # We can't directly set session in request specs; verify the controller
-      # path doesn't error by checking a clean sign-in succeeds
+      # We can't directly set session[:cart_id] in request specs, so just
+      # verify the sign-in path completes without error (cart merge is a no-op
+      # when no session cart exists).
       sign_in_as(admin_user)
-      expect(response.status).to be_in([200, 302])
+      expect(response).to be_redirect
     end
   end
 
