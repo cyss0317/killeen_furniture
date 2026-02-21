@@ -57,7 +57,7 @@ gem "stripe", "~> 13.0"
 gem "aws-sdk-s3", require: false
 
 # Pagination
-gem "pagy", "~> 43.2"
+gem "pagy", "~> 43.3"
 
 # URL-friendly slugs
 gem "friendly_id", "~> 5.5"
