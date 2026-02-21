@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: -> { "Killeen Furniture <#{ENV.fetch('ADMIN_EMAIL', 'noreply@killeenfurniture.com')}>" }
+  default from: -> { "#{APP_NAME} <#{ENV.fetch('ADMIN_EMAIL', 'noreply@warehousefurniture.com')}>" }
   layout "mailer"
 end

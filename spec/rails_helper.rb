@@ -19,4 +19,9 @@ RSpec.configure do |config|
 
   config.include FactoryBot::Syntax::Methods
   config.include Pundit::Authorization, type: :policy
+
+  # Use the test queue adapter for mailer specs so have_enqueued_mail works.
+  config.before(:each, type: :mailer) do
+    ActiveJob::Base.queue_adapter = :test
+  end
 end

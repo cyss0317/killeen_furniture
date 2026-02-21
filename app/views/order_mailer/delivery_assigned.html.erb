@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; background: #f9fafb; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: #fff; }
+    .header { background: #1e3a5f; color: #fff; padding: 28px 32px; }
+    .header h1 { margin: 0 0 4px; font-size: 22px; font-weight: bold; }
+    .header p { margin: 0; opacity: 0.85; font-size: 14px; }
+    .body { padding: 32px; }
+    .info-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .info-box p { margin: 0 0 6px; font-size: 13px; color: #1e40af; }
+    .info-box p:last-child { margin-bottom: 0; }
+    .section { margin-bottom: 24px; }
+    .section h3 { margin: 0 0 10px; font-size: 15px; color: #374151; border-bottom: 1px solid #f3f4f6; padding-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    td { padding: 8px 0; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    a.item-link { color: #1e3a5f; text-decoration: underline; font-weight: 600; }
+    a.maps-link { color: #1e40af; text-decoration: underline; }
+    .cta { display: inline-block; margin-top: 8px; padding: 12px 24px; background: #1e3a5f; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; }
+    .footer { background: #f3f4f6; padding: 20px 32px; text-align: center; font-size: 12px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Warehouse Furniture</h1>
+      <p>Delivery Assignment</p>
+    </div>
+
+    <div class="body">
+      <p>Hi <%= @delivery_user.first_name %>,</p>
+      <p>You have been assigned a delivery. Please review the details below and confirm your availability.</p>
+
+      <div class="info-box">
+        <p><strong>Order Number:</strong> <%= @order.order_number %></p>
+        <p><strong>Customer:</strong> <%= @order.customer_name %></p>
+        <p><strong>Phone:</strong> <%= @order.customer_phone.presence || "—" %></p>
+      </div>
+
+      <div class="section">
+        <h3>Delivery Address</h3>
+        <% maps_url = google_maps_url(@order.shipping_address) %>
+        <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #374151;">
+          <%= @order.shipping_address["full_name"] %><br>
+          <a href="<%= maps_url %>" class="maps-link">
+            <%= @order.shipping_address["street_address"] %><br>
+            <%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %> <%= @order.shipping_address["zip_code"] %>
+          </a>
+        </p>
+      </div>
+
+      <div class="section">
+        <h3>Items to Deliver</h3>
+        <table>
+          <% @order_items.each do |item| %>
+            <tr>
+              <td>
+                <% if item.product %>
+                  <a href="<%= admin_product_url(item.product) %>" class="item-link"><%= item.product_name %></a>
+                <% else %>
+                  <strong><%= item.product_name %></strong>
+                <% end %>
+                <span style="color: #6b7280; font-size: 12px; display: block;">SKU: <%= item.product_sku %></span>
+              </td>
+              <td style="text-align: right; width: 60px;">× <%= item.quantity %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+
+      <a href="<%= delivery_order_url(@order) %>" class="cta">
+        View Delivery Details →
+      </a>
+
+      <p style="margin-top: 20px; font-size: 13px; color: #6b7280;">
+        Log in to the delivery portal to update the order status as you complete the delivery.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>© <%= Time.current.year %> Warehouse Furniture. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

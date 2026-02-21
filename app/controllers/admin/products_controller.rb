@@ -2,6 +2,8 @@ module Admin
   class ProductsController < BaseController
     before_action :set_product, only: [:show, :edit, :update, :destroy, :update_stock, :toggle_featured, :publish, :archive]
 
+    SORTABLE_COLUMNS = %w[name selling_price stock_quantity created_at status].freeze
+
     def index
       scope = Product.includes(:category, :images_attachments)
 
@@ -9,7 +11,11 @@ module Admin
       scope = scope.where(status: params[:status]) if params[:status].present?
       scope = scope.by_category(params[:category_id]) if params[:category_id].present?
 
-      @pagy, @products = pagy(:offset, scope.order(created_at: :desc), limit: 25)
+      @sort      = SORTABLE_COLUMNS.include?(params[:sort]) ? params[:sort] : "created_at"
+      @direction = params[:direction] == "asc" ? "asc" : "desc"
+      scope      = scope.reorder("#{@sort} #{@direction}")
+
+      @pagy, @products = pagy(:offset, scope, limit: 25)
       @categories = Category.ordered
     end
 

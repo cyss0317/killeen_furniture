@@ -1,0 +1,182 @@
+<% content_for :title, "Revenue Analytics" %>
+
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Revenue Analytics</h1>
+    <p class="text-sm text-gray-500 mt-1">Sales, costs, and profit — excludes canceled &amp; refunded orders</p>
+  </div>
+
+  <%# Period selector %>
+  <div class="flex rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+    <% [["Week", "week"], ["Month", "month"], ["Year", "year"]].each do |label, val| %>
+      <%= link_to label,
+          admin_analytics_path(period: val),
+          class: "px-4 py-2 text-sm font-medium transition-colors #{
+            @period == val ? 'bg-amber-700 text-white' : 'text-gray-600 hover:bg-gray-50'
+          }" %>
+    <% end %>
+  </div>
+</div>
+
+<%# Period label %>
+<% period_label = { "week" => "This Week vs Last Week", "month" => "This Month vs Last Month", "year" => "This Year vs Last Year" }[@period] %>
+<p class="text-xs text-gray-400 mb-5 uppercase tracking-wide font-medium"><%= period_label %></p>
+
+<%# KPI Cards — Current Period %>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <%# Total Sales %>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Sales</p>
+    <p class="text-2xl font-bold text-gray-900"><%= number_to_currency(@analytics.current_sales) %></p>
+    <% if @analytics.sales_change %>
+      <p class="text-xs mt-1 <%= @analytics.sales_change >= 0 ? 'text-green-600' : 'text-red-500' %>">
+        <%= @analytics.sales_change >= 0 ? "↑" : "↓" %>
+        <%= @analytics.sales_change.abs %>% vs previous
+      </p>
+    <% end %>
+    <p class="text-xs text-gray-400 mt-1"><%= @analytics.current_count %> orders</p>
+  </div>
+
+  <%# Total Cost %>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Cost</p>
+    <p class="text-2xl font-bold text-gray-900"><%= number_to_currency(@analytics.current_cost) %></p>
+    <% if @analytics.prev_cost > 0 %>
+      <% cost_chg = ((@analytics.current_cost - @analytics.prev_cost) / @analytics.prev_cost * 100).round(1) %>
+      <p class="text-xs mt-1 <%= cost_chg <= 0 ? 'text-green-600' : 'text-gray-500' %>">
+        <%= cost_chg >= 0 ? "↑" : "↓" %> <%= cost_chg.abs %>% vs previous
+      </p>
+    <% end %>
+    <p class="text-xs text-gray-400 mt-1">Prev: <%= number_to_currency(@analytics.prev_cost) %></p>
+  </div>
+
+  <%# Gross Profit %>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Gross Profit</p>
+    <p class="text-2xl font-bold <%= @analytics.current_profit >= 0 ? 'text-green-700' : 'text-red-600' %>">
+      <%= number_to_currency(@analytics.current_profit) %>
+    </p>
+    <% if @analytics.profit_change %>
+      <p class="text-xs mt-1 <%= @analytics.profit_change >= 0 ? 'text-green-600' : 'text-red-500' %>">
+        <%= @analytics.profit_change >= 0 ? "↑" : "↓" %>
+        <%= @analytics.profit_change.abs %>% vs previous
+      </p>
+    <% end %>
+    <p class="text-xs text-gray-400 mt-1">Prev: <%= number_to_currency(@analytics.prev_profit) %></p>
+  </div>
+
+  <%# Gross Margin % %>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Gross Margin</p>
+    <p class="text-2xl font-bold text-gray-900"><%= @analytics.current_margin %>%</p>
+    <% margin_diff = @analytics.margin_change %>
+    <p class="text-xs mt-1 <%= margin_diff >= 0 ? 'text-green-600' : 'text-red-500' %>">
+      <%= margin_diff >= 0 ? "↑" : "↓" %> <%= margin_diff.abs %>pp vs previous
+    </p>
+    <p class="text-xs text-gray-400 mt-1">Prev: <%= @analytics.prev_margin %>%</p>
+  </div>
+</div>
+
+<%# Revenue & Cost Chart %>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+  <h2 class="font-semibold text-gray-900 mb-4">Revenue vs Cost Trend</h2>
+  <% if @analytics.chart_labels.any? %>
+    <div class="relative h-64">
+      <canvas
+        data-controller="revenue-chart"
+        data-revenue-chart-labels-value="<%= @analytics.chart_labels.to_json %>"
+        data-revenue-chart-revenue-value="<%= @analytics.chart_revenue.to_json %>"
+        data-revenue-chart-cost-value="<%= @analytics.chart_cost.to_json %>">
+      </canvas>
+    </div>
+  <% else %>
+    <div class="h-32 flex items-center justify-center text-gray-400 text-sm">
+      No revenue data for this period
+    </div>
+  <% end %>
+</div>
+
+<%# Comparison Summary Table %>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h2 class="font-semibold text-gray-900">Period Comparison</h2>
+  </div>
+  <table class="min-w-full divide-y divide-gray-100">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Metric</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Current</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Previous</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Change</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <tr>
+        <td class="px-6 py-3 text-sm text-gray-700 font-medium">Orders</td>
+        <td class="px-6 py-3 text-sm text-right font-semibold"><%= @analytics.current_count %></td>
+        <td class="px-6 py-3 text-sm text-right text-gray-500"><%= @analytics.prev_count %></td>
+        <td class="px-6 py-3 text-sm text-right">
+          <% cnt_diff = @analytics.current_count - @analytics.prev_count %>
+          <span class="<%= cnt_diff >= 0 ? 'text-green-600' : 'text-red-500' %>">
+            <%= cnt_diff >= 0 ? "+" : "" %><%= cnt_diff %>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="px-6 py-3 text-sm text-gray-700 font-medium">Revenue</td>
+        <td class="px-6 py-3 text-sm text-right font-semibold"><%= number_to_currency(@analytics.current_sales) %></td>
+        <td class="px-6 py-3 text-sm text-right text-gray-500"><%= number_to_currency(@analytics.prev_sales) %></td>
+        <td class="px-6 py-3 text-sm text-right">
+          <% if @analytics.sales_change %>
+            <span class="<%= @analytics.sales_change >= 0 ? 'text-green-600' : 'text-red-500' %>">
+              <%= @analytics.sales_change >= 0 ? "+" : "" %><%= @analytics.sales_change %>%
+            </span>
+          <% else %>
+            <span class="text-gray-400">—</span>
+          <% end %>
+        </td>
+      </tr>
+      <tr>
+        <td class="px-6 py-3 text-sm text-gray-700 font-medium">Cost</td>
+        <td class="px-6 py-3 text-sm text-right font-semibold"><%= number_to_currency(@analytics.current_cost) %></td>
+        <td class="px-6 py-3 text-sm text-right text-gray-500"><%= number_to_currency(@analytics.prev_cost) %></td>
+        <td class="px-6 py-3 text-sm text-right">
+          <% if @analytics.prev_cost > 0 %>
+            <% cost_chg = ((@analytics.current_cost - @analytics.prev_cost) / @analytics.prev_cost * 100).round(1) %>
+            <span class="<%= cost_chg <= 0 ? 'text-green-600' : 'text-gray-500' %>">
+              <%= cost_chg >= 0 ? "+" : "" %><%= cost_chg %>%
+            </span>
+          <% else %>
+            <span class="text-gray-400">—</span>
+          <% end %>
+        </td>
+      </tr>
+      <tr>
+        <td class="px-6 py-3 text-sm text-gray-700 font-medium">Gross Profit</td>
+        <td class="px-6 py-3 text-sm text-right font-semibold <%= @analytics.current_profit >= 0 ? 'text-green-700' : 'text-red-600' %>">
+          <%= number_to_currency(@analytics.current_profit) %>
+        </td>
+        <td class="px-6 py-3 text-sm text-right text-gray-500"><%= number_to_currency(@analytics.prev_profit) %></td>
+        <td class="px-6 py-3 text-sm text-right">
+          <% if @analytics.profit_change %>
+            <span class="<%= @analytics.profit_change >= 0 ? 'text-green-600' : 'text-red-500' %>">
+              <%= @analytics.profit_change >= 0 ? "+" : "" %><%= @analytics.profit_change %>%
+            </span>
+          <% else %>
+            <span class="text-gray-400">—</span>
+          <% end %>
+        </td>
+      </tr>
+      <tr class="bg-amber-50">
+        <td class="px-6 py-3 text-sm text-gray-700 font-semibold">Gross Margin %</td>
+        <td class="px-6 py-3 text-sm text-right font-bold"><%= @analytics.current_margin %>%</td>
+        <td class="px-6 py-3 text-sm text-right text-gray-500"><%= @analytics.prev_margin %>%</td>
+        <td class="px-6 py-3 text-sm text-right">
+          <span class="<%= @analytics.margin_change >= 0 ? 'text-green-600' : 'text-red-500' %>">
+            <%= @analytics.margin_change >= 0 ? "+" : "" %><%= @analytics.margin_change %>pp
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

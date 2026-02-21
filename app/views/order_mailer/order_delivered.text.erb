@@ -1,0 +1,30 @@
+Hi <%= @super_admin.first_name %>,
+
+An order has been successfully delivered.
+
+ORDER: <%= @order.order_number %>
+Delivered At: <%= @order.delivered_at&.strftime("%B %d, %Y at %I:%M %p") || "—" %>
+Delivered By: <%= @order.delivered_by&.full_name || "—" %> (<%= @order.delivered_by&.email %>)
+
+CUSTOMER
+<%= @order.customer_name %>
+<%= @order.customer_email %>
+<%= @order.customer_phone.presence || "No phone on file" %>
+
+DELIVERY ADDRESS
+<%= @order.shipping_address["full_name"] %>
+<%= @order.shipping_address["street_address"] %>
+<%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %> <%= @order.shipping_address["zip_code"] %>
+
+Open in Maps: <%= google_maps_url(@order.shipping_address) %>
+
+ITEMS DELIVERED
+<% @order_items.each do |item| %>
+  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %><% if item.product %>
+    <%= admin_product_url(item.product) %><% end %>
+<% end %>
+
+View order in admin panel:
+<%= admin_order_url(@order) %>
+
+— Warehouse Furniture

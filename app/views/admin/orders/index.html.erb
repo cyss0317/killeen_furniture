@@ -26,12 +26,20 @@
   <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50">
       <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase">
+          <%= sort_link("Order", :order_number, current_sort: @sort, current_direction: @direction) %>
+        </th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Zone</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
-        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+        <th class="px-6 py-3 text-right text-xs font-medium uppercase">
+          <%= sort_link("Total", :grand_total, current_sort: @sort, current_direction: @direction) %>
+        </th>
+        <th class="px-6 py-3 text-center text-xs font-medium uppercase">
+          <%= sort_link("Status", :status, current_sort: @sort, current_direction: @direction) %>
+        </th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase">
+          <%= sort_link("Date", :created_at, current_sort: @sort, current_direction: @direction) %>
+        </th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">

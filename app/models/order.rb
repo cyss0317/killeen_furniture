@@ -23,6 +23,11 @@ class Order < ApplicationRecord
     in_store:     3
   }, default: :web_customer, prefix: :source
 
+  enum :payment_method, {
+    stripe:   0,
+    external: 1
+  }, default: :stripe, prefix: :payment
+
   before_create :generate_order_number
 
   validates :shipping_address, presence: true

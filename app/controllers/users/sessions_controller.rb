@@ -1,6 +1,10 @@
 class Users::SessionsController < Devise::SessionsController
+  # Not auto-included in Devise 4.9 — gives us remember_me(resource).
+  include Devise::Controllers::Rememberable
+
   def create
     super do |user|
+      remember_me(user) if user.admin_or_above?
       merge_session_cart_into_user(user)
     end
   end

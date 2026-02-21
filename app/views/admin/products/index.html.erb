@@ -36,12 +36,20 @@
   <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50">
       <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase">
+          <%= sort_link("Product", :name, current_sort: @sort, current_direction: @direction) %>
+        </th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
-        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Stock</th>
-        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+        <th class="px-6 py-3 text-right text-xs font-medium uppercase">
+          <%= sort_link("Price", :selling_price, current_sort: @sort, current_direction: @direction) %>
+        </th>
+        <th class="px-6 py-3 text-center text-xs font-medium uppercase">
+          <%= sort_link("Stock", :stock_quantity, current_sort: @sort, current_direction: @direction) %>
+        </th>
+        <th class="px-6 py-3 text-center text-xs font-medium uppercase">
+          <%= sort_link("Status", :status, current_sort: @sort, current_direction: @direction) %>
+        </th>
         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
       </tr>
     </thead>

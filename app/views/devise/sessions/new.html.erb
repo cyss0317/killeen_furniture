@@ -35,5 +35,30 @@
 
       <%= render "devise/shared/links" %>
     </div>
+
+    <% if Rails.env.development? %>
+      <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <p class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-3">Dev Quick Login</p>
+        <div class="flex flex-col gap-2">
+          <button type="button"
+                  onclick="quickLogin('cyss0317@gmail.com', 'asdfasdf')"
+                  class="w-full text-sm font-medium bg-white border border-amber-300 text-amber-800 py-2 px-4 rounded-lg hover:bg-amber-100 transition-colors text-left">
+            Login as Admin (cyss0317@gmail.com)
+          </button>
+          <button type="button"
+                  onclick="quickLogin('delivery@gmail.com', 'asdfasdf')"
+                  class="w-full text-sm font-medium bg-white border border-amber-300 text-amber-800 py-2 px-4 rounded-lg hover:bg-amber-100 transition-colors text-left">
+            Login as Delivery (delivery@gmail.com)
+          </button>
+        </div>
+      </div>
+      <script>
+        function quickLogin(email, password) {
+          document.querySelector('input[type="email"]').value = email;
+          document.querySelector('input[type="password"]').value = password;
+          document.querySelector('input[type="submit"]').click();
+        }
+      </script>
+    <% end %>
   </div>
 </div>

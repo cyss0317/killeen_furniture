@@ -1,8 +1,8 @@
 <% content_for :title, "Order #{@order.order_number} — Delivery" %>
 
-<div class="flex items-center gap-4 mb-6">
-  <%= link_to "← Delivery Queue", delivery_orders_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
-  <h1 class="text-2xl font-bold text-gray-900 font-mono"><%= @order.order_number %></h1>
+<div class="flex flex-wrap items-center gap-3 mb-6">
+  <%= link_to "← Delivery Queue", delivery_orders_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
+  <h1 class="text-xl font-bold text-gray-900 font-mono"><%= @order.order_number %></h1>
   <span class="px-3 py-1 rounded-full text-sm font-medium <%= status_badge_class(@order.status) %>">
     <%= @order.status.humanize %>
   </span>
@@ -10,30 +10,87 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <div class="lg:col-span-2 space-y-6">
-    <%# Order Items %>
+    <%# Order Items — with product link, dimensions, weight %>
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
         <h2 class="font-semibold text-gray-900">Items to Deliver</h2>
       </div>
-      <table class="min-w-full divide-y divide-gray-100">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Qty</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <% @order_items.each do |item| %>
+      <%# Desktop table %>
+      <div class="hidden sm:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-100">
+          <thead class="bg-gray-50">
             <tr>
-              <td class="px-6 py-4">
-                <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
-                <p class="text-xs text-gray-400 font-mono">SKU: <%= item.product_sku %></p>
-              </td>
-              <td class="px-6 py-4 text-center text-sm font-medium"><%= item.quantity %></td>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Qty</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dimensions</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weight</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% @order_items.each do |item| %>
+              <tr>
+                <td class="px-6 py-4">
+                  <% if item.product %>
+                    <%= link_to item.product_name, admin_product_path(item.product),
+                        class: "text-sm font-medium text-amber-700 hover:underline" %>
+                  <% else %>
+                    <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
+                  <% end %>
+                  <p class="text-xs text-gray-400 font-mono mt-0.5">SKU: <%= item.product_sku %></p>
+                </td>
+                <td class="px-6 py-4 text-center text-sm font-semibold text-gray-800">
+                  <%= item.quantity %>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <% if item.product&.dimensions.present? && item.product.dimensions.any? %>
+                    <% d = item.product.dimensions %>
+                    <span class="font-mono text-xs">
+                      <%= d["length"] %> &times; <%= d["width"] %> &times; <%= d["height"] %> in
+                    </span>
+                  <% else %>
+                    <span class="text-gray-300 text-xs">&mdash;</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <% if item.product&.weight.present? %>
+                    <span class="font-mono text-xs"><%= item.product.weight %> lbs</span>
+                  <% else %>
+                    <span class="text-gray-300 text-xs">&mdash;</span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%# Mobile card layout for items %>
+      <div class="sm:hidden divide-y divide-gray-100">
+        <% @order_items.each do |item| %>
+          <div class="px-4 py-4">
+            <div class="flex justify-between items-start">
+              <div class="flex-1 min-w-0 pr-3">
+                <% if item.product %>
+                  <%= link_to item.product_name, admin_product_path(item.product),
+                      class: "text-sm font-medium text-amber-700" %>
+                <% else %>
+                  <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
+                <% end %>
+                <p class="text-xs text-gray-400 font-mono">SKU: <%= item.product_sku %></p>
+              </div>
+              <span class="text-sm font-bold text-gray-800 flex-shrink-0">&times; <%= item.quantity %></span>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-4 text-xs text-gray-500">
+              <% if item.product&.dimensions.present? && item.product.dimensions.any? %>
+                <% d = item.product.dimensions %>
+                <span><%= d["length"] %> &times; <%= d["width"] %> &times; <%= d["height"] %> in</span>
+              <% end %>
+              <% if item.product&.weight.present? %>
+                <span><%= item.product.weight %> lbs</span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
     </div>
 
     <%# Delivery Events Timeline %>
@@ -56,6 +113,7 @@
                 <% end %>
                 <time class="text-xs text-gray-400">
                   <%= event.created_at.strftime("%b %d, %Y %l:%M %p") %>
+                  <% if event.created_by %>&mdash; by <%= event.created_by.full_name %><% end %>
                 </time>
               </div>
             </li>
@@ -66,22 +124,44 @@
   </div>
 
   <div class="space-y-6">
-    <%# Mark Delivered CTA %>
+    <%# Super Admin: Status Update %>
+    <% if current_user.super_admin? && @order.editable_by_admin? && @order.allowed_next_statuses.any? %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 class="font-semibold text-gray-900 mb-3">Update Status</h3>
+        <%= form_with url: update_status_delivery_order_path(@order), method: :patch, class: "flex gap-2 items-end" do |f| %>
+          <div class="flex-1">
+            <select name="status" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+              <% @order.allowed_next_statuses.each do |s| %>
+                <option value="<%= s %>"><%= s.to_s.humanize %></option>
+              <% end %>
+            </select>
+          </div>
+          <button type="submit" class="flex-shrink-0 bg-gray-800 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 transition-colors cursor-pointer">
+            Update
+          </button>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Mark Delivered CTA (delivery admin or super_admin who can mark this one) %>
     <% if policy(@order).mark_delivered? %>
       <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <div class="text-green-600 text-4xl mb-3">✓</div>
+        <div class="text-green-600 text-4xl mb-3">&#10003;</div>
         <h3 class="font-semibold text-gray-900 mb-2">Ready to mark delivered?</h3>
         <p class="text-sm text-gray-500 mb-4">This will record the delivery and close the order.</p>
         <%= button_to "Mark as Delivered", mark_delivered_delivery_order_path(@order),
             method: :patch,
-            class: "w-full bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 cursor-pointer text-sm",
+            class: "w-full bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition-colors cursor-pointer text-sm",
             data: { confirm: "Confirm: Mark order #{@order.order_number} as delivered?" } %>
       </div>
     <% elsif @order.delivered? %>
       <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <p class="text-green-700 font-semibold">Delivered</p>
+        <p class="text-green-700 font-semibold">Delivered &#10003;</p>
         <% if @order.delivered_at %>
           <p class="text-sm text-gray-500 mt-1"><%= @order.delivered_at.strftime("%b %d, %Y %l:%M %p") %></p>
+        <% end %>
+        <% if @order.delivered_by %>
+          <p class="text-xs text-gray-400 mt-1">by <%= @order.delivered_by.full_name %></p>
         <% end %>
       </div>
     <% end %>
@@ -92,9 +172,16 @@
       <dl class="space-y-2 text-sm">
         <div><dt class="text-gray-500">Name</dt><dd class="font-medium"><%= @order.customer_name %></dd></div>
         <% if @order.customer_phone.present? %>
-          <div><dt class="text-gray-500">Phone</dt><dd><%= @order.customer_phone %></dd></div>
+          <div>
+            <dt class="text-gray-500">Phone</dt>
+            <dd>
+              <a href="tel:<%= @order.customer_phone.gsub(/\D/, '') %>" class="text-amber-700 hover:underline">
+                <%= @order.customer_phone %>
+              </a>
+            </dd>
+          </div>
         <% end %>
-        <div><dt class="text-gray-500">Email</dt><dd class="text-xs"><%= @order.customer_email %></dd></div>
+        <div><dt class="text-gray-500">Email</dt><dd class="text-xs break-all"><%= @order.customer_email %></dd></div>
       </dl>
     </div>
 

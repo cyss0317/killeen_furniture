@@ -2,16 +2,29 @@ module Admin
   class OrdersController < BaseController
     before_action :set_order, only: [:show, :update_status, :assign_delivery]
 
+    SORTABLE_COLUMNS = %w[order_number created_at grand_total status].freeze
+
     def index
-      scope = Order.includes(:user, :order_items, :delivery_zone, :assigned_to).recent
+      scope = Order.includes(:user, :order_items, :delivery_zone, :assigned_to)
 
       scope = scope.where(status: params[:status]) if params[:status].present?
       scope = scope.where(source: params[:source]) if params[:source].present?
 
       if params[:q].present?
-        q = "%#{params[:q]}%"
-        scope = scope.where("order_number ILIKE ? OR guest_email ILIKE ? OR guest_name ILIKE ?", q, q, q)
+        q = "%#{params[:q].strip}%"
+        scope = scope.left_joins(:user).where(
+          "orders.order_number ILIKE :q OR orders.guest_email ILIKE :q OR " \
+          "orders.guest_name ILIKE :q OR orders.guest_phone ILIKE :q OR " \
+          "users.email ILIKE :q OR " \
+          "(users.first_name || ' ' || users.last_name) ILIKE :q OR " \
+          "users.first_name ILIKE :q OR users.last_name ILIKE :q",
+          q: q
+        ).distinct
       end
+
+      @sort      = SORTABLE_COLUMNS.include?(params[:sort]) ? params[:sort] : "created_at"
+      @direction = params[:direction] == "asc" ? "asc" : "desc"
+      scope      = scope.reorder("orders.#{@sort} #{@direction}")
 
       @pagy, @orders = pagy(:offset, scope, limit: 25)
       @status_counts = Order.group(:status).count

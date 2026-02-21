@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   # Checkout flow
   resource :checkout, only: [:show, :create] do
     post :calculate_shipping, on: :collection
+    post :external_payment,   on: :collection
     get  :confirmation
   end
 
@@ -47,6 +48,7 @@ Rails.application.routes.draw do
     resources :orders, only: [:index, :show] do
       member do
         patch :mark_delivered
+        patch :update_status
       end
     end
   end
@@ -54,6 +56,8 @@ Rails.application.routes.draw do
   # === Admin panel ===
   namespace :admin do
     root "dashboard#index", as: :dashboard
+
+    get "analytics", to: "analytics#index", as: :analytics
 
     resources :products do
       member do

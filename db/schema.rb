@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_20_200818) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_20_214743) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -166,6 +166,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_20_200818) do
     t.bigint "assigned_to_id"
     t.bigint "delivered_by_id"
     t.datetime "delivered_at"
+    t.integer "payment_method", default: 0, null: false
+    t.text "external_payment_reference"
     t.index ["assigned_to_id"], name: "index_orders_on_assigned_to_id"
     t.index ["created_at"], name: "index_orders_on_created_at"
     t.index ["delivered_at"], name: "index_orders_on_delivered_at"

@@ -1,5 +1,5 @@
 class CheckoutsController < ApplicationController
-  before_action :ensure_cart_not_empty, only: [:show, :create]
+  before_action :ensure_cart_not_empty, only: [ :show, :create, :external_payment ]
 
   def show
     @default_address = current_user.addresses.find_by(is_default: true) if user_signed_in?
@@ -23,7 +23,7 @@ class CheckoutsController < ApplicationController
       intent = Stripe::PaymentIntent.create(
         amount:      (@order.grand_total * 100).to_i,
         currency:    "usd",
-        description: "Killeen Furniture Order #{@order.order_number}",
+        description: "#{APP_NAME} Order #{@order.order_number}",
         metadata:    {
           order_id:     @order.id,
           order_number: @order.order_number,
@@ -48,6 +48,28 @@ class CheckoutsController < ApplicationController
     redirect_to root_path, alert: "Order not found." unless @order
   end
 
+  def external_payment
+    unless user_signed_in? && current_user.admin_or_above?
+      redirect_to checkout_path, alert: "Not authorized."
+      return
+    end
+
+    result = Orders::ExternalCheckout.call(
+      cart:              current_cart,
+      checkout_params:   external_checkout_params,
+      user:              current_user,
+      payment_reference: params[:external_payment_reference].to_s.strip
+    )
+
+    if result.success?
+      session[:pending_order_id] = result.order.id
+      redirect_to confirmation_checkout_path
+    else
+      flash[:alert] = result.error
+      redirect_to checkout_path
+    end
+  end
+
   def calculate_shipping
     result = ShippingCalculator.call(cart: current_cart, zip_code: params[:zip_code])
     render json: {
@@ -60,6 +82,13 @@ class CheckoutsController < ApplicationController
   private
 
   def checkout_params
+    params.require(:checkout).permit(
+      :full_name, :email, :phone,
+      :street_address, :city, :state, :zip_code
+    )
+  end
+
+  def external_checkout_params
     params.require(:checkout).permit(
       :full_name, :email, :phone,
       :street_address, :city, :state, :zip_code

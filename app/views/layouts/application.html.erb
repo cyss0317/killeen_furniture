@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="h-full">
   <head>
-    <title><%= content_for(:title) || "Killeen Furniture" %></title>
+    <title><%= content_for(:title) || APP_NAME %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-prefetch" content="false">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,6 +25,12 @@
 
   <body class="h-full bg-stone-50 text-gray-900 flex flex-col">
     <%= render "shared/navbar" %>
+
+    <% if content_for?(:breadcrumb) %>
+      <div class="bg-white border-b border-gray-100">
+        <%= yield :breadcrumb %>
+      </div>
+    <% end %>
 
     <div id="flash-messages" class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-2">
       <%= render "shared/flash_messages" %>

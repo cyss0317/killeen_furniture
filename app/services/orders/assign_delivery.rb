@@ -9,6 +9,9 @@ module Orders
           note:       "Assigned to #{assigned_to.full_name}"
         )
       end
+
+      OrderMailer.delivery_assigned(order, assigned_to).deliver_later
+
       order
     end
   end

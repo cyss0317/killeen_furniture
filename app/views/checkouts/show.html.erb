@@ -1,4 +1,4 @@
-<% content_for :title, "Checkout — Killeen Furniture" %>
+<% content_for :title, "Checkout — #{APP_NAME}" %>
 
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-controller="checkout">
   <h1 class="text-2xl font-bold text-gray-900 mb-8">Checkout</h1>
@@ -94,6 +94,59 @@
               class="w-full mt-6 bg-amber-800 text-white font-semibold py-4 px-6 rounded-md hover:bg-amber-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base">
         Place Order
       </button>
+
+      <%# Admin: External Payment Option %>
+      <% if user_signed_in? && current_user.admin_or_above? %>
+        <details class="mt-4 border border-dashed border-amber-300 rounded-lg">
+          <summary class="px-4 py-3 text-sm font-medium text-amber-800 cursor-pointer select-none flex items-center gap-2 hover:bg-amber-50 rounded-lg transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            Admin: Create Order with External Payment
+          </summary>
+          <div class="px-4 pb-4 pt-2">
+            <p class="text-xs text-gray-500 mb-3">Use this when the customer already paid via Zelle, Venmo, CashApp, or in-person. Stock is decremented immediately.</p>
+            <%= form_with url: external_payment_checkout_path, method: :post, id: "external-payment-form", class: "space-y-3" do |f| %>
+              <input type="hidden" name="checkout[full_name]"      id="ext_full_name">
+              <input type="hidden" name="checkout[email]"          id="ext_email">
+              <input type="hidden" name="checkout[phone]"          id="ext_phone">
+              <input type="hidden" name="checkout[street_address]" id="ext_street_address">
+              <input type="hidden" name="checkout[city]"           id="ext_city">
+              <input type="hidden" name="checkout[state]"          id="ext_state">
+              <input type="hidden" name="checkout[zip_code]"       id="ext_zip_code">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Reference</label>
+                <input type="text" name="external_payment_reference"
+                       placeholder="e.g. Zelle - John Smith / CashApp TX-1234"
+                       class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <p class="text-xs text-gray-400 mt-1">Include payment method and any transaction reference.</p>
+              </div>
+              <button type="submit" onclick="copyCheckoutFieldsToExternal(event)"
+                      class="w-full bg-gray-800 text-white font-semibold py-3 px-6 rounded-md hover:bg-gray-700 transition-colors text-sm cursor-pointer">
+                Create Order (External Payment)
+              </button>
+            <% end %>
+          </div>
+        </details>
+        <script>
+          function copyCheckoutFieldsToExternal(e) {
+            const fields = ["full_name", "email", "phone", "street_address", "city", "state", "zip_code"]
+            let valid = true
+            fields.forEach(field => {
+              const src = document.querySelector(`[name="checkout[${field}]"]`)
+              const dst = document.getElementById(`ext_${field}`)
+              if (src && dst) {
+                dst.value = src.value
+                if (!src.value.trim()) valid = false
+              }
+            })
+            if (!valid) {
+              e.preventDefault()
+              alert("Please fill in all contact and address fields before submitting.")
+            }
+          }
+        </script>
+      <% end %>
 
       <% unless user_signed_in? %>
         <p class="text-center text-xs text-gray-400 mt-3">

@@ -1,0 +1,25 @@
+Hi <%= @delivery_user.first_name %>,
+
+You have been assigned a delivery. Please review the details below.
+
+ORDER: <%= @order.order_number %>
+Customer: <%= @order.customer_name %>
+Phone: <%= @order.customer_phone.presence || "—" %>
+
+DELIVERY ADDRESS
+<%= @order.shipping_address["full_name"] %>
+<%= @order.shipping_address["street_address"] %>
+<%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %> <%= @order.shipping_address["zip_code"] %>
+
+Open in Maps: <%= google_maps_url(@order.shipping_address) %>
+
+ITEMS
+<% @order_items.each do |item| %>
+  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %><% if item.product %>
+    <%= admin_product_url(item.product) %><% end %>
+<% end %>
+
+View delivery details:
+<%= delivery_order_url(@order) %>
+
+— Warehouse Furniture

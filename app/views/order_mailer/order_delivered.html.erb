@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; background: #f9fafb; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: #fff; }
+    .header { background: #166534; color: #fff; padding: 28px 32px; }
+    .header h1 { margin: 0 0 4px; font-size: 22px; font-weight: bold; }
+    .header p { margin: 0; opacity: 0.85; font-size: 14px; }
+    .body { padding: 32px; }
+    .success-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .success-box p { margin: 0 0 6px; font-size: 13px; color: #166534; }
+    .success-box p:last-child { margin-bottom: 0; }
+    .section { margin-bottom: 24px; }
+    .section h3 { margin: 0 0 10px; font-size: 15px; color: #374151; border-bottom: 1px solid #f3f4f6; padding-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    td { padding: 8px 0; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    a.item-link { color: #166534; text-decoration: underline; font-weight: 600; }
+    a.maps-link { color: #166534; text-decoration: underline; }
+    .cta { display: inline-block; margin-top: 8px; padding: 12px 24px; background: #166534; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; }
+    .footer { background: #f3f4f6; padding: 20px 32px; text-align: center; font-size: 12px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Warehouse Furniture</h1>
+      <p>Order Delivered</p>
+    </div>
+
+    <div class="body">
+      <p>Hi <%= @super_admin.first_name %>,</p>
+      <p>An order has been successfully delivered. Here is a summary:</p>
+
+      <div class="success-box">
+        <p><strong>Order Number:</strong> <%= @order.order_number %></p>
+        <p><strong>Delivered At:</strong> <%= @order.delivered_at&.strftime("%B %d, %Y at %I:%M %p") || "—" %></p>
+        <p><strong>Delivered By:</strong> <%= @order.delivered_by&.full_name || "—" %> (<%= @order.delivered_by&.email %>)</p>
+      </div>
+
+      <div class="section">
+        <h3>Customer</h3>
+        <p style="margin: 0; font-size: 14px; color: #374151;">
+          <strong><%= @order.customer_name %></strong><br>
+          <%= @order.customer_email %><br>
+          <%= @order.customer_phone.presence || "No phone on file" %>
+        </p>
+      </div>
+
+      <div class="section">
+        <h3>Delivery Address</h3>
+        <% maps_url = google_maps_url(@order.shipping_address) %>
+        <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #374151;">
+          <%= @order.shipping_address["full_name"] %><br>
+          <a href="<%= maps_url %>" class="maps-link">
+            <%= @order.shipping_address["street_address"] %><br>
+            <%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %> <%= @order.shipping_address["zip_code"] %>
+          </a>
+        </p>
+      </div>
+
+      <div class="section">
+        <h3>Items Delivered</h3>
+        <table>
+          <% @order_items.each do |item| %>
+            <tr>
+              <td>
+                <% if item.product %>
+                  <a href="<%= admin_product_url(item.product) %>" class="item-link"><%= item.product_name %></a>
+                <% else %>
+                  <strong><%= item.product_name %></strong>
+                <% end %>
+                <span style="color: #6b7280; font-size: 12px; display: block;">SKU: <%= item.product_sku %></span>
+              </td>
+              <td style="text-align: right; width: 60px;">× <%= item.quantity %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+
+      <a href="<%= admin_order_url(@order) %>" class="cta">
+        View Order in Admin Panel →
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>© <%= Time.current.year %> Warehouse Furniture. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
