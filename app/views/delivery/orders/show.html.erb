@@ -130,8 +130,10 @@
         <h3 class="font-semibold text-gray-900 mb-3">Update Status</h3>
         <%= form_with url: update_status_delivery_order_path(@order), method: :patch, class: "flex gap-2 items-end" do |f| %>
           <div class="flex-1">
+            <% next_statuses = @order.allowed_next_statuses
+               next_statuses = next_statuses.reject { |s| s == :canceled } unless current_user.super_admin? %>
             <select name="status" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
-              <% @order.allowed_next_statuses.each do |s| %>
+              <% next_statuses.each do |s| %>
                 <option value="<%= s %>"><%= s.to_s.humanize %></option>
               <% end %>
             </select>

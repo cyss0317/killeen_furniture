@@ -67,6 +67,9 @@ Rails.application.routes.draw do
         patch :publish
         patch :archive
       end
+      collection do
+        post :import_screenshot
+      end
       resources :stock_adjustments, only: [:create]
     end
 

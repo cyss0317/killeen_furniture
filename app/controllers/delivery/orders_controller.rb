@@ -46,6 +46,7 @@ module Delivery
         admin = User.find_by(email: admin_email)
         OrderMailer.order_delivered(@order, admin).deliver_later if admin
       end
+      OrderMailer.order_delivered_customer(@order).deliver_later
 
       redirect_to delivery_orders_path, notice: "Order #{@order.order_number} marked as delivered."
     rescue => e

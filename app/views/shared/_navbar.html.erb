@@ -33,7 +33,7 @@
         <%= link_to "Shop All", products_path,
             class: "flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-amber-50 hover:text-amber-800 rounded-lg transition-colors",
             data: { action: "click->drawer#close" } %>
-        <% Category.root_categories.limit(4).each do |category| %>
+        <% Category.root_categories.where.not(name: ["Ashley Furniture", "Generation Trade"]).limit(4).each do |category| %>
           <%= link_to category.name, category_path(category),
               class: "flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-amber-50 hover:text-amber-800 rounded-lg transition-colors",
               data: { action: "click->drawer#close" } %>
@@ -124,7 +124,7 @@
         <div class="hidden md:flex items-center gap-8">
           <nav class="flex items-center space-x-6">
             <%= link_to "Shop All", products_path, class: "text-sm font-medium text-gray-700 hover:text-amber-800 transition-colors" %>
-            <% Category.root_categories.limit(4).each do |category| %>
+            <% Category.root_categories.where.not(name: ["Ashley Furniture", "Generation Trade"]).limit(4).each do |category| %>
               <%= link_to category.name, category_path(category), class: "text-sm font-medium text-gray-700 hover:text-amber-800 transition-colors" %>
             <% end %>
             <div class="relative" data-controller="dropdown">

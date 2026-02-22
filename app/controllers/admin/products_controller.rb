@@ -114,6 +114,20 @@ module Admin
       redirect_back(fallback_location: admin_products_path, notice: "Product #{state}.")
     end
 
+    def import_screenshot
+      unless params[:screenshot].present?
+        render json: { error: "No screenshot uploaded" }, status: :unprocessable_entity and return
+      end
+
+      result = ProductImport::FromScreenshot.call(screenshot_file: params[:screenshot])
+
+      if result.error
+        render json: { error: result.error }, status: :unprocessable_entity
+      else
+        render json: { data: result.data }
+      end
+    end
+
     private
 
     def set_product
