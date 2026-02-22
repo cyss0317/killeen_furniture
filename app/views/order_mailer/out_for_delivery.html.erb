@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; background: #f9fafb; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: #fff; }
+    .header { background: #b45309; color: #fff; padding: 28px 32px; }
+    .header h1 { margin: 0 0 4px; font-size: 22px; font-weight: bold; }
+    .header p { margin: 0; opacity: 0.85; font-size: 14px; }
+    .body { padding: 32px; }
+    .alert-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .alert-box p { margin: 0 0 6px; font-size: 13px; color: #92400e; }
+    .alert-box p:last-child { margin-bottom: 0; }
+    .section { margin-bottom: 24px; }
+    .section h3 { margin: 0 0 10px; font-size: 15px; color: #374151; border-bottom: 1px solid #f3f4f6; padding-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    td { padding: 8px 0; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    .footer { background: #f3f4f6; padding: 20px 32px; text-align: center; font-size: 12px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Warehouse Furniture</h1>
+      <p>Your Order Is On Its Way!</p>
+    </div>
+
+    <div class="body">
+      <p>Hi <%= @order.customer_name %>,</p>
+      <p>Great news! Your order is out for delivery today and should arrive soon.</p>
+
+      <div class="alert-box">
+        <p><strong>Order Number:</strong> <%= @order.order_number %></p>
+        <p><strong>Status:</strong> Out for Delivery</p>
+      </div>
+
+      <div class="section">
+        <h3>Delivery Address</h3>
+        <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #374151;">
+          <%= @order.shipping_address["full_name"] %><br>
+          <%= @order.shipping_address["street_address"] %><br>
+          <%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %> <%= @order.shipping_address["zip_code"] %>
+        </p>
+      </div>
+
+      <div class="section">
+        <h3>Items Being Delivered</h3>
+        <table>
+          <% @order_items.each do |item| %>
+            <tr>
+              <td>
+                <strong><%= item.product_name %></strong>
+                <span style="color: #6b7280; font-size: 12px; display: block;">SKU: <%= item.product_sku %></span>
+              </td>
+              <td style="text-align: right; width: 60px;">× <%= item.quantity %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+
+      <p style="font-size: 13px; color: #6b7280;">
+        Please ensure someone is available to receive the delivery. If you have any questions, feel free to contact us.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>© <%= Time.current.year %> Warehouse Furniture. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

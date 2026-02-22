@@ -8,20 +8,43 @@ class Admin::PurchaseOrdersController < Admin::BaseController
   def index
     authorize PurchaseOrder, :index?
 
+    @period = params[:period].presence_in(%w[week month year]) || "month"
+    @offset = params[:offset].to_i
+
+    now    = Time.current
+    anchor = case @period
+             when "week"  then now + @offset.weeks
+             when "year"  then now + @offset.years
+             else              now + @offset.months
+             end
+
+    @period_range = case @period
+                    when "week"  then anchor.beginning_of_week.to_date..anchor.end_of_week.to_date
+                    when "year"  then anchor.beginning_of_year.to_date..anchor.end_of_year.to_date
+                    else              anchor.beginning_of_month.to_date..anchor.end_of_month.to_date
+                    end
+
+    @period_display = case @period
+                      when "week"  then "Week of #{anchor.beginning_of_week.strftime('%b %-d')} – #{anchor.end_of_week.strftime('%b %-d, %Y')}"
+                      when "year"  then anchor.strftime("%Y")
+                      else              anchor.strftime("%B %Y")
+                      end
+
     scope = policy_scope(PurchaseOrder)
               .includes(:created_by, :purchase_order_items)
+              .where(ordered_at: @period_range)
               .recent
 
     if params[:status].present? && PurchaseOrder.statuses.key?(params[:status])
       scope = scope.where(status: params[:status])
     end
 
-    @sort      = params[:sort].in?(SORTABLE_COLUMNS) ? params[:sort] : "created_at"
+    @sort      = params[:sort].in?(SORTABLE_COLUMNS) ? params[:sort] : "ordered_at"
     @direction = params[:direction] == "asc" ? "asc" : "desc"
     scope      = scope.reorder("purchase_orders.#{@sort} #{@direction}")
 
     @pagy, @purchase_orders = pagy(:offset, scope, limit: 25)
-    @status_counts = PurchaseOrder.group(:status).count
+    @status_counts = PurchaseOrder.where(ordered_at: @period_range).group(:status).count
   end
 
   def show
@@ -132,17 +155,13 @@ class Admin::PurchaseOrdersController < Admin::BaseController
       return render :import_screenshot, status: :unprocessable_entity
     end
 
-    unless params[:reference_number].present?
-      flash.now[:alert] = "Reference number is required."
-      return render :import_screenshot, status: :unprocessable_entity
-    end
-
     result = PurchaseOrders::ImportScreenshot.call(
       file:             params[:file],
-      reference_number: params[:reference_number],
+      reference_number: params[:reference_number].presence,
       ordered_at:       params[:ordered_at].presence,
       notes:            params[:notes].presence,
-      created_by:       current_user
+      created_by:       current_user,
+      supplier:         params[:supplier].presence || "ashley"
     )
 
     if result.success?

@@ -27,12 +27,12 @@
           <td class="px-6 py-4 text-sm text-gray-600"><%= category.parent&.name || "—" %></td>
           <td class="px-6 py-4 text-center text-sm"><%= category.products.count %></td>
           <td class="px-6 py-4 text-right">
-            <div class="flex justify-end gap-2">
+            <div class="flex justify-end items-center gap-2">
               <%= link_to "Edit", edit_admin_category_path(category), class: "text-sm text-amber-700 hover:underline font-medium" %>
               <% unless category.products.any? %>
                 <%= button_to "Delete", admin_category_path(category), method: :delete,
-                    class: "text-sm text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0",
-                    form: { data: { turbo_confirm: "Delete '#{category.name}'?" } } %>
+                    form: { class: "contents", data: { turbo_confirm: "Delete '#{category.name}'?" } },
+                    class: "text-sm text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0" %>
               <% end %>
             </div>
           </td>

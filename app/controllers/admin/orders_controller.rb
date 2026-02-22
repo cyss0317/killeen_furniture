@@ -22,6 +22,20 @@ module Admin
         ).distinct
       end
 
+      if params[:address].present?
+        addr = "%#{params[:address].strip}%"
+        scope = scope.where(
+          "(orders.shipping_address->>'street_address') ILIKE :a OR " \
+          "(orders.shipping_address->>'city') ILIKE :a OR " \
+          "(orders.shipping_address->>'state') ILIKE :a OR " \
+          "(orders.shipping_address->>'zip_code') ILIKE :a",
+          a: addr
+        )
+      end
+
+      scope = scope.where("grand_total >= ?", params[:min_price].to_f) if params[:min_price].present?
+      scope = scope.where("grand_total <= ?", params[:max_price].to_f) if params[:max_price].present?
+
       @sort      = SORTABLE_COLUMNS.include?(params[:sort]) ? params[:sort] : "created_at"
       @direction = params[:direction] == "asc" ? "asc" : "desc"
       scope      = scope.reorder("orders.#{@sort} #{@direction}")
@@ -42,6 +56,8 @@ module Admin
       @users          = User.order(:first_name, :last_name)
       @products       = Product.published.includes(:category).order(:name)
       @delivery_zones = DeliveryZone.active.order(:name)
+      @categories     = Category.order(:name)
+      @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
     end
 
     def create
@@ -55,6 +71,8 @@ module Admin
         @users          = User.order(:first_name, :last_name)
         @products       = Product.published.includes(:category).order(:name)
         @delivery_zones = DeliveryZone.active.order(:name)
+        @categories     = Category.order(:name)
+        @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
         flash.now[:alert] = result.error
         render :new, status: :unprocessable_entity
       end

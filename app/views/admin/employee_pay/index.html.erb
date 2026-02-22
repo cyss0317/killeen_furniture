@@ -1,0 +1,125 @@
+<% content_for :title, "Employee Pay" %>
+
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Employee Pay</h1>
+    <p class="text-sm text-gray-500 mt-1">Track labor costs by period</p>
+  </div>
+
+  <div class="flex items-center gap-3 flex-wrap">
+    <%# Period type selector %>
+    <div class="flex rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+      <% [["Week", "week"], ["Month", "month"], ["Year", "year"]].each do |label, val| %>
+        <%= link_to label,
+            admin_employee_pay_index_path(period: val, offset: 0),
+            class: "px-4 py-2 text-sm font-medium transition-colors #{
+              @period == val ? 'bg-amber-700 text-white' : 'text-gray-600 hover:bg-gray-50'
+            }" %>
+      <% end %>
+    </div>
+
+    <%# Prev / label / Next navigation %>
+    <div class="flex items-center gap-1">
+      <%= link_to admin_employee_pay_index_path(period: @period, offset: @offset - 1),
+          class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
+          title: "Previous #{@period}" do %>←<% end %>
+      <span class="px-3 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md min-w-36 text-center">
+        <%= @period_display %>
+      </span>
+      <% if @offset < 0 %>
+        <%= link_to admin_employee_pay_index_path(period: @period, offset: @offset + 1),
+            class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
+            title: "Next #{@period}" do %>→<% end %>
+      <% else %>
+        <span class="px-2.5 py-1.5 rounded-md border border-gray-100 bg-gray-50 text-gray-300 text-sm font-medium cursor-default">→</span>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%# Period total card %>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-6 inline-block min-w-56">
+  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Labor Cost</p>
+  <p class="text-2xl font-bold text-gray-900"><%= number_to_currency(@period_total) %></p>
+  <p class="text-xs text-gray-400 mt-1"><%= @entries.size %> <%= "entry".pluralize(@entries.size) %></p>
+</div>
+
+<%# Add new entry form %>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-6">
+  <h2 class="text-sm font-semibold text-gray-900 mb-4">Add Pay Entry</h2>
+  <%= form_with model: @entry, url: admin_employee_pay_index_path, method: :post do |f| %>
+    <%= f.hidden_field :period, value: @period %>
+    <%= f.hidden_field :offset, value: @offset %>
+    <div class="flex flex-wrap gap-3 items-end">
+      <div class="flex-1 min-w-40">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Employee Name</label>
+        <%= f.text_field :employee_name, placeholder: "Full name",
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+      <div class="w-32">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Amount</label>
+        <%= f.number_field :amount, placeholder: "0.00", step: "0.01", min: "0.01",
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Date Paid</label>
+        <%= f.date_field :paid_on,
+            class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+      <div class="flex-1 min-w-48">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Description (optional)</label>
+        <%= f.text_field :description, placeholder: "e.g. Weekly wages, delivery bonus…",
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+      <%= f.submit "Add Entry",
+          class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer transition-colors" %>
+    </div>
+  <% end %>
+</div>
+
+<%# Entries table %>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <% if @entries.any? %>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Paid</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Added By</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @entries.each do |entry| %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= entry.employee_name %></td>
+            <td class="px-6 py-4 text-sm text-gray-500"><%= entry.description.presence || "—" %></td>
+            <td class="px-6 py-4 text-sm text-gray-600"><%= entry.paid_on.strftime("%b %d, %Y") %></td>
+            <td class="px-6 py-4 text-sm font-semibold text-right text-gray-900"><%= number_to_currency(entry.amount) %></td>
+            <td class="px-6 py-4 text-xs text-gray-400"><%= entry.created_by&.full_name || "—" %></td>
+            <td class="px-6 py-4 text-right">
+              <%= button_to "Delete",
+                  admin_employee_pay_path(entry, period: @period, offset: @offset),
+                  method: :delete,
+                  form: { class: "contents" },
+                  class: "text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer",
+                  data: { confirm: "Delete this pay entry for #{entry.employee_name}?" } %>
+            </td>
+          </tr>
+        <% end %>
+        <tr class="bg-amber-50">
+          <td colspan="3" class="px-6 py-3 text-sm font-semibold text-gray-700">Period Total</td>
+          <td class="px-6 py-3 text-sm font-bold text-right text-gray-900"><%= number_to_currency(@period_total) %></td>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="py-12 text-center text-gray-400 text-sm">
+      <p class="font-medium">No pay entries for this period</p>
+      <p class="mt-1">Use the form above to add entries.</p>
+    </div>
+  <% end %>
+</div>

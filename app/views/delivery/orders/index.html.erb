@@ -11,12 +11,13 @@
 
 <%# Status filter tabs %>
 <div class="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto">
-  <% [
+  <% tabs = [
     ["Scheduled",        "scheduled_for_delivery"],
     ["Out for Delivery", "out_for_delivery"],
-    ["Delivered",        "delivered"],
-    ["Canceled",         "canceled"]
-  ].each do |label, value| %>
+    ["Delivered",        "delivered"]
+  ]
+  tabs << ["Canceled", "canceled"] unless current_user.delivery_admin?
+  tabs.each do |label, value| %>
     <%= link_to label,
         delivery_orders_path(status: value),
         class: "flex-shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap #{
@@ -57,7 +58,9 @@
               <p class="text-xs text-gray-400"><%= order.customer_phone %></p>
             </td>
             <td class="px-6 py-4 hidden md:table-cell">
-              <p class="text-sm text-gray-700 leading-snug"><%= order.shipping_address_line %></p>
+              <%= link_to order.shipping_address_line, google_maps_url(order.shipping_address),
+                  target: "_blank", rel: "noopener",
+                  class: "text-sm text-gray-700 leading-snug hover:text-amber-700 hover:underline" %>
             </td>
             <td class="px-6 py-4 text-sm text-gray-600">
               <%= order.order_items.sum(:quantity) %> item(s)
@@ -74,6 +77,7 @@
                 <% if policy(order).mark_delivered? %>
                   <%= button_to "Delivered", mark_delivered_delivery_order_path(order),
                       method: :patch,
+                      form: { class: "contents" },
                       class: "text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors cursor-pointer",
                       data: { confirm: "Mark order #{order.order_number} as delivered?" } %>
                 <% end %>
@@ -98,14 +102,17 @@
         </div>
         <p class="text-sm font-medium text-gray-900"><%= order.customer_name %></p>
         <p class="text-xs text-gray-400 mb-1"><%= order.customer_phone %></p>
-        <p class="text-xs text-gray-500 mb-3"><%= order.shipping_address_line %></p>
+        <%= link_to order.shipping_address_line, google_maps_url(order.shipping_address),
+            target: "_blank", rel: "noopener",
+            class: "text-xs text-gray-500 mb-3 block hover:text-amber-700 hover:underline" %>
         <div class="flex gap-2">
           <%= link_to "View Details", delivery_order_path(order),
               class: "flex-1 text-center text-sm font-medium text-amber-700 border border-amber-300 rounded-md py-2 hover:bg-amber-50 transition-colors" %>
           <% if policy(order).mark_delivered? %>
             <%= button_to "Mark Delivered", mark_delivered_delivery_order_path(order),
                 method: :patch,
-                class: "flex-1 text-sm font-medium bg-green-600 text-white rounded-md py-2 hover:bg-green-700 transition-colors cursor-pointer",
+                form: { class: "flex-1" },
+                class: "w-full text-sm font-medium bg-green-600 text-white rounded-md py-2 hover:bg-green-700 transition-colors cursor-pointer",
                 data: { confirm: "Mark order #{order.order_number} as delivered?" } %>
           <% end %>
         </div>

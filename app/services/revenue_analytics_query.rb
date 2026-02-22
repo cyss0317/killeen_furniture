@@ -6,15 +6,17 @@ class RevenueAnalyticsQuery
     :prev_sales, :prev_cost, :prev_profit, :prev_margin, :prev_count,
     :sales_change, :profit_change, :margin_change,
     :chart_labels, :chart_revenue, :chart_cost,
+    :current_labor_cost, :prev_labor_cost, :current_net_profit, :prev_net_profit,
     keyword_init: true
   )
 
-  def self.call(period:)
-    new(period: period).call
+  def self.call(period:, offset: 0)
+    new(period: period, offset: offset).call
   end
 
-  def initialize(period:)
+  def initialize(period:, offset: 0)
     @period = period.to_s.presence_in(%w[week month year]) || "month"
+    @offset = offset.to_i
     @current_range, @previous_range = compute_ranges
   end
 
@@ -23,23 +25,30 @@ class RevenueAnalyticsQuery
     prev    = aggregate(@previous_range)
     chart   = build_chart_data(@current_range)
 
+    current_labor = labor_cost(@current_range)
+    prev_labor    = labor_cost(@previous_range)
+
     Result.new(
-      current_sales:  current[:sales],
-      current_cost:   current[:cost],
-      current_profit: current[:profit],
-      current_margin: current[:margin],
-      current_count:  current[:count],
-      prev_sales:     prev[:sales],
-      prev_cost:      prev[:cost],
-      prev_profit:    prev[:profit],
-      prev_margin:    prev[:margin],
-      prev_count:     prev[:count],
-      sales_change:   pct_change(prev[:sales], current[:sales]),
-      profit_change:  pct_change(prev[:profit], current[:profit]),
-      margin_change:  (current[:margin] - prev[:margin]).round(1),
-      chart_labels:   chart[:labels],
-      chart_revenue:  chart[:revenue],
-      chart_cost:     chart[:cost]
+      current_sales:      current[:sales],
+      current_cost:       current[:cost],
+      current_profit:     current[:profit],
+      current_margin:     current[:margin],
+      current_count:      current[:count],
+      prev_sales:         prev[:sales],
+      prev_cost:          prev[:cost],
+      prev_profit:        prev[:profit],
+      prev_margin:        prev[:margin],
+      prev_count:         prev[:count],
+      sales_change:       pct_change(prev[:sales], current[:sales]),
+      profit_change:      pct_change(prev[:profit], current[:profit]),
+      margin_change:      (current[:margin] - prev[:margin]).round(1),
+      chart_labels:       chart[:labels],
+      chart_revenue:      chart[:revenue],
+      chart_cost:         chart[:cost],
+      current_labor_cost: current_labor,
+      prev_labor_cost:    prev_labor,
+      current_net_profit: current[:profit] - current_labor,
+      prev_net_profit:    prev[:profit] - prev_labor
     )
   end
 
@@ -49,14 +58,17 @@ class RevenueAnalyticsQuery
     now = Time.current
     case @period
     when "week"
-      current  = now.beginning_of_week..now.end_of_week
-      previous = (now - 1.week).beginning_of_week..(now - 1.week).end_of_week
+      anchor   = now + @offset.weeks
+      current  = anchor.beginning_of_week..anchor.end_of_week
+      previous = (anchor - 1.week).beginning_of_week..(anchor - 1.week).end_of_week
     when "year"
-      current  = now.beginning_of_year..now.end_of_year
-      previous = (now - 1.year).beginning_of_year..(now - 1.year).end_of_year
+      anchor   = now + @offset.years
+      current  = anchor.beginning_of_year..anchor.end_of_year
+      previous = (anchor - 1.year).beginning_of_year..(anchor - 1.year).end_of_year
     else
-      current  = now.beginning_of_month..now.end_of_month
-      previous = (now - 1.month).beginning_of_month..(now - 1.month).end_of_month
+      anchor   = now + @offset.months
+      current  = anchor.beginning_of_month..anchor.end_of_month
+      previous = (anchor - 1.month).beginning_of_month..(anchor - 1.month).end_of_month
     end
     [current, previous]
   end
@@ -71,6 +83,11 @@ class RevenueAnalyticsQuery
     profit = sales - cost
     margin = sales > 0 ? (profit / sales * 100).round(1) : 0.0
     { sales: sales, cost: cost, profit: profit, margin: margin, count: orders.count }
+  end
+
+  def labor_cost(range)
+    date_range = range.first.to_date..range.last.to_date
+    EmployeePayEntry.where(paid_on: date_range).sum(:amount).to_f
   end
 
   def build_chart_data(range)

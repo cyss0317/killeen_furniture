@@ -14,7 +14,10 @@
       base_cost:         p.base_cost.to_f,
       markup_percentage: p.markup_percentage.to_f,
       selling_price:     p.selling_price.to_f,
-      stock_quantity:    p.stock_quantity
+      stock_quantity:    p.stock_quantity,
+      category_id:       p.category_id.to_s,
+      category_name:     p.category&.name,
+      color:             p.color.to_s
     }
   }.to_json) %>
 </script>
@@ -177,11 +180,107 @@
            data-admin-order-target="lineItemsContainer">
         <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 class="font-semibold text-gray-900">Products</h2>
-          <button type="button"
-                  data-action="click->admin-order#addProduct"
-                  class="inline-flex items-center gap-1.5 bg-amber-800 text-white text-sm font-medium px-3 py-1.5 rounded-md hover:bg-amber-900 transition-colors">
-            + Add Product
-          </button>
+          <div class="flex gap-2">
+            <button type="button"
+                    data-action="click->admin-order#toggleBrowser"
+                    data-admin-order-target="browserToggle"
+                    class="inline-flex items-center gap-1.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium px-3 py-1.5 rounded-md hover:bg-gray-50 transition-colors">
+              Hide Browser
+            </button>
+            <button type="button"
+                    data-action="click->admin-order#addProduct"
+                    class="inline-flex items-center gap-1.5 bg-amber-800 text-white text-sm font-medium px-3 py-1.5 rounded-md hover:bg-amber-900 transition-colors">
+              + Add Row
+            </button>
+          </div>
+        </div>
+
+        <%# Product Browser Panel (collapsible) %>
+        <div data-admin-order-target="browserPanel" class="border-b border-gray-200">
+          <%# Filters %>
+          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex flex-wrap items-center gap-3">
+            <input type="text" placeholder="Search name or SKU…"
+                   data-admin-order-target="browserSearch"
+                   data-action="input->admin-order#filterBrowser"
+                   class="flex-1 min-w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <select data-admin-order-target="browserCategory"
+                    data-action="change->admin-order#filterBrowser"
+                    class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="">All Categories</option>
+              <% @categories.each do |cat| %>
+                <option value="<%= cat.id %>"><%= cat.name %></option>
+              <% end %>
+            </select>
+            <% if @colors.any? %>
+              <select data-admin-order-target="browserColor"
+                      data-action="change->admin-order#filterBrowser"
+                      class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <option value="">All Colors</option>
+                <% @colors.each do |c| %>
+                  <option value="<%= c.downcase %>"><%= c %></option>
+                <% end %>
+              </select>
+            <% end %>
+            <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer whitespace-nowrap">
+              <input type="checkbox"
+                     data-admin-order-target="browserInStock"
+                     data-action="change->admin-order#filterBrowser"
+                     class="rounded border-gray-300 text-amber-700 focus:ring-amber-500">
+              In Stock Only
+            </label>
+          </div>
+          <%# Products list %>
+          <div class="max-h-80 overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-100">
+              <thead class="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Category</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Color</th>
+                  <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Stock</th>
+                  <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
+                  <th class="px-4 py-2 w-16"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <% @products.each do |product| %>
+                  <tr data-admin-order-target="browserRow"
+                      data-product-id="<%= product.id %>"
+                      data-search-text="<%= "#{product.name} #{product.sku}".downcase %>"
+                      data-category-id="<%= product.category_id %>"
+                      data-color="<%= product.color.to_s.downcase %>"
+                      data-in-stock="<%= product.stock_quantity > 0 ? 'true' : 'false' %>"
+                      class="hover:bg-amber-50 transition-colors">
+                    <td class="px-4 py-2.5">
+                      <p class="text-sm font-medium text-gray-900 leading-tight"><%= product.name %></p>
+                      <p class="text-xs text-gray-400"><%= product.sku %></p>
+                    </td>
+                    <td class="px-4 py-2.5 text-sm text-gray-500 hidden sm:table-cell"><%= product.category&.name || "—" %></td>
+                    <td class="px-4 py-2.5 text-sm text-gray-500 hidden sm:table-cell"><%= product.color.presence || "—" %></td>
+                    <td class="px-4 py-2.5 text-center">
+                      <span class="text-xs font-medium <%= product.stock_quantity > 0 ? 'text-green-600' : 'text-red-500' %>">
+                        <%= product.stock_quantity %>
+                      </span>
+                    </td>
+                    <td class="px-4 py-2.5 text-right text-sm font-medium text-gray-900">
+                      <%= number_to_currency(product.selling_price) %>
+                    </td>
+                    <td class="px-4 py-2.5 text-center">
+                      <button type="button"
+                              data-action="click->admin-order#addProductFromBrowser"
+                              data-product-id="<%= product.id %>"
+                              class="bg-amber-800 text-white text-xs font-medium px-2.5 py-1 rounded hover:bg-amber-900 transition-colors">
+                        + Add
+                      </button>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+            <p class="hidden py-6 text-center text-sm text-gray-400" data-admin-order-target="browserEmpty">
+              No products match your filters.
+            </p>
+          </div>
         </div>
 
         <div class="overflow-x-auto">

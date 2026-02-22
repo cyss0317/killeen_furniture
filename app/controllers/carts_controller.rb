@@ -17,7 +17,7 @@ class CartsController < ApplicationController
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: [
-            turbo_stream.update("cart-count", current_cart.reload.total_items.to_s),
+            turbo_stream.replace("cart-count", partial: "shared/cart_badge", locals: { count: current_cart.reload.total_items }),
             turbo_stream.update("flash-messages",
               partial: "shared/flash_messages",
               locals:  { notice: "#{product.name} added to cart." })
@@ -54,7 +54,7 @@ class CartsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: [
           turbo_stream.remove("cart-item-#{params[:id]}"),
-          turbo_stream.update("cart-count", current_cart.reload.total_items.to_s),
+          turbo_stream.replace("cart-count", partial: "shared/cart_badge", locals: { count: current_cart.reload.total_items }),
           turbo_stream.update("cart-subtotal", helpers.number_to_currency(current_cart.subtotal))
         ]
       end

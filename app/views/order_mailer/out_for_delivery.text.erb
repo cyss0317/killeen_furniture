@@ -1,0 +1,20 @@
+Hi <%= @order.customer_name %>,
+
+Great news! Your order is out for delivery today and should arrive soon.
+
+ORDER: <%= @order.order_number %>
+Status: Out for Delivery
+
+DELIVERY ADDRESS
+<%= @order.shipping_address["full_name"] %>
+<%= @order.shipping_address["street_address"] %>
+<%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %> <%= @order.shipping_address["zip_code"] %>
+
+ITEMS BEING DELIVERED
+<% @order_items.each do |item| %>
+  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %>
+<% end %>
+
+Please ensure someone is available to receive the delivery.
+
+— Warehouse Furniture

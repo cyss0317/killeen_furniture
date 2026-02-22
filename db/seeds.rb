@@ -109,7 +109,51 @@ end
 # === Ashley Furniture Product Catalog ===
 load Rails.root.join("db/seeds/ashley_products.rb")
 
+# === Generation Trade Product Catalog ===
+load Rails.root.join("db/seeds/generation_trade_products.rb")
+
 puts "\nSeeding complete!"
+
+# === Employee Pay Sample Data ===
+if EmployeePayEntry.count < 10
+  today = Date.current
+
+  pay_data = [
+    # This week
+    { employee_name: "Maria Lopez",   amount: 950.00,  description: "Delivery driver — weekly pay",   paid_on: today.beginning_of_week },
+    { employee_name: "Tom Reeves",    amount: 850.00,  description: "Warehouse staff — weekly pay",   paid_on: today.beginning_of_week + 1 },
+    { employee_name: "Sara Kim",      amount: 750.00,  description: "Sales associate — weekly pay",   paid_on: today.beginning_of_week + 2 },
+
+    # Earlier this month (2–3 weeks ago)
+    { employee_name: "Maria Lopez",   amount: 950.00,  description: "Delivery driver — weekly pay",   paid_on: today - 14 },
+    { employee_name: "Tom Reeves",    amount: 850.00,  description: "Warehouse staff — weekly pay",   paid_on: today - 14 },
+    { employee_name: "Sara Kim",      amount: 750.00,  description: "Sales associate — weekly pay",   paid_on: today - 10 },
+    { employee_name: "James Carter",  amount: 1200.00, description: "Store manager — bi-weekly pay",  paid_on: today - 14 },
+
+    # Earlier this year (2–3 months ago)
+    { employee_name: "Maria Lopez",   amount: 950.00,  description: "Delivery driver — weekly pay",   paid_on: today - 60 },
+    { employee_name: "Tom Reeves",    amount: 850.00,  description: "Warehouse staff — weekly pay",   paid_on: today - 60 },
+    { employee_name: "James Carter",  amount: 1200.00, description: "Store manager — bi-weekly pay",  paid_on: today - 45 },
+    { employee_name: "Sara Kim",      amount: 750.00,  description: "Sales associate — weekly pay",   paid_on: today - 55 },
+    { employee_name: "Maria Lopez",   amount: 200.00,  description: "Overtime bonus",                 paid_on: today - 50 },
+
+    # Earlier this year (4–6 months ago)
+    { employee_name: "Maria Lopez",   amount: 950.00,  description: "Delivery driver — weekly pay",   paid_on: today - 120 },
+    { employee_name: "Tom Reeves",    amount: 850.00,  description: "Warehouse staff — weekly pay",   paid_on: today - 120 },
+    { employee_name: "James Carter",  amount: 1200.00, description: "Store manager — bi-weekly pay",  paid_on: today - 100 },
+    { employee_name: "Sara Kim",      amount: 750.00,  description: "Sales associate — weekly pay",   paid_on: today - 110 },
+    { employee_name: "Tom Reeves",    amount: 300.00,  description: "Moving bonus",                   paid_on: today - 115 }
+  ]
+
+  pay_data.each do |attrs|
+    EmployeePayEntry.find_or_create_by!(
+      employee_name: attrs[:employee_name],
+      paid_on:       attrs[:paid_on],
+      amount:        attrs[:amount]
+    ) { |e| e.description = attrs[:description]; e.created_by = admin }
+  end
+  puts "  ✓ Employee pay sample data created"
+end
 
 # === Delivery Admin User ===
 delivery_user = User.find_or_initialize_by(email: "delivery@killeenfurniture.com")

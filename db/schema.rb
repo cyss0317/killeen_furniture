@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_21_143755) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_22_045503) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -120,6 +120,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_143755) do
     t.datetime "updated_at", null: false
     t.index ["active"], name: "index_delivery_zones_on_active"
     t.index ["zip_codes"], name: "index_delivery_zones_on_zip_codes", using: :gin
+  end
+
+  create_table "employee_pay_entries", force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.string "employee_name", null: false
+    t.text "description"
+    t.date "paid_on", null: false
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_employee_pay_entries_on_created_by_id"
+    t.index ["paid_on"], name: "index_employee_pay_entries_on_paid_on"
   end
 
   create_table "global_settings", force: :cascade do |t|
@@ -394,6 +406,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_143755) do
   add_foreign_key "carts", "users"
   add_foreign_key "delivery_events", "orders"
   add_foreign_key "delivery_events", "users", column: "created_by_id"
+  add_foreign_key "employee_pay_entries", "users", column: "created_by_id"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "delivery_zones"

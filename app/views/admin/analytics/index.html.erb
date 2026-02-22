@@ -1,26 +1,60 @@
 <% content_for :title, "Revenue Analytics" %>
 
+<%# Compute human-readable label for the current period window %>
+<%
+  now    = Time.current
+  anchor = case @period
+           when "week"  then now + @offset.weeks
+           when "year"  then now + @offset.years
+           else              now + @offset.months
+           end
+  period_display = case @period
+                   when "week"  then "Week of #{anchor.beginning_of_week.strftime('%b %-d')} – #{anchor.end_of_week.strftime('%b %-d, %Y')}"
+                   when "year"  then anchor.strftime('%Y')
+                   else              anchor.strftime('%B %Y')
+                   end
+%>
+
 <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
   <div>
     <h1 class="text-2xl font-bold text-gray-900">Revenue Analytics</h1>
     <p class="text-sm text-gray-500 mt-1">Sales, costs, and profit — excludes canceled &amp; refunded orders</p>
   </div>
 
-  <%# Period selector %>
-  <div class="flex rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
-    <% [["Week", "week"], ["Month", "month"], ["Year", "year"]].each do |label, val| %>
-      <%= link_to label,
-          admin_analytics_path(period: val),
-          class: "px-4 py-2 text-sm font-medium transition-colors #{
-            @period == val ? 'bg-amber-700 text-white' : 'text-gray-600 hover:bg-gray-50'
-          }" %>
-    <% end %>
+  <div class="flex items-center gap-3 flex-wrap">
+    <%# Period type selector %>
+    <div class="flex rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm">
+      <% [["Week", "week"], ["Month", "month"], ["Year", "year"]].each do |label, val| %>
+        <%= link_to label,
+            admin_analytics_path(period: val, offset: 0),
+            class: "px-4 py-2 text-sm font-medium transition-colors #{
+              @period == val ? 'bg-amber-700 text-white' : 'text-gray-600 hover:bg-gray-50'
+            }" %>
+      <% end %>
+    </div>
+
+    <%# Prev / current label / next navigation %>
+    <div class="flex items-center gap-1">
+      <%= link_to admin_analytics_path(period: @period, offset: @offset - 1),
+          class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
+          title: "Previous #{@period}" do %>←<% end %>
+      <span class="px-3 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md min-w-36 text-center">
+        <%= period_display %>
+      </span>
+      <% if @offset < 0 %>
+        <%= link_to admin_analytics_path(period: @period, offset: @offset + 1),
+            class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
+            title: "Next #{@period}" do %>→<% end %>
+      <% else %>
+        <span class="px-2.5 py-1.5 rounded-md border border-gray-100 bg-gray-50 text-gray-300 text-sm font-medium cursor-default">→</span>
+      <% end %>
+    </div>
   </div>
 </div>
 
-<%# Period label %>
-<% period_label = { "week" => "This Week vs Last Week", "month" => "This Month vs Last Month", "year" => "This Year vs Last Year" }[@period] %>
-<p class="text-xs text-gray-400 mb-5 uppercase tracking-wide font-medium"><%= period_label %></p>
+<p class="text-xs text-gray-400 mb-5 uppercase tracking-wide font-medium">
+  <%= period_display %> vs previous <%= @period %>
+</p>
 
 <%# KPI Cards — Current Period %>
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -76,6 +110,27 @@
     <p class="text-xs text-gray-400 mt-1">Prev: <%= @analytics.prev_margin %>%</p>
   </div>
 </div>
+
+<%# Labor Cost & Net Profit (shown only when labor data exists) %>
+<% if @analytics.current_labor_cost > 0 || @analytics.prev_labor_cost > 0 %>
+  <div class="grid grid-cols-2 gap-4 mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Labor Cost</p>
+      <p class="text-2xl font-bold text-gray-900"><%= number_to_currency(@analytics.current_labor_cost) %></p>
+      <p class="text-xs text-gray-400 mt-1">Prev: <%= number_to_currency(@analytics.prev_labor_cost) %></p>
+      <p class="text-xs text-amber-700 mt-1">→ Deducted from Gross Profit</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-amber-200 p-5">
+      <p class="text-xs font-medium text-amber-700 uppercase tracking-wide mb-1">Net Profit (after labor)</p>
+      <p class="text-2xl font-bold <%= @analytics.current_net_profit >= 0 ? 'text-green-700' : 'text-red-600' %>">
+        <%= number_to_currency(@analytics.current_net_profit) %>
+      </p>
+      <p class="text-xs text-gray-400 mt-1">Prev: <%= number_to_currency(@analytics.prev_net_profit) %></p>
+      <%= link_to "Manage Pay →", admin_employee_pay_index_path(period: @period, offset: @offset),
+          class: "text-xs text-amber-700 hover:underline mt-1 block" %>
+    </div>
+  </div>
+<% end %>
 
 <%# Revenue & Cost Chart %>
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -177,6 +232,35 @@
           </span>
         </td>
       </tr>
+      <% if @analytics.current_labor_cost > 0 || @analytics.prev_labor_cost > 0 %>
+        <tr>
+          <td class="px-6 py-3 text-sm text-gray-700 font-medium">Labor Cost (deducted)</td>
+          <td class="px-6 py-3 text-sm text-right font-semibold text-red-600">
+            − <%= number_to_currency(@analytics.current_labor_cost) %>
+          </td>
+          <td class="px-6 py-3 text-sm text-right text-gray-500">
+            − <%= number_to_currency(@analytics.prev_labor_cost) %>
+          </td>
+          <td class="px-6 py-3 text-sm text-right text-gray-400">—</td>
+        </tr>
+        <tr class="bg-green-50">
+          <td class="px-6 py-3 text-sm font-bold text-gray-800">Net Profit (after labor)</td>
+          <td class="px-6 py-3 text-sm text-right font-bold <%= @analytics.current_net_profit >= 0 ? 'text-green-700' : 'text-red-600' %>">
+            <%= number_to_currency(@analytics.current_net_profit) %>
+          </td>
+          <td class="px-6 py-3 text-sm text-right text-gray-500"><%= number_to_currency(@analytics.prev_net_profit) %></td>
+          <td class="px-6 py-3 text-sm text-right">
+            <% if @analytics.prev_net_profit && @analytics.prev_net_profit != 0 %>
+              <% net_chg = ((@analytics.current_net_profit - @analytics.prev_net_profit) / @analytics.prev_net_profit.abs * 100).round(1) %>
+              <span class="<%= net_chg >= 0 ? 'text-green-600' : 'text-red-500' %>">
+                <%= net_chg >= 0 ? "+" : "" %><%= net_chg %>%
+              </span>
+            <% else %>
+              <span class="text-gray-400">—</span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
     </tbody>
   </table>
 </div>

@@ -102,10 +102,18 @@
                     <%= item.remaining_quantity %>
                   </td>
                   <td class="px-6 py-3 text-center">
-                    <input type="number"
-                           name="items[<%= item.id %>][qty_to_receive]"
-                           min="0" max="<%= item.remaining_quantity %>" value="0"
-                           class="w-24 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <div class="flex items-center gap-1 justify-center">
+                      <input type="number"
+                             name="items[<%= item.id %>][qty_to_receive]"
+                             min="0" max="<%= item.remaining_quantity %>" value="0"
+                             class="w-20 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-500">
+                      <button type="button"
+                              onclick="this.previousElementSibling.value = '<%= item.remaining_quantity %>'"
+                              title="Fill all remaining (<%= item.remaining_quantity %>)"
+                              class="text-green-700 hover:text-green-900 text-xs font-bold px-1.5 py-1 rounded border border-green-300 hover:border-green-500 transition-colors">
+                        ✓
+                      </button>
+                    </div>
                   </td>
                   <td class="px-6 py-3 text-right">
                     <input type="number"
@@ -133,7 +141,7 @@
       <h3 class="font-semibold text-gray-900 mb-4">Order Info</h3>
       <dl class="space-y-3 text-sm">
         <div>
-          <dt class="text-gray-500">Reference #</dt>
+          <dt class="text-gray-500">Invoice #</dt>
           <dd class="font-mono font-medium text-gray-900 mt-0.5"><%= @po.reference_number %></dd>
         </div>
         <div>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; background: #f9fafb; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: #fff; }
+    .header { background: #166534; color: #fff; padding: 28px 32px; }
+    .header h1 { margin: 0 0 4px; font-size: 22px; font-weight: bold; }
+    .header p { margin: 0; opacity: 0.85; font-size: 14px; }
+    .body { padding: 32px; }
+    .success-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .success-box p { margin: 0 0 6px; font-size: 13px; color: #166534; }
+    .success-box p:last-child { margin-bottom: 0; }
+    .section { margin-bottom: 24px; }
+    .section h3 { margin: 0 0 10px; font-size: 15px; color: #374151; border-bottom: 1px solid #f3f4f6; padding-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    td { padding: 8px 0; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    .footer { background: #f3f4f6; padding: 20px 32px; text-align: center; font-size: 12px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Warehouse Furniture</h1>
+      <p>Your Order Has Been Delivered!</p>
+    </div>
+
+    <div class="body">
+      <p>Hi <%= @order.customer_name %>,</p>
+      <p>Your order has been successfully delivered. We hope you love your new furniture!</p>
+
+      <div class="success-box">
+        <p><strong>Order Number:</strong> <%= @order.order_number %></p>
+        <p><strong>Delivered On:</strong> <%= @order.delivered_at&.strftime("%B %d, %Y") || "Today" %></p>
+      </div>
+
+      <div class="section">
+        <h3>Items Delivered</h3>
+        <table>
+          <% @order_items.each do |item| %>
+            <tr>
+              <td>
+                <strong><%= item.product_name %></strong>
+                <span style="color: #6b7280; font-size: 12px; display: block;">SKU: <%= item.product_sku %></span>
+              </td>
+              <td style="text-align: right; width: 60px;">× <%= item.quantity %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+
+      <p style="font-size: 13px; color: #6b7280;">
+        Thank you for choosing Warehouse Furniture. If you have any questions or concerns about your order, please don't hesitate to contact us.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>© <%= Time.current.year %> Warehouse Furniture. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

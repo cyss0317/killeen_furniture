@@ -12,24 +12,26 @@ module PurchaseOrders
       "image/webp" => "image/webp"
     }.freeze
 
-    EXTRACTION_PROMPT = <<~PROMPT.freeze
+    ASHLEY_PROMPT = <<~PROMPT.freeze
       This is an Ashley Furniture order document (order confirmation, invoice, or dealer portal screenshot).
-      Extract all product line items and return them as a JSON array.
+      Extract the invoice/order number and all product line items. Return ONLY valid JSON — no markdown, no explanation:
 
-      Return ONLY a valid JSON array — no markdown, no explanation, no other text:
-
-      [
-        {
-          "item_code": "B1190-31",
-          "description": "Six Drawer Dresser",
-          "series": "Gerridan",
-          "color": "White/Gray",
-          "qty": 1,
-          "price": 189.50
-        }
-      ]
+      {
+        "invoice_number": "ASH-2026-001",
+        "items": [
+          {
+            "item_code": "B1190-31",
+            "description": "Six Drawer Dresser",
+            "series": "Gerridan",
+            "color": "White/Gray",
+            "qty": 1,
+            "price": 189.50
+          }
+        ]
+      }
 
       Rules:
+      - invoice_number: the order/invoice/PO number shown on the document (empty string "" if not visible)
       - item_code: Ashley SKU / item code (e.g. "B1190-31", "8376-92")
       - description: product name or description text
       - series: furniture collection or series name (empty string "" if not shown)
@@ -37,32 +39,76 @@ module PurchaseOrders
       - qty: integer quantity from the Qty or Ordered column
       - price: unit wholesale price as a decimal (use the "Price" column, NOT "Ext. Price")
       - Skip rows that are section headers, subtotals, shipping lines, or blank
-      - Return an empty array [] if no valid line items are found
+      - items must be an empty array [] if no valid line items are found
     PROMPT
+
+    GENERATION_TRADE_PROMPT = <<~PROMPT.freeze
+      This is a Generation Trade order document (order confirmation, invoice, or portal screenshot).
+      Extract the invoice/order number and all product line items. Return ONLY valid JSON — no markdown, no explanation:
+
+      {
+        "invoice_number": "GT-2026-001",
+        "items": [
+          {
+            "item_code": "GT-1234",
+            "description": "Accent Chair",
+            "series": "",
+            "color": "Gray",
+            "qty": 2,
+            "price": 245.00
+          }
+        ]
+      }
+
+      Rules:
+      - invoice_number: the order/invoice/PO number shown on the document (empty string "" if not visible)
+      - item_code: Generation Trade SKU / item code
+      - description: product name or description text
+      - series: collection or series name (empty string "" if not shown)
+      - color: color or finish name (empty string "" if not shown)
+      - qty: integer quantity
+      - price: unit wholesale price as a decimal (unit price, NOT extended/total)
+      - Skip rows that are section headers, subtotals, shipping lines, or blank
+      - items must be an empty array [] if no valid line items are found
+    PROMPT
+
+    SUPPLIER_PROMPTS = {
+      "ashley"           => ASHLEY_PROMPT,
+      "generation_trade" => GENERATION_TRADE_PROMPT
+    }.freeze
 
     def self.call(...) = new(...).call
 
-    def initialize(file:, reference_number:, ordered_at: nil, notes: nil, created_by: nil)
+    def initialize(file:, reference_number: nil, ordered_at: nil, notes: nil, created_by: nil, supplier: "ashley")
       @file             = file
-      @reference_number = reference_number
+      @reference_number = reference_number.to_s.strip.presence
       @ordered_at       = ordered_at
       @notes            = notes
       @created_by       = created_by
+      @supplier         = supplier.to_s.presence || "ashley"
     end
 
     def call
       image_data, media_type = read_image
       return Result.new(error: "Unsupported file type. Please upload a JPEG, PNG, WebP, or GIF image.") unless media_type
 
-      raw_items = extract_items_via_claude(image_data, media_type)
-      return Result.new(error: raw_items) if raw_items.is_a?(String)  # error message
-      return Result.new(error: "No order items could be found in the image. Make sure the screenshot shows Ashley Furniture order lines with Item Codes and prices.") if raw_items.empty?
+      extracted = extract_via_claude(image_data, media_type)
+      return Result.new(error: extracted) if extracted.is_a?(String)  # error message
+
+      invoice_number = extracted["invoice_number"].to_s.strip.presence
+      raw_items      = Array(extracted["items"])
+
+      # Resolve reference number: use manually entered one, fall back to extracted
+      ref = @reference_number || invoice_number
+      return Result.new(error: "Could not determine invoice number. Please enter it manually or ensure it is visible in the image.") if ref.blank?
+
+      return Result.new(error: "No order items could be found in the image.") if raw_items.empty?
 
       created_products = []
       updated_products = []
       skipped_rows     = []
       po               = nil
-      ashley_category  = nil
+      supplier_category = nil
 
       ActiveRecord::Base.transaction do
         line_items = []
@@ -97,7 +143,7 @@ module PurchaseOrders
             product.increment!(:stock_quantity, qty)
             updated_products << product unless updated_products.include?(product)
           else
-            ashley_category ||= Category.find_or_create_by!(name: "Ashley Furniture")
+            supplier_category ||= Category.find_or_create_by!(name: supplier_category_name)
             product = Product.create!(
               sku:            sku,
               name:           description.presence || sku,
@@ -106,13 +152,13 @@ module PurchaseOrders
               base_cost:      price,
               stock_quantity: qty,
               status:         :draft,
-              category:       ashley_category
+              category:       supplier_category
             )
             created_products << product
           end
 
-          # Best-effort: enrich product details from Ashley's website
-          Products::FetchFromAshley.enrich!(product, series: series, description: description)
+          # Best-effort: enrich product details from supplier website
+          enrich_product!(product, series: series, description: description)
 
           line_items << {
             product:          product,
@@ -126,7 +172,7 @@ module PurchaseOrders
         raise "No valid line items found in the image." if line_items.empty?
 
         po = PurchaseOrder.create!(
-          reference_number: @reference_number,
+          reference_number: ref,
           status:           :submitted,
           ordered_at:       @ordered_at,
           notes:            @notes,
@@ -150,6 +196,22 @@ module PurchaseOrders
 
     private
 
+    def supplier_category_name
+      case @supplier
+      when "generation_trade" then "Generation Trade"
+      else "Ashley Furniture"
+      end
+    end
+
+    def enrich_product!(product, series:, description:)
+      case @supplier
+      when "generation_trade"
+        Products::FetchFromGenerationTrade.enrich!(product, series: series, description: description)
+      else
+        Products::FetchFromAshley.enrich!(product, series: series, description: description)
+      end
+    end
+
     def read_image
       data       = @file.read
       raw_type   = @file.content_type.to_s.split(";").first.strip.downcase
@@ -157,7 +219,11 @@ module PurchaseOrders
       [Base64.strict_encode64(data), media_type]
     end
 
-    def extract_items_via_claude(image_data, media_type)
+    def extraction_prompt
+      SUPPLIER_PROMPTS[@supplier] || ASHLEY_PROMPT
+    end
+
+    def extract_via_claude(image_data, media_type)
       api_key = ENV["ANTHROPIC_API_KEY"] || Rails.application.credentials.anthropic_api_key || "empty"
       return "Anthropic API key is not configured. Set ANTHROPIC_API_KEY in your environment." if api_key.blank?
 
@@ -173,7 +239,7 @@ module PurchaseOrders
               type:   "image",
               source: { type: "base64", media_type: media_type, data: image_data }
             },
-            { type: "text", text: EXTRACTION_PROMPT }
+            { type: "text", text: extraction_prompt }
           ]
         }]
       )

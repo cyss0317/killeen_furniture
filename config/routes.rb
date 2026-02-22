@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   # Product catalog
   resources :categories, only: [:show], param: :slug
   resources :products,   only: [:index, :show], param: :slug
+  get "/brands/:name", to: "brands#show", as: :brand
 
   # Shopping cart
   resource :cart, only: [:show] do
@@ -81,7 +82,8 @@ Rails.application.routes.draw do
       end
     end
 
-    resource :settings, only: [:show, :update]
+    resource  :settings,     only: [:show, :update]
+    resources :employee_pay, only: [:index, :create, :destroy]
 
     resources :purchase_orders, only: [:index, :show, :new, :create] do
       member { patch :receive }

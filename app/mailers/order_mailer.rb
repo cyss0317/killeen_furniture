@@ -31,6 +31,17 @@ class OrderMailer < ApplicationMailer
     )
   end
 
+  # Sent to the customer when their order is out for delivery.
+  def out_for_delivery(order)
+    @order       = order
+    @order_items = order.order_items.includes(:product)
+
+    mail(
+      to:      order.customer_email,
+      subject: "Your order is out for delivery! — #{order.order_number}"
+    )
+  end
+
   # Sent to all super_admins when an order is marked as delivered.
   def order_delivered(order, super_admin)
     @order       = order
@@ -40,6 +51,17 @@ class OrderMailer < ApplicationMailer
     mail(
       to:      super_admin.email,
       subject: "Order delivered: #{order.order_number}"
+    )
+  end
+
+  # Sent to the customer when their order is marked as delivered.
+  def order_delivered_customer(order)
+    @order       = order
+    @order_items = order.order_items.includes(:product)
+
+    mail(
+      to:      order.customer_email,
+      subject: "Your order has been delivered — #{order.order_number}"
     )
   end
 end

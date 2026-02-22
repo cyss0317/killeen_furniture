@@ -2,12 +2,14 @@ module Delivery
   class OrdersController < BaseController
     include Pagy::Method
 
-    ALLOWED_STATUSES = %w[scheduled_for_delivery out_for_delivery delivered canceled].freeze
+    ALLOWED_STATUSES         = %w[scheduled_for_delivery out_for_delivery delivered canceled].freeze
+    DELIVERY_ADMIN_STATUSES  = %w[scheduled_for_delivery out_for_delivery delivered].freeze
 
     before_action :set_order, only: [:show, :mark_delivered, :update_status]
 
     def index
-      @status_filter = params[:status].presence_in(ALLOWED_STATUSES) || "scheduled_for_delivery"
+      allowed_statuses = current_user.delivery_admin? ? DELIVERY_ADMIN_STATUSES : ALLOWED_STATUSES
+      @status_filter   = params[:status].presence_in(allowed_statuses) || "scheduled_for_delivery"
 
       scope = policy_scope(Order)
                .where(status: @status_filter)
@@ -39,8 +41,10 @@ module Delivery
         )
       end
 
-      User.where(role: :super_admin).each do |admin|
-        OrderMailer.order_delivered(@order, admin).deliver_later
+      admin_email = ENV["ADMIN_EMAIL"].presence
+      if admin_email
+        admin = User.find_by(email: admin_email)
+        OrderMailer.order_delivered(@order, admin).deliver_later if admin
       end
 
       redirect_to delivery_orders_path, notice: "Order #{@order.order_number} marked as delivered."
@@ -64,6 +68,10 @@ module Delivery
           created_by: current_user,
           note:       "Status updated to #{new_status.to_s.humanize}"
         )
+      end
+
+      if new_status == :out_for_delivery
+        OrderMailer.out_for_delivery(@order).deliver_later
       end
 
       redirect_to delivery_order_path(@order), notice: "Order status updated to #{new_status.to_s.humanize.downcase}."

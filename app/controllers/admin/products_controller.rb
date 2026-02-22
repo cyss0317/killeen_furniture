@@ -17,8 +17,18 @@ module Admin
       scope      = scope.reorder("#{@sort} #{@direction}")
 
       @pagy, @products = pagy(:offset, scope, limit: 25)
-      @categories = Category.ordered
-      @colors     = Product.where.not(color: [nil, ""]).distinct.pluck(:color).sort
+
+      # When color is filtered, restrict categories + statuses to those with that color
+      if params[:color].present?
+        color_product_base = Product.where(color: params[:color])
+        @categories        = Category.where(id: color_product_base.select(:category_id)).order(:name)
+        @available_statuses = color_product_base.distinct.pluck(:status)
+      else
+        @categories         = Category.ordered
+        @available_statuses = nil
+      end
+
+      @colors = Product.where.not(color: [nil, ""]).distinct.pluck(:color).sort
     end
 
     def show

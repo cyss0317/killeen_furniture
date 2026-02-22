@@ -103,6 +103,21 @@
           <span>Grand Total</span>
           <span><%= number_to_currency(@order.grand_total) %></span>
         </div>
+        <% order_cogs = @order_items.sum { |i| i.unit_cost.to_f * i.quantity } %>
+        <% if order_cogs > 0 %>
+          <% order_profit = @order.subtotal - order_cogs %>
+          <% profit_pct   = (order_profit / order_cogs * 100).round(1) %>
+          <div class="border-t border-gray-100 pt-2 mt-2 space-y-1">
+            <div class="flex justify-between text-sm text-gray-500">
+              <span>Total Cost (COGS)</span>
+              <span><%= number_to_currency(order_cogs) %></span>
+            </div>
+            <div class="flex justify-between text-sm font-semibold text-green-700">
+              <span>Gross Profit</span>
+              <span><%= number_to_currency(order_profit) %> (<%= profit_pct %>%)</span>
+            </div>
+          </div>
+        <% end %>
       </div>
     </div>
 
@@ -185,8 +200,8 @@
       <% end %>
     </div>
 
-    <%# Delivery Assignment (super_admin only) %>
-    <% if policy(@order).assign? %>
+    <%# Delivery Assignment (super_admin only, not shown for canceled/refunded orders) %>
+    <% if policy(@order).assign? && !@order.canceled? && !@order.refunded? %>
       <div class="bg-white rounded-lg shadow-sm border border-amber-200 p-6">
         <h3 class="font-semibold text-gray-900 mb-3">Assign Delivery</h3>
         <% if @order.assigned_to %>

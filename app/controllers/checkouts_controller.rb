@@ -2,7 +2,9 @@ class CheckoutsController < ApplicationController
   before_action :ensure_cart_not_empty, only: [ :show, :create, :external_payment ]
 
   def show
-    @default_address = current_user.addresses.find_by(is_default: true) if user_signed_in?
+    if user_signed_in? && !current_user.admin_or_above?
+      @default_address = current_user.addresses.find_by(is_default: true)
+    end
   end
 
   def create

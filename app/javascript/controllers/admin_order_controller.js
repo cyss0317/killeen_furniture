@@ -7,7 +7,9 @@ export default class extends Controller {
     "customerType", "userSection", "guestSection",
     "userSelect", "shippingZone",
     "addressFullName", "addressStreet", "addressCity", "addressState", "addressZip",
-    "calculateShippingBtn", "shippingError", "shippingAmount", "deliveryZoneId"
+    "calculateShippingBtn", "shippingError", "shippingAmount", "deliveryZoneId",
+    "browserPanel", "browserToggle", "browserSearch", "browserCategory",
+    "browserColor", "browserInStock", "browserRow", "browserEmpty"
   ]
 
   connect() {
@@ -24,7 +26,8 @@ export default class extends Controller {
     this.recalculate()
   }
 
-  // Customer type toggle
+  // ── Customer ─────────────────────────────────────────────────────────────
+
   customerTypeChanged(event) {
     const isGuest = event.target.value === "guest"
     this.userSectionTarget.classList.toggle("hidden", isGuest)
@@ -32,7 +35,6 @@ export default class extends Controller {
     if (!isGuest) this.loadUserAddress()
   }
 
-  // Auto-fill address when user is selected
   userChanged() {
     this.loadUserAddress()
   }
@@ -40,8 +42,6 @@ export default class extends Controller {
   loadUserAddress() {
     const userId = this.userSelectTarget.value
     if (!userId) return
-    const user = this.products   // not ideal but we'll use a separate data source
-    // Address is auto-filled via pre-loaded data - see users-data script tag
     const usersEl = document.getElementById("users-data")
     if (!usersEl) return
     const users = JSON.parse(usersEl.textContent)
@@ -56,15 +56,102 @@ export default class extends Controller {
     }
   }
 
-  // Add a new product line item row
+  // ── Product Browser ───────────────────────────────────────────────────────
+
+  toggleBrowser() {
+    const isNowHidden = this.browserPanelTarget.classList.toggle("hidden")
+    if (this.hasBrowserToggleTarget) {
+      this.browserToggleTarget.textContent = isNowHidden ? "Browse Products" : "Hide Browser"
+    }
+    if (!isNowHidden && this.hasBrowserSearchTarget) {
+      this.browserSearchTarget.focus()
+    }
+  }
+
+  filterBrowser() {
+    const search      = this.hasBrowserSearchTarget   ? this.browserSearchTarget.value.toLowerCase().trim() : ""
+    const categoryId  = this.hasBrowserCategoryTarget ? this.browserCategoryTarget.value : ""
+    const color       = this.hasBrowserColorTarget    ? this.browserColorTarget.value.toLowerCase() : ""
+    const inStockOnly = this.hasBrowserInStockTarget  ? this.browserInStockTarget.checked : false
+
+    const rows = this.browserRowTargets
+
+    const baseMatch = row =>
+      (!search     || row.dataset.searchText.includes(search)) &&
+      (!inStockOnly || row.dataset.inStock === "true")
+
+    // Update category dropdown: show only categories that have products matching current color+search+stock
+    if (this.hasBrowserCategoryTarget) {
+      const validCatIds = new Set(
+        rows.filter(r => baseMatch(r) && (!color || r.dataset.color === color))
+            .map(r => r.dataset.categoryId)
+      )
+      this.browserCategoryTarget.querySelectorAll("option").forEach(opt => {
+        if (!opt.value) return
+        opt.hidden = !validCatIds.has(opt.value)
+      })
+    }
+
+    // Update color dropdown: show only colors that have products matching current category+search+stock
+    if (this.hasBrowserColorTarget) {
+      const validColors = new Set(
+        rows.filter(r => baseMatch(r) && (!categoryId || r.dataset.categoryId === categoryId))
+            .map(r => r.dataset.color).filter(Boolean)
+      )
+      this.browserColorTarget.querySelectorAll("option").forEach(opt => {
+        if (!opt.value) return
+        opt.hidden = !validColors.has(opt.value)
+      })
+    }
+
+    // Apply all filters to rows
+    let visibleCount = 0
+    rows.forEach(row => {
+      const visible =
+        baseMatch(row) &&
+        (!categoryId || row.dataset.categoryId === categoryId) &&
+        (!color      || row.dataset.color === color)
+      row.classList.toggle("hidden", !visible)
+      if (visible) visibleCount++
+    })
+
+    if (this.hasBrowserEmptyTarget) {
+      this.browserEmptyTarget.classList.toggle("hidden", visibleCount > 0)
+    }
+  }
+
+  addProductFromBrowser(event) {
+    const productId = event.currentTarget.dataset.productId
+
+    // If the product is already in the order, increment its quantity instead
+    const existingRow = this.lineItemRowTargets.find(row =>
+      row.querySelector("select[data-idx='product_id']")?.value === productId
+    )
+    if (existingRow) {
+      const qtyInput = existingRow.querySelector("input[data-idx='quantity']")
+      if (qtyInput) {
+        qtyInput.value = parseInt(qtyInput.value) + 1
+        this.recalculate()
+      }
+      return
+    }
+
+    this._addRow(productId)
+  }
+
+  // ── Line Items ────────────────────────────────────────────────────────────
+
   addProduct() {
+    this._addRow(null)
+  }
+
+  _addRow(productId) {
     const template = document.getElementById("line-item-template")
     if (!template) return
 
     const clone = template.content.cloneNode(true)
     const idx = this.rowIndex++
 
-    // Update all input names with the correct index
     clone.querySelectorAll("[data-idx]").forEach(el => {
       const field = el.dataset.idx
       el.name = `order[line_items][${idx}][${field}]`
@@ -72,17 +159,26 @@ export default class extends Controller {
     })
 
     this.lineItemsTarget.appendChild(clone)
+
+    // Pre-select the product and populate pricing cells
+    if (productId) {
+      const newRow = this.lineItemRowTargets[this.lineItemRowTargets.length - 1]
+      const select = newRow.querySelector("select[data-idx='product_id']")
+      if (select) {
+        select.value = productId
+        select.dispatchEvent(new Event("change"))
+      }
+    }
+
     this.updateEmptyState()
   }
 
-  // Remove a line item row
   removeItem(event) {
     event.currentTarget.closest("tr").remove()
     this.recalculate()
     this.updateEmptyState()
   }
 
-  // When product changes, update pricing cells
   productChanged(event) {
     const row     = event.currentTarget.closest("tr")
     const product = this.products[event.currentTarget.value]
@@ -92,7 +188,6 @@ export default class extends Controller {
       row.querySelector("[data-cell='markup']").textContent      = product.markup_percentage + "%"
       row.querySelector("[data-cell='sell-price']").textContent  = this.formatCurrency(product.selling_price)
       row.querySelector("[data-cell='stock']").textContent       = product.stock_quantity + " in stock"
-      // Update quantity max
       const qtyInput = row.querySelector("[data-qty]")
       if (qtyInput) qtyInput.max = product.stock_quantity
     } else {
@@ -105,17 +200,17 @@ export default class extends Controller {
     this.recalculate()
   }
 
-  // When quantity changes
   quantityChanged() {
     this.recalculate()
   }
 
-  // Recalculate order totals
+  // ── Totals ────────────────────────────────────────────────────────────────
+
   recalculate() {
     let subtotal = 0
 
     this.lineItemRowTargets.forEach(row => {
-      const select = row.querySelector("select[data-idx='product_id']")
+      const select   = row.querySelector("select[data-idx='product_id']")
       const qtyInput = row.querySelector("input[data-idx='quantity']")
       if (!select || !qtyInput) return
 
@@ -141,7 +236,8 @@ export default class extends Controller {
     if (this.hasGrandTotalTarget) this.grandTotalTarget.textContent = this.formatCurrency(grandTotal)
   }
 
-  // Calculate shipping via AJAX
+  // ── Shipping ──────────────────────────────────────────────────────────────
+
   async calculateShipping() {
     const zip = this.addressZipTarget?.value?.trim()
     if (!zip) {
@@ -149,7 +245,6 @@ export default class extends Controller {
       return
     }
 
-    // Collect line items
     const items = []
     this.lineItemRowTargets.forEach(row => {
       const select   = row.querySelector("select[data-idx='product_id']")
@@ -197,6 +292,8 @@ export default class extends Controller {
       this.calculateShippingBtnTarget.textContent = "Calculate Shipping"
     }
   }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   updateEmptyState() {
     if (this.hasEmptyStateTarget) {

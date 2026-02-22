@@ -1,0 +1,16 @@
+Hi <%= @order.customer_name %>,
+
+Your order has been successfully delivered. We hope you love your new furniture!
+
+ORDER: <%= @order.order_number %>
+Delivered On: <%= @order.delivered_at&.strftime("%B %d, %Y") || "Today" %>
+
+ITEMS DELIVERED
+<% @order_items.each do |item| %>
+  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %>
+<% end %>
+
+Thank you for choosing Warehouse Furniture.
+If you have any questions, please contact us.
+
+— Warehouse Furniture

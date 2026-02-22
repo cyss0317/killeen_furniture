@@ -1,0 +1,3 @@
+<span id="cart-count" class="absolute -top-2 -right-2 bg-amber-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center <%= local_assigns[:count].to_i.zero? ? 'hidden' : '' %>">
+  <%= local_assigns[:count].to_i.nonzero? %>
+</span>

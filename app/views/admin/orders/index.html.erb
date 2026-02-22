@@ -1,23 +1,68 @@
 <% content_for :title, "Orders" %>
 
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-4">
   <h1 class="text-2xl font-bold text-gray-900">Orders</h1>
-  <div class="flex gap-2">
-    <% [["All", nil], ["Pending", "pending"], ["Paid", "paid"], ["Scheduled", "scheduled_for_delivery"], ["Delivered", "delivered"]] .each do |label, status| %>
-      <%= link_to label, admin_orders_path(status: status),
-          class: "px-3 py-1.5 text-sm rounded-md font-medium transition-colors #{params[:status] == status ? 'bg-amber-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}" %>
-    <% end %>
-  </div>
+  <% if current_user.super_admin? %>
+    <%= link_to "+ New Order", new_admin_order_path,
+        class: "px-4 py-1.5 text-sm rounded-md font-medium bg-amber-800 text-white hover:bg-amber-900 transition-colors" %>
+  <% end %>
 </div>
 
-<!-- Search -->
+<%# Status filter pills %>
+<div class="flex gap-2 flex-wrap mb-4 text-sm">
+  <% [
+    ["All",             nil],
+    ["Pending",         "pending"],
+    ["Paid",            "paid"],
+    ["Scheduled",       "scheduled_for_delivery"],
+    ["Out for Delivery","out_for_delivery"],
+    ["Delivered",       "delivered"],
+    ["Canceled",        "canceled"],
+    ["Refunded",        "refunded"]
+  ].each do |label, status| %>
+    <%= link_to label, admin_orders_path(status: status, q: params[:q]),
+        class: "px-3 py-1.5 rounded-md font-medium transition-colors #{params[:status].to_s == status.to_s ? 'bg-amber-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}" %>
+  <% end %>
+</div>
+
+<!-- Search & Filters -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
   <%= form_with url: admin_orders_path, method: :get, data: { turbo: false } do |f| %>
     <%= f.hidden_field :status, value: params[:status] %>
-    <div class="flex gap-3">
-      <%= f.search_field :q, value: params[:q], placeholder: "Search order number, customer name, email...",
-          class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 flex-1" %>
-      <%= f.submit "Search", class: "bg-gray-800 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer" %>
+    <div class="flex flex-wrap gap-3 items-end">
+      <%# Name / email / order number %>
+      <div class="flex-1 min-w-48">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Customer / Order #</label>
+        <%= f.search_field :q, value: params[:q], placeholder: "Name, email, order number…",
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+
+      <%# Delivery address search %>
+      <div class="flex-1 min-w-48">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Delivery Address</label>
+        <%= f.search_field :address, value: params[:address], placeholder: "Street, city, or ZIP…",
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+
+      <%# Price range %>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Total range</label>
+        <div class="flex items-center gap-2">
+          <%= f.number_field :min_price, value: params[:min_price], placeholder: "Min $", min: 0,
+              class: "w-24 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          <span class="text-gray-400 text-sm">–</span>
+          <%= f.number_field :max_price, value: params[:max_price], placeholder: "Max $", min: 0,
+              class: "w-24 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <%= f.submit "Search", class: "bg-gray-800 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer" %>
+        <% if params.permit(:q, :address, :min_price, :max_price).values.any?(&:present?) %>
+          <%= link_to "Clear", admin_orders_path(status: params[:status]),
+              class: "text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50" %>
+        <% end %>
+      </div>
     </div>
   <% end %>
 </div>
@@ -31,6 +76,7 @@
         </th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivery Address</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Cost</th>
         <th class="px-6 py-3 text-right text-xs font-medium uppercase">
           <%= sort_link("Total", :grand_total, current_sort: @sort, current_direction: @direction) %>
         </th>
@@ -56,7 +102,18 @@
               <p class="text-xs text-gray-400"><%= order.customer_phone %></p>
             <% end %>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-600"><%= order.shipping_address_line %></td>
+          <td class="px-6 py-4 text-sm text-gray-600">
+            <%= link_to order.shipping_address_line, google_maps_url(order.shipping_address),
+                target: "_blank", rel: "noopener", class: "hover:text-amber-700 hover:underline" %>
+          </td>
+          <td class="px-6 py-4 text-sm text-right text-gray-500">
+            <% order_cost = order.order_items.sum { |i| i.unit_cost.to_f * i.quantity } %>
+            <% if order_cost > 0 %>
+              <%= number_to_currency(order_cost) %>
+            <% else %>
+              <span class="text-gray-300">—</span>
+            <% end %>
+          </td>
           <td class="px-6 py-4 text-sm font-semibold text-right"><%= number_to_currency(order.grand_total) %></td>
           <td class="px-6 py-4 text-center">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_badge_class(order.status) %>">
