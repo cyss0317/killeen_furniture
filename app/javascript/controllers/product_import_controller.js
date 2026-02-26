@@ -99,12 +99,13 @@ export default class extends Controller {
 
     imageUrls.forEach((url, i) => {
       const label = document.createElement("label")
-      label.className = "relative cursor-pointer"
+      // Start hidden/verifying
+      label.className = "opacity-0 pointer-events-none absolute transition-opacity duration-300"
       label.innerHTML = `
-        <input type="checkbox" class="sr-only peer" value="${url}" data-action="change->product-import#toggleImage" checked>
+        <input type="checkbox" class="sr-only peer" value="${url}" data-action="change->product-import#toggleImage" disabled>
         <div class="aspect-square bg-gray-100 rounded-md overflow-hidden border-2 border-transparent peer-checked:border-amber-500 transition-all">
           <img src="${url}" alt="Product image ${i + 1}" class="w-full h-full object-cover" loading="lazy"
-               onerror="this.closest('label').remove(); this.getRootNode().host?.application?.getControllerForElementAndIdentifier(this.closest('[data-controller]'), 'product-import')?.syncHiddenInputs()">
+               data-action="load->product-import#confirmImage error->product-import#removeImage">
         </div>
         <div class="absolute top-1 right-1 w-4 h-4 bg-amber-500 rounded-full hidden peer-checked:flex items-center justify-center pointer-events-none">
           <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -116,6 +117,32 @@ export default class extends Controller {
     })
 
     // Inject hidden inputs for all checked (pre-selected) images
+    this.syncHiddenInputs()
+  }
+
+  confirmImage(event) {
+    const img = event.currentTarget
+    const label = img.closest('label')
+    if (!label) return
+
+    // Show the label once confirmed
+    label.classList.remove("opacity-0", "pointer-events-none", "absolute")
+    label.classList.add("relative")
+    
+    // Enable the checkbox
+    const checkbox = label.querySelector('input[type="checkbox"]')
+    if (checkbox) {
+      checkbox.checked = true
+      checkbox.disabled = false
+    }
+
+    this.syncHiddenInputs()
+  }
+
+  removeImage(event) {
+    const img = event.currentTarget
+    const label = img.closest('label')
+    if (label) label.remove()
     this.syncHiddenInputs()
   }
 
@@ -202,6 +229,11 @@ export default class extends Controller {
     this.setField("product_dimensions_height", data.dimensions_height)
     this.setField("product_dimensions_depth",  data.dimensions_depth)
     this.setField("product_page_url",          data.page_url)
+
+    // NEW: If Claude found image URLs in the screenshot/address bar, render them immediately
+    if (data.vendor_image_urls && data.vendor_image_urls.length > 0) {
+      this.renderImagePicker(data.vendor_image_urls)
+    }
 
     // ActionText / Trix rich text editor
     if (data.description) {

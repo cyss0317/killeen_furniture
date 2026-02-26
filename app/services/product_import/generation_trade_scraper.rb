@@ -17,7 +17,7 @@ module ProductImport
     end
 
     def initialize(sku, page_url: nil)
-      @sku      = sku.to_s.strip
+      @sku      = sku.to_s.strip.gsub(/\AGT-?\s*/i, "") # Remove 'GT-' or 'GT ' prefix
       @page_url = page_url
     end
 
@@ -72,9 +72,24 @@ module ProductImport
                                        .first(8)
       return nil if images.empty?
 
+      # Weight from variants
+      weight = nil
+      variant = Array(product["variants"]).first
+      if variant
+        weight_val = variant["weight"].to_f
+        weight_unit = variant["weight_unit"].to_s.downcase
+        case weight_unit
+        when "kg" then weight = (weight_val * 2.20462).round(2).nonzero?
+        when "g"  then weight = (weight_val * 0.00220462).round(2).nonzero?
+        when "oz" then weight = (weight_val / 16.0).round(2).nonzero?
+        else           weight = weight_val.nonzero?
+        end
+      end
+
       Result.new(image_urls: images, data: {
         name:              product["title"],
-        description:       product["body_html"]&.gsub(/<[^>]+>/, " ")&.strip
+        description:       product["body_html"]&.gsub(/<[^>]+>/, " ")&.strip,
+        weight:            weight
       })
     end
 
@@ -97,6 +112,9 @@ module ProductImport
           loc = res["location"].to_s
           loc = "#{BASE_URL}#{loc}" unless loc.start_with?("http")
           fetch_url(loc, depth - 1)
+        else
+          Rails.logger.warn("GenerationTradeScraper: HTTP #{res.code} for #{url}")
+          nil
         end
       end
     rescue => e

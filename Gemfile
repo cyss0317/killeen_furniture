@@ -100,3 +100,5 @@ group :development do
   # Preview emails in browser
   gem "letter_opener"
 end
+
+gem "pry", "~> 0.16.0"

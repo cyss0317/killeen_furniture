@@ -41,26 +41,14 @@ module Products
     # 1) Search by SKU via /search.json
     # 2) Try SKU as a handle via /products/{handle}.json
     def fetch_shopify_product
-      # 1) Shopify search JSON endpoint
-      body = safe_get_body("#{BASE_URL}/search.json?q=#{CGI.escape(@product.sku)}&type=product")
-      if body
-        json = JSON.parse(body) rescue nil
-        if json
-          products = json["results"] || json["products"] || []
-          handle   = products.first&.dig("handle") || products.first&.dig("url")&.split("/products/")&.last
-          if handle
-            product_json = fetch_product_json(handle.to_s.split("?").first)
-            return product_json if product_json
-          end
-        end
+      # We delegate to VendorScraper which handles Shopify JSON search + handle logic
+      result = ProductImport::VendorScraper.call(sku: @product.sku, brand: "generation_trade")
+
+      if result.image_urls.any?
+        data = (result.data || {}).merge(image_urls: result.image_urls)
+        return data
       end
 
-      # 2) Try the SKU directly as a product handle (lowercased, hyphenated)
-      handle = @product.sku.downcase.gsub(/[^a-z0-9]+/, "-")
-      product_json = fetch_product_json(handle)
-      return product_json if product_json
-
-      Rails.logger.info "[FetchFromGenerationTrade] #{@product.sku}: no product found via Shopify API"
       nil
     end
 
@@ -77,38 +65,8 @@ module Products
       product
     end
 
-    def extract_data(product_data)
-      data = {}
-
-      data[:name] = product_data["title"].presence
-
-      # Extract description from body_html, strip HTML tags
-      raw_desc = product_data["body_html"].to_s
-      if raw_desc.present?
-        data[:description] = ActionController::Base.helpers.strip_tags(raw_desc).squish.presence
-      end
-
-      # Extract all image URLs from the Shopify images array
-      data[:image_urls] = Array(product_data["images"])
-                            .map { |img| img["src"].to_s.gsub(/\?.*\z/, "") }
-                            .select { |u| u.match?(/\Ahttps?:\/\//) }
-                            .first(8)
-
-      # Weight from variants
-      variant = Array(product_data["variants"]).first
-      if variant
-        weight_val = variant["weight"].to_f
-        weight_unit = variant["weight_unit"].to_s.downcase
-        # Convert to pounds if needed
-        case weight_unit
-        when "kg" then data[:weight] = (weight_val * 2.20462).round(2).nonzero?
-        when "g"  then data[:weight] = (weight_val * 0.00220462).round(2).nonzero?
-        when "oz" then data[:weight] = (weight_val / 16.0).round(2).nonzero?
-        else           data[:weight] = weight_val.nonzero?
-        end
-      end
-
-      data.compact
+    def extract_data(scraper_result_data)
+      scraper_result_data
     end
 
     def apply_updates(data)

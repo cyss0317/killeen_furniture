@@ -18,7 +18,8 @@ module ProductImport
         "dimensions_height": 36.0,
         "dimensions_depth": 18.0,
         "base_cost": 299.00,
-        "page_url": "The full URL visible in the browser address bar at the top of the screenshot (e.g. https://www.ashleyfurniture.com/p/...). Copy it exactly. Use null if no address bar is visible."
+        "page_url": "The full URL visible in the browser address bar at the top of the screenshot (e.g. https://www.ashleyfurniture.com/p/...). Copy it exactly. Use null if no address bar is visible.",
+        "vendor_image_urls": ["url1", "url2"]
       }
       Use null for any field not visible in the screenshot.
       Weight must be a number in pounds. Dimensions must be numbers in inches. base_cost must be a number with no $ sign.
