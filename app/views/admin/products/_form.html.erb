@@ -1,4 +1,4 @@
-<%= form_with model: [:admin, product], multipart: true, class: "space-y-6" do |f| %>
+<%= form_with model: [:admin, product], multipart: true, data: { product_form: true }, class: "space-y-6" do |f| %>
   <%= render "shared/form_errors", object: product %>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -70,6 +70,33 @@
       <!-- Images -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 class="font-semibold text-gray-900 mb-4">Product Images</h3>
+
+        <%# Vendor image URLs — shown as a removable grid on edit %>
+        <% if product.vendor_image_urls.present? %>
+          <div class="mb-4">
+            <p class="text-xs font-medium text-gray-600 mb-2">Vendor Images <span class="font-normal text-gray-400">(uncheck to remove)</span></p>
+            <%# Sentinel ensures key is present even when all unchecked, so model can clear the array %>
+            <input type="hidden" name="product[vendor_image_urls][]" value="">
+            <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              <% product.vendor_image_urls.each do |url| %>
+                <label class="relative cursor-pointer">
+                  <input type="checkbox" name="product[vendor_image_urls][]" value="<%= url %>"
+                         class="sr-only peer" checked>
+                  <div class="aspect-square bg-gray-100 rounded-md overflow-hidden border-2 border-transparent peer-checked:border-amber-500 transition-all">
+                    <%= image_tag url, class: "w-full h-full object-cover" %>
+                  </div>
+                  <div class="absolute top-1 right-1 w-4 h-4 bg-amber-500 rounded-full hidden peer-checked:flex items-center justify-center pointer-events-none">
+                    <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <%# Uploaded ActiveStorage images %>
         <% if product.images.attached? %>
           <div class="grid grid-cols-4 gap-2 mb-4">
             <% product.images.each do |image| %>
@@ -79,6 +106,7 @@
             <% end %>
           </div>
         <% end %>
+
         <%= f.file_field :images, multiple: true, accept: "image/*",
             class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" %>
         <p class="text-xs text-gray-400 mt-2">Upload multiple images. First image will be used as the primary image.</p>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_22_045503) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_22_232533) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -211,6 +211,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_22_045503) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "qr_token"
+    t.string "vendor_image_urls", default: [], array: true
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["dimensions"], name: "index_products_on_dimensions", using: :gin
     t.index ["featured"], name: "index_products_on_featured"

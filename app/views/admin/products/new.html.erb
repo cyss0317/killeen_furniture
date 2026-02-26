@@ -9,7 +9,7 @@
 <div class="mb-6" data-controller="product-import">
   <div class="bg-amber-50 border border-amber-200 rounded-lg p-5">
     <h2 class="text-sm font-semibold text-amber-900 mb-1">Import from Vendor Screenshot</h2>
-    <p class="text-xs text-amber-700 mb-4">Upload a screenshot of an Ashley Furniture or Generation Trade product page to auto-fill the form below.</p>
+    <p class="text-xs text-amber-700 mb-4">Upload a screenshot of an Ashley Furniture or Generation Trade product page to auto-fill the form and fetch product images.</p>
     <div class="flex items-center gap-3 flex-wrap">
       <input type="file" accept="image/*" data-product-import-target="file"
              class="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer" />
@@ -20,6 +20,34 @@
         Analyze Screenshot
       </button>
       <span data-product-import-target="status" class="text-sm text-gray-500"></span>
+    </div>
+  </div>
+
+  <!-- Vendor image picker (shown after screenshot analysis) -->
+  <div data-product-import-target="imagePicker" class="hidden mt-4 bg-white border border-amber-200 rounded-lg p-5">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-sm font-semibold text-gray-900">Vendor Images</h2>
+      <div class="flex gap-3">
+        <button type="button" data-action="click->product-import#selectAllImages"
+                class="text-xs text-amber-800 hover:underline">Select All</button>
+        <button type="button" data-action="click->product-import#deselectAllImages"
+                class="text-xs text-gray-500 hover:underline">Deselect All</button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 mb-1">Checked images will be downloaded and attached when you save the product.</p>
+    <p data-product-import-target="scrapeStatus" class="text-xs text-gray-400 mb-3"></p>
+    <div data-product-import-target="imageGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-3"></div>
+
+    <!-- Manual URL paste fallback -->
+    <div class="mt-4 pt-4 border-t border-gray-100">
+      <p class="text-xs font-medium text-gray-600 mb-1.5">Paste image URLs manually <span class="text-gray-400 font-normal">(one per line — right-click a product image on the vendor site → Copy image address)</span></p>
+      <textarea data-product-import-target="urlInput" rows="3"
+                placeholder="https://cdn.ashleyfurniture.com/...&#10;https://cdn.shopify.com/..."
+                class="w-full text-xs border border-gray-200 rounded-md px-3 py-2 font-mono resize-none focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+      <button type="button" data-action="click->product-import#addUrlImages"
+              class="mt-1.5 text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors">
+        Add Images
+      </button>
     </div>
   </div>
 </div>

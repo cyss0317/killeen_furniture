@@ -1,7 +1,11 @@
 <article class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100">
   <%= link_to product_path(product) do %>
     <div class="aspect-square bg-gray-100 overflow-hidden">
-      <% if product.images.attached? && product.primary_image %>
+      <% if product.vendor_image_urls.present? %>
+        <%= image_tag product.vendor_image_urls.first,
+            class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
+            alt: product.name %>
+      <% elsif product.images.attached? && product.primary_image %>
         <%= image_tag product.primary_image.variant(resize_to_fill: [400, 400]),
             class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
             alt: product.name %>

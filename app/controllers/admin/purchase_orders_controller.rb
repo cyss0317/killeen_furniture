@@ -31,7 +31,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
                       end
 
     scope = policy_scope(PurchaseOrder)
-              .includes(:created_by, :purchase_order_items)
+              .includes(:created_by, purchase_order_items: :product)
               .where(ordered_at: @period_range)
               .recent
 
@@ -55,7 +55,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
   def new
     authorize PurchaseOrder, :new?
     @po       = PurchaseOrder.new(status: :submitted, ordered_at: Date.current)
-    @products = Product.published.order(:name)
+    @products = Product.where.not(status: :archived).order(:name)
   end
 
   def create
@@ -66,7 +66,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
 
     if line_items.empty?
       @po       = PurchaseOrder.new(po_params)
-      @products = Product.published.order(:name)
+      @products = Product.where.not(status: :archived).order(:name)
       flash.now[:alert] = "Add at least one product."
       return render :new, status: :unprocessable_entity
     end
@@ -89,7 +89,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
     redirect_to admin_purchase_order_path(@po), notice: "Purchase order #{@po.reference_number} created."
   rescue ActiveRecord::RecordInvalid => e
     @po       = PurchaseOrder.new(po_params)
-    @products = Product.published.order(:name)
+    @products = Product.where.not(status: :archived).order(:name)
     flash.now[:alert] = e.message
     render :new, status: :unprocessable_entity
   end

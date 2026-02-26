@@ -69,6 +69,7 @@ Rails.application.routes.draw do
       end
       collection do
         post :import_screenshot
+        post :scrape_vendor
       end
       resources :stock_adjustments, only: [:create]
     end

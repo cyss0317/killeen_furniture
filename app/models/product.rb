@@ -19,6 +19,7 @@ class Product < ApplicationRecord
   validates :weight, numericality: { greater_than: 0 }, allow_nil: true
 
   before_validation :normalize_sku
+  before_save       :compact_vendor_image_urls
   before_create     :generate_qr_token
   before_save       :calculate_selling_price
   before_validation :set_markup_from_global, if: :markup_percentage_blank?
@@ -54,6 +55,16 @@ class Product < ApplicationRecord
     images.first
   end
 
+  # Returns the first vendor image URL if present, else nil.
+  def primary_vendor_image_url
+    vendor_image_urls.presence&.first
+  end
+
+  # True if the product has any displayable image (vendor URL or ActiveStorage).
+  def has_display_image?
+    vendor_image_urls.present? || images.attached?
+  end
+
   def formatted_price
     ActionController::Base.helpers.number_to_currency(selling_price)
   end
@@ -84,5 +95,9 @@ class Product < ApplicationRecord
 
   def normalize_sku
     self.sku = sku.to_s.strip.upcase if sku.present?
+  end
+
+  def compact_vendor_image_urls
+    self.vendor_image_urls = vendor_image_urls.select { |u| u.to_s.match?(/\Ahttps?:\/\//) }
   end
 end

@@ -164,7 +164,10 @@
           <% current_cart.cart_items.includes(:product).each do |item| %>
             <div class="flex gap-3">
               <div class="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                <% if item.product.primary_image %>
+                <% if item.product.vendor_image_urls.present? %>
+                  <%= image_tag item.product.vendor_image_urls.first,
+                      class: "w-full h-full object-cover", alt: item.product.name %>
+                <% elsif item.product.primary_image %>
                   <%= image_tag item.product.primary_image.variant(resize_to_fill: [50, 50]),
                       class: "w-full h-full object-cover", alt: item.product.name %>
                 <% end %>

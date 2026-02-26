@@ -36,6 +36,9 @@
                 <%= link_to item.product_name, admin_product_path(item.product),
                       class: "text-sm font-medium text-amber-800 hover:underline" %>
                 <p class="text-xs text-gray-400 font-mono">SKU: <%= item.product_sku %></p>
+                <% if item.product&.color.present? %>
+                  <p class="text-xs text-gray-500 mt-0.5"><%= item.product.color %></p>
+                <% end %>
               </td>
               <td class="px-6 py-4 text-center text-sm"><%= item.quantity_ordered %></td>
               <td class="px-6 py-4 text-center text-sm">
@@ -97,6 +100,9 @@
                   <td class="px-6 py-3 text-sm font-medium text-gray-900">
                     <%= item.product_name %>
                     <span class="text-xs text-gray-400 font-mono block">SKU: <%= item.product_sku %></span>
+                    <% if item.product&.color.present? %>
+                      <span class="text-xs text-gray-500 block mt-0.5"><%= item.product.color %></span>
+                    <% end %>
                   </td>
                   <td class="px-6 py-3 text-center text-sm text-amber-700 font-medium">
                     <%= item.remaining_quantity %>

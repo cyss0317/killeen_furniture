@@ -8,7 +8,9 @@ module Admin
       scope = Product.includes(:category, :images_attachments)
 
       scope = scope.search_by(params[:q]) if params[:q].present?
-      scope = scope.where(status: params[:status]) if params[:status].present?
+      # When a keyword search is active, ignore status filter so SKU/name searches
+      # always find the product regardless of draft/published state.
+      scope = scope.where(status: params[:status]) if params[:status].present? && params[:q].blank?
       scope = scope.by_category(params[:category_id]) if params[:category_id].present?
       scope = scope.by_color(params[:color]) if params[:color].present?
 
@@ -128,6 +130,23 @@ module Admin
       end
     end
 
+    def scrape_vendor
+      sku   = params[:sku].to_s.strip
+      brand = params[:brand].to_s.strip
+
+      if sku.blank? || brand.blank?
+        render json: { error: "SKU and brand are required" }, status: :unprocessable_entity and return
+      end
+
+      result = ProductImport::VendorScraper.call(sku: sku, brand: brand)
+
+      if result.error && result.image_urls.blank?
+        render json: { error: result.error }, status: :unprocessable_entity
+      else
+        render json: { image_urls: result.image_urls || [], warning: result.error }
+      end
+    end
+
     private
 
     def set_product
@@ -144,7 +163,8 @@ module Admin
         :stock_quantity, :status, :featured,
         :weight, :material, :color,
         dimensions: [:width, :height, :depth],
-        images: []
+        images: [],
+        vendor_image_urls: []
       )
     end
   end

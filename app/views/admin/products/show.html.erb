@@ -23,7 +23,25 @@
     <!-- Images -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 class="font-semibold text-gray-900 mb-3">Images</h3>
-      <% if @product.images.attached? %>
+      <% if @product.vendor_image_urls.present? %>
+        <div class="grid grid-cols-4 gap-2">
+          <% @product.vendor_image_urls.each do |url| %>
+            <div class="aspect-square rounded-md overflow-hidden bg-gray-100">
+              <%= image_tag url, class: "w-full h-full object-cover" %>
+            </div>
+          <% end %>
+        </div>
+        <% if @product.images.attached? %>
+          <h4 class="text-xs font-medium text-gray-500 mt-4 mb-2">Uploaded Images</h4>
+          <div class="grid grid-cols-4 gap-2">
+            <% @product.images.each do |img| %>
+              <div class="aspect-square rounded-md overflow-hidden bg-gray-100">
+                <%= image_tag img.variant(resize_to_fill: [120, 120]), class: "w-full h-full object-cover" %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% elsif @product.images.attached? %>
         <div class="grid grid-cols-4 gap-2">
           <% @product.images.each do |img| %>
             <div class="aspect-square rounded-md overflow-hidden bg-gray-100">
