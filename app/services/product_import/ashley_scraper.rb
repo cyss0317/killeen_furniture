@@ -13,16 +13,27 @@ module ProductImport
       "Accept-Language" => "en-US,en;q=0.9"
     }.freeze
 
-    def self.call(sku:)
-      new(sku).call
+    def self.call(sku:, page_url: nil)
+      new(sku, page_url:).call
     end
 
-    def initialize(sku)
-      @sku = sku.to_s.strip
+    def initialize(sku, page_url: nil)
+      @sku      = sku.to_s.strip
+      @page_url = page_url
     end
 
     def call
-      # Try direct product URL first (Ashley uses /p/-/SKU/ as a canonical pattern)
+      # Try the exact product URL from the browser address bar first (most reliable)
+      if @page_url&.match?(/ashleyfurniture\.com/i)
+        html = fetch_url(@page_url)
+        if html
+          doc  = Nokogiri::HTML(html)
+          imgs = extract_images(doc)
+          return Result.new(image_urls: imgs, data: {}) if imgs.any?
+        end
+      end
+
+      # Try direct product URL using SKU
       html = fetch_url("#{BASE_URL}/p/-/#{CGI.escape(@sku)}/")
       if html
         doc  = Nokogiri::HTML(html)
@@ -80,26 +91,36 @@ module ProductImport
     end
 
     def extract_images(doc)
-      # 1) JSON-LD schema.org Product — most reliable
+      # 1) JSON-LD schema.org Product (handles both array and @graph formats)
       doc.css('script[type="application/ld+json"]').each do |script|
         json = JSON.parse(script.text.strip) rescue next
-        Array(json).each do |rec|
+        records = if json.is_a?(Hash) && json["@graph"]
+          Array(json["@graph"])
+        else
+          Array(json)
+        end
+        records.each do |rec|
           next unless rec.is_a?(Hash) && rec["@type"] == "Product"
-          imgs = Array(rec["image"]).map { |img| img.is_a?(Hash) ? img["url"].to_s : img.to_s }
+          imgs = Array(rec["image"]).map { |img| img.is_a?(Hash) ? (img["url"] || img["contentUrl"]).to_s : img.to_s }
                                     .select { |u| u.match?(/\Ahttps?:\/\//) }
           return imgs.first(8) if imgs.any?
         end
       end
 
-      # 2) Open Graph image tags
-      og = doc.css('meta[property="og:image"]').map { |m| m["content"].to_s }
+      # 2) Open Graph image tags (usually at least 1 is present in SSR HTML)
+      og = doc.css('meta[property="og:image"], meta[name="og:image"]').map { |m| m["content"].to_s }
               .select { |u| u.match?(/\Ahttps?:\/\//) }
       return og.first(8) if og.any?
 
-      # 3) Ashley-specific image attributes
-      doc.css("img[data-zoom-image], img[data-src]").map { |img|
+      # 3) Ashley CDN image tags — look for images from ashley CDN domains
+      cdn_imgs = doc.css("img[src]").map { |img|
         img["data-zoom-image"] || img["data-src"] || img["src"]
-      }.select { |u| u.to_s.match?(/\Ahttps?:\/\//) }.first(8)
+      }.select { |u|
+        u.to_s.match?(/\Ahttps?:\/\/(cdn|s7d2|images)\.ashleyfurniture\.com|akamaized\.net/i)
+      }.uniq.first(8)
+      return cdn_imgs if cdn_imgs.any?
+
+      []
     end
   end
 end

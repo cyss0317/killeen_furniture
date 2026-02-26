@@ -17,10 +17,12 @@ module ProductImport
         "dimensions_width": 60.0,
         "dimensions_height": 36.0,
         "dimensions_depth": 18.0,
-        "base_cost": 299.00
+        "base_cost": 299.00,
+        "page_url": "The full URL visible in the browser address bar at the top of the screenshot (e.g. https://www.ashleyfurniture.com/p/...). Copy it exactly. Use null if no address bar is visible."
       }
       Use null for any field not visible in the screenshot.
       Weight must be a number in pounds. Dimensions must be numbers in inches. base_cost must be a number with no $ sign.
+      For page_url: look carefully for a browser address bar near the top of the screenshot and copy the full URL shown there.
       Return ONLY the JSON object — no markdown code fences, no explanation text.
     PROMPT
 

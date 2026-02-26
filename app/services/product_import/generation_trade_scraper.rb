@@ -12,15 +12,26 @@ module ProductImport
       "Accept-Language" => "en-US,en;q=0.9"
     }.freeze
 
-    def self.call(sku:)
-      new(sku).call
+    def self.call(sku:, page_url: nil)
+      new(sku, page_url:).call
     end
 
-    def initialize(sku)
-      @sku = sku.to_s.strip
+    def initialize(sku, page_url: nil)
+      @sku      = sku.to_s.strip
+      @page_url = page_url
     end
 
     def call
+      # Try the exact product URL from the browser address bar first (most reliable)
+      if @page_url&.match?(/generationtrade\.com/i)
+        # Extract Shopify product handle from URL: /products/HANDLE
+        handle = @page_url[/\/products\/([^\/?#]+)/, 1]
+        if handle
+          result = fetch_product_json(handle)
+          return result if result
+        end
+      end
+
       # Shopify stores expose a public search JSON endpoint
       body = fetch_url("#{BASE_URL}/search.json?q=#{CGI.escape(@sku)}&type=product")
       if body

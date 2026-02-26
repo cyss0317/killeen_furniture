@@ -23,34 +23,39 @@
     <!-- Images -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 class="font-semibold text-gray-900 mb-3">Images</h3>
+
       <% if @product.vendor_image_urls.present? %>
-        <div class="grid grid-cols-4 gap-2">
-          <% @product.vendor_image_urls.each do |url| %>
-            <div class="aspect-square rounded-md overflow-hidden bg-gray-100">
-              <%= image_tag url, class: "w-full h-full object-cover" %>
-            </div>
+        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          Vendor Images (<%= @product.vendor_image_urls.size %>)
+        </h4>
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4">
+          <% @product.vendor_image_urls.each_with_index do |url, i| %>
+            <a href="<%= url %>" target="_blank" rel="noopener"
+               class="block aspect-square rounded-md overflow-hidden bg-gray-100 ring-1 ring-gray-200 hover:ring-amber-400 transition-all">
+              <img src="<%= url %>" alt="<%= @product.name %> — image <%= i + 1 %>"
+                   loading="lazy"
+                   class="w-full h-full object-cover"
+                   onerror="this.parentElement.classList.add('flex','items-center','justify-center'); this.outerHTML='<span class=\'text-xs text-gray-400 text-center px-1\'>Failed to load</span>'">
+            </a>
           <% end %>
         </div>
-        <% if @product.images.attached? %>
-          <h4 class="text-xs font-medium text-gray-500 mt-4 mb-2">Uploaded Images</h4>
-          <div class="grid grid-cols-4 gap-2">
-            <% @product.images.each do |img| %>
-              <div class="aspect-square rounded-md overflow-hidden bg-gray-100">
-                <%= image_tag img.variant(resize_to_fill: [120, 120]), class: "w-full h-full object-cover" %>
-              </div>
-            <% end %>
-          </div>
+      <% end %>
+
+      <% if @product.images.attached? %>
+        <% if @product.vendor_image_urls.present? %>
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Uploaded Images</h4>
         <% end %>
-      <% elsif @product.images.attached? %>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
           <% @product.images.each do |img| %>
-            <div class="aspect-square rounded-md overflow-hidden bg-gray-100">
+            <div class="aspect-square rounded-md overflow-hidden bg-gray-100 ring-1 ring-gray-200">
               <%= image_tag img.variant(resize_to_fill: [120, 120]), class: "w-full h-full object-cover" %>
             </div>
           <% end %>
         </div>
-      <% else %>
-        <p class="text-sm text-gray-400">No images uploaded. <%= link_to "Edit product", edit_admin_product_path(@product), class: "text-amber-700 hover:underline" %> to add images.</p>
+      <% end %>
+
+      <% unless @product.vendor_image_urls.present? || @product.images.attached? %>
+        <p class="text-sm text-gray-400">No images. <%= link_to "Edit product", edit_admin_product_path(@product), class: "text-amber-700 hover:underline" %> to add images.</p>
       <% end %>
     </div>
 
@@ -150,6 +155,20 @@
                 class: "text-sm text-amber-700 hover:underline bg-transparent border-0 cursor-pointer p-0 font-medium" %>
           </dd>
         </div>
+        <% if @product.vendor_image_urls.present? %>
+          <div class="pt-3 border-t border-gray-100">
+            <dt class="text-gray-500 mb-2">Vendor Image URLs (<%= @product.vendor_image_urls.size %>)</dt>
+            <dd class="space-y-2">
+              <% @product.vendor_image_urls.each_with_index do |url, i| %>
+                <div class="text-xs">
+                  <span class="text-gray-400 font-medium">[<%= i + 1 %>]</span>
+                  <%= link_to url.truncate(55), url, target: "_blank", rel: "noopener",
+                      class: "font-mono text-amber-700 hover:underline break-all", title: url %>
+                </div>
+              <% end %>
+            </dd>
+          </div>
+        <% end %>
       </dl>
     </div>
   </div>

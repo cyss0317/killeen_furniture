@@ -45,10 +45,7 @@
 <script type="application/json" id="tax-rate-data"><%= GlobalSetting.tax_rate %></script>
 
 <%= form_with url: admin_orders_path, method: :post,
-    data: {
-      controller: "admin-order",
-      "admin-order-calculate-shipping-url-value": calculate_shipping_admin_orders_path
-    },
+    data: { controller: "admin-order" },
     class: "space-y-6" do |f| %>
 
   <%# Flash errors %>
@@ -58,7 +55,7 @@
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:items-start">
 
     <%# ── LEFT COLUMN: Customer + Address + Products ── %>
     <div class="xl:col-span-2 space-y-6">
@@ -289,8 +286,6 @@
               <tr>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-80">Product</th>
                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase w-20">Qty</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Base Cost</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Markup</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Sell Price</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Line Total</th>
                 <th class="px-4 py-3 w-10"></th>
@@ -318,24 +313,7 @@
     </div>
 
     <%# ── RIGHT COLUMN: Shipping + Summary ── %>
-    <div class="space-y-6">
-
-      <%# Shipping Calculator %>
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="font-semibold text-gray-900 mb-4">Shipping</h2>
-        <p class="text-xs text-gray-500 mb-3">Enter the delivery ZIP above, then calculate.</p>
-
-        <%= f.hidden_field :shipping_amount, value: "0", data: { "admin-order-target": "shippingAmount" } %>
-        <%= f.hidden_field :delivery_zone_id, value: "", data: { "admin-order-target": "deliveryZoneId" } %>
-
-        <button type="button"
-                data-admin-order-target="calculateShippingBtn"
-                data-action="click->admin-order#calculateShipping"
-                class="w-full bg-gray-800 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-gray-900 transition-colors disabled:opacity-50">
-          Calculate Shipping
-        </button>
-        <p class="text-xs text-red-500 mt-1 min-h-[1rem]" data-admin-order-target="shippingError"></p>
-      </div>
+    <div class="space-y-6 sticky top-6 self-start">
 
       <%# Order Summary %>
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -345,13 +323,29 @@
             <span>Subtotal</span>
             <span data-admin-order-target="subtotal">$0.00</span>
           </div>
-          <div class="flex justify-between text-gray-600">
+          <div class="flex justify-between items-center text-gray-600">
             <span>Shipping</span>
-            <span data-admin-order-target="shipping">—</span>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-400 text-sm">$</span>
+              <%= f.number_field :shipping_amount,
+                    value: "0", min: 0, step: "0.01",
+                    data: { "admin-order-target": "shippingAmount", action: "input->admin-order#shippingChanged" },
+                    class: "w-24 border border-gray-300 rounded-md px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
           </div>
           <div class="flex justify-between text-gray-600">
             <span>Tax (<%= GlobalSetting.tax_rate %>%)</span>
             <span data-admin-order-target="tax">$0.00</span>
+          </div>
+          <div class="flex justify-between items-center text-gray-600">
+            <span>Discount</span>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-400 text-sm">-$</span>
+              <%= f.number_field :discount_amount,
+                    value: 0, min: 0, step: "0.01",
+                    data: { "admin-order-target": "discount", action: "input->admin-order#discountChanged" },
+                    class: "w-24 border border-gray-300 rounded-md px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
           </div>
           <div class="flex justify-between text-base font-bold border-t border-gray-200 pt-2 mt-2">
             <span>Total</span>
@@ -391,8 +385,6 @@
              value="1" min="1" max="999"
              class="w-16 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-500">
     </td>
-    <td class="px-4 py-3 text-right text-sm text-gray-500 tabular-nums" data-cell="base-cost">—</td>
-    <td class="px-4 py-3 text-right text-sm text-gray-500" data-cell="markup">—</td>
     <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 tabular-nums" data-cell="sell-price">—</td>
     <td class="px-4 py-3 text-right text-sm font-semibold text-amber-800 tabular-nums" data-cell="line-total">—</td>
     <td class="px-4 py-3 text-center">

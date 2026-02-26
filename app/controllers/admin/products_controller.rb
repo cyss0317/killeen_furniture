@@ -138,7 +138,7 @@ module Admin
         render json: { error: "SKU and brand are required" }, status: :unprocessable_entity and return
       end
 
-      result = ProductImport::VendorScraper.call(sku: sku, brand: brand)
+      result = ProductImport::VendorScraper.call(sku: sku, brand: brand, page_url: params[:page_url].presence)
 
       if result.error && result.image_urls.blank?
         render json: { error: result.error }, status: :unprocessable_entity

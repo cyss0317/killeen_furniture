@@ -65,7 +65,7 @@ nav.pagy a[aria-disabled="true"][aria-label] {
   turbo-frame,
   main > *,
   .page-content {
-    animation: kf-fade-up 0.18s ease-out both;
+    animation: kf-fade-up 0.18s ease-out backwards;
   }
 
   /* Suppress animation during Turbo cache preview/restore to prevent flicker */

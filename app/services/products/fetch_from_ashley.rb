@@ -128,6 +128,8 @@ module Products
       data[:name]      ||= doc.at_css('meta[property="og:title"]')&.attr("content").presence
       data[:image_url] ||= doc.at_css('meta[property="og:image"]')&.attr("content").presence
 
+      Rails.logger.info("HELLOWORLD: #{data[:image_url]}")
+
       data.compact
     end
 

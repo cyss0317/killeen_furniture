@@ -3,26 +3,23 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "lineItems", "lineItemRow", "emptyState",
-    "subtotal", "shipping", "tax", "grandTotal",
+    "subtotal", "tax", "grandTotal", "discount", "shippingAmount",
     "customerType", "userSection", "guestSection",
-    "userSelect", "shippingZone",
+    "userSelect",
     "addressFullName", "addressStreet", "addressCity", "addressState", "addressZip",
-    "calculateShippingBtn", "shippingError", "shippingAmount", "deliveryZoneId",
     "browserPanel", "browserToggle", "browserSearch", "browserCategory",
     "browserColor", "browserInStock", "browserRow", "browserEmpty"
   ]
 
   connect() {
-    // Parse product catalog from embedded JSON
     const dataEl = document.getElementById("products-data")
     this.products = dataEl ? JSON.parse(dataEl.textContent) : {}
 
-    // Parse tax rate
     const taxEl = document.getElementById("tax-rate-data")
     this.taxRate = taxEl ? parseFloat(taxEl.textContent) : 0
 
     this.rowIndex = this.lineItemRowTargets.length
-    this.shippingCost = 0
+    this.shippingCost = this.hasShippingAmountTarget ? (parseFloat(this.shippingAmountTarget.value) || 0) : 0
     this.recalculate()
   }
 
@@ -80,7 +77,6 @@ export default class extends Controller {
       (!search     || row.dataset.searchText.includes(search)) &&
       (!inStockOnly || row.dataset.inStock === "true")
 
-    // Update category dropdown: show only categories that have products matching current color+search+stock
     if (this.hasBrowserCategoryTarget) {
       const validCatIds = new Set(
         rows.filter(r => baseMatch(r) && (!color || r.dataset.color === color))
@@ -92,7 +88,6 @@ export default class extends Controller {
       })
     }
 
-    // Update color dropdown: show only colors that have products matching current category+search+stock
     if (this.hasBrowserColorTarget) {
       const validColors = new Set(
         rows.filter(r => baseMatch(r) && (!categoryId || r.dataset.categoryId === categoryId))
@@ -104,7 +99,6 @@ export default class extends Controller {
       })
     }
 
-    // Apply all filters to rows
     let visibleCount = 0
     rows.forEach(row => {
       const visible =
@@ -123,7 +117,6 @@ export default class extends Controller {
   addProductFromBrowser(event) {
     const productId = event.currentTarget.dataset.productId
 
-    // If the product is already in the order, increment its quantity instead
     const existingRow = this.lineItemRowTargets.find(row =>
       row.querySelector("select[data-idx='product_id']")?.value === productId
     )
@@ -160,13 +153,13 @@ export default class extends Controller {
 
     this.lineItemsTarget.appendChild(clone)
 
-    // Pre-select the product and populate pricing cells
     if (productId) {
-      const newRow = this.lineItemRowTargets[this.lineItemRowTargets.length - 1]
-      const select = newRow.querySelector("select[data-idx='product_id']")
+      const newRow = this.lineItemsTarget.lastElementChild
+      const select = newRow?.querySelector("select[data-idx='product_id']")
       if (select) {
         select.value = productId
-        select.dispatchEvent(new Event("change"))
+        this._populateRow(newRow, productId)
+        this.recalculate()
       }
     }
 
@@ -180,28 +173,41 @@ export default class extends Controller {
   }
 
   productChanged(event) {
-    const row     = event.currentTarget.closest("tr")
-    const product = this.products[event.currentTarget.value]
-
-    if (product) {
-      row.querySelector("[data-cell='base-cost']").textContent   = this.formatCurrency(product.base_cost)
-      row.querySelector("[data-cell='markup']").textContent      = product.markup_percentage + "%"
-      row.querySelector("[data-cell='sell-price']").textContent  = this.formatCurrency(product.selling_price)
-      row.querySelector("[data-cell='stock']").textContent       = product.stock_quantity + " in stock"
-      const qtyInput = row.querySelector("[data-qty]")
-      if (qtyInput) qtyInput.max = product.stock_quantity
-    } else {
-      row.querySelector("[data-cell='base-cost']").textContent   = "—"
-      row.querySelector("[data-cell='markup']").textContent      = "—"
-      row.querySelector("[data-cell='sell-price']").textContent  = "—"
-      row.querySelector("[data-cell='stock']").textContent       = ""
-    }
-
+    const row       = event.currentTarget.closest("tr")
+    const productId = event.currentTarget.value
+    this._populateRow(row, productId)
     this.recalculate()
   }
 
   quantityChanged() {
     this.recalculate()
+  }
+
+  discountChanged() {
+    this.recalculate()
+  }
+
+  shippingChanged() {
+    this.shippingCost = parseFloat(this.shippingAmountTarget.value) || 0
+    this.recalculate()
+  }
+
+  // ── Row population ────────────────────────────────────────────────────────
+
+  _populateRow(row, productId) {
+    const product       = this.products[productId]
+    const sellPriceCell = row.querySelector("[data-cell='sell-price']")
+    const stockCell     = row.querySelector("[data-cell='stock']")
+    const qtyInput      = row.querySelector("[data-qty]")
+
+    if (product) {
+      if (sellPriceCell) sellPriceCell.textContent = this.formatCurrency(product.selling_price)
+      if (stockCell)     stockCell.textContent     = product.stock_quantity + " in stock"
+      if (qtyInput)      qtyInput.max = product.stock_quantity
+    } else {
+      if (sellPriceCell) sellPriceCell.textContent = "—"
+      if (stockCell)     stockCell.textContent     = ""
+    }
   }
 
   // ── Totals ────────────────────────────────────────────────────────────────
@@ -228,69 +234,13 @@ export default class extends Controller {
       }
     })
 
-    const tax = subtotal * (this.taxRate / 100)
-    const grandTotal = subtotal + this.shippingCost + tax
+    const discount   = this.hasDiscountTarget ? (parseFloat(this.discountTarget.value) || 0) : 0
+    const tax        = subtotal * (this.taxRate / 100)
+    const grandTotal = Math.max(0, subtotal + this.shippingCost + tax - discount)
 
     if (this.hasSubtotalTarget)   this.subtotalTarget.textContent   = this.formatCurrency(subtotal)
     if (this.hasTaxTarget)        this.taxTarget.textContent        = this.formatCurrency(tax)
     if (this.hasGrandTotalTarget) this.grandTotalTarget.textContent = this.formatCurrency(grandTotal)
-  }
-
-  // ── Shipping ──────────────────────────────────────────────────────────────
-
-  async calculateShipping() {
-    const zip = this.addressZipTarget?.value?.trim()
-    if (!zip) {
-      if (this.hasShippingErrorTarget) this.shippingErrorTarget.textContent = "Please enter a ZIP code first."
-      return
-    }
-
-    const items = []
-    this.lineItemRowTargets.forEach(row => {
-      const select   = row.querySelector("select[data-idx='product_id']")
-      const qtyInput = row.querySelector("input[data-idx='quantity']")
-      if (select?.value && parseInt(qtyInput?.value) > 0) {
-        items.push({ product_id: select.value, quantity: qtyInput.value })
-      }
-    })
-
-    this.calculateShippingBtnTarget.disabled = true
-    this.calculateShippingBtnTarget.textContent = "Calculating..."
-
-    try {
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
-      const formData = new FormData()
-      formData.append("zip_code", zip)
-      items.forEach((item, i) => {
-        formData.append(`line_items[${i}][product_id]`, item.product_id)
-        formData.append(`line_items[${i}][quantity]`, item.quantity)
-      })
-
-      const resp = await fetch(this.element.dataset.calculateShippingUrl, {
-        method: "POST",
-        headers: { "X-CSRF-Token": csrfToken },
-        body: formData
-      })
-      const data = await resp.json()
-
-      if (data.error) {
-        if (this.hasShippingErrorTarget) this.shippingErrorTarget.textContent = data.error
-        if (this.hasShippingTarget)      this.shippingTarget.textContent      = "—"
-        this.shippingCost = 0
-        if (this.hasShippingAmountTarget) this.shippingAmountTarget.value = 0
-      } else {
-        if (this.hasShippingErrorTarget) this.shippingErrorTarget.textContent = ""
-        if (this.hasShippingTarget)      this.shippingTarget.textContent      = this.formatCurrency(data.cost) + (data.zone_name ? ` (${data.zone_name})` : "")
-        this.shippingCost = data.cost
-        if (this.hasShippingAmountTarget) this.shippingAmountTarget.value = data.cost
-      }
-      this.recalculate()
-    } catch (e) {
-      if (this.hasShippingErrorTarget) this.shippingErrorTarget.textContent = "Error calculating shipping."
-    } finally {
-      this.calculateShippingBtnTarget.disabled = false
-      this.calculateShippingBtnTarget.textContent = "Calculate Shipping"
-    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

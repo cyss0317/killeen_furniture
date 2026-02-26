@@ -4,7 +4,7 @@ puts "Seeding database..."
 # === Global Settings ===
 [
   ["global_markup_percentage", "35.0"],
-  ["tax_rate",                 "0.0"],
+  ["tax_rate",                 "8.25"],
   ["admin_notification_email", "admin@killeenfurniture.com"]
 ].each do |key, value|
   GlobalSetting.find_or_create_by!(key: key) { |s| s.value = value }

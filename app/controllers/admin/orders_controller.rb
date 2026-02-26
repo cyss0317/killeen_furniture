@@ -131,15 +131,16 @@ module Admin
         line_items: [:product_id, :quantity]
       )[:line_items] || []
 
-      shipping_address = params.require(:order).permit(
-        shipping_address: [:full_name, :street_address, :city, :state, :zip_code]
-      )[:shipping_address]
+      # shipping_address = params.require("[shipping_address]").permit(
+      #   shipping_address: [:full_name, :street_address, :city, :state, :zip_code]
+      # )[:shipping_address]
 
-      base = params.require(:order).permit(
-        :source, :user_id, :guest_name, :guest_email, :guest_phone,
-        :notes, :shipping_amount, :delivery_zone_id
-      )
-
+      shipping_address = params.require("[shipping_address]").permit(:full_name, :street_address, :city, :state, :zip_code)
+      # base = params.require(:order).permit(
+      #   :source, :user_id, :guest_name, :guest_email, :guest_phone,
+      #   :notes, :shipping_amount, :discount_amount, :delivery_zone_id
+      # )
+      base = params.permit(:source, :customer_type, :user_id, :guest_name, :guest_email, :guest_phone)
       base.merge(line_items: line_items, shipping_address: shipping_address)
     end
 

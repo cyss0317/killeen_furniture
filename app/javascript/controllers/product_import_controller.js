@@ -41,7 +41,7 @@ export default class extends Controller {
 
         // Automatically scrape vendor website for images using extracted SKU + brand
         if (json.data.sku && json.data.brand) {
-          this.scrapeVendor(json.data.sku, json.data.brand)
+          this.scrapeVendor(json.data.sku, json.data.brand, json.data.page_url)
         }
       })
       .catch(err => {
@@ -50,7 +50,7 @@ export default class extends Controller {
       })
   }
 
-  scrapeVendor(sku, brand) {
+  scrapeVendor(sku, brand, pageUrl = null) {
     if (this.hasScrapeStatusTarget) {
       this.scrapeStatusTarget.textContent = "Fetching images from vendor website…"
     }
@@ -59,6 +59,7 @@ export default class extends Controller {
     const body = new FormData()
     body.append("sku", sku)
     body.append("brand", brand)
+    if (pageUrl) body.append("page_url", pageUrl)
 
     fetch("/admin/products/scrape_vendor", {
       method: "POST",

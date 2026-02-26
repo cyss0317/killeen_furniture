@@ -28,7 +28,7 @@ module Orders
     private
 
     def validate_stock!
-      @line_items_with_products = @params[:line_items].map do |item|
+      @line_items_with_products = @params[:line_items]&.to_h.map do |_idx, item|
         product = Product.find(item[:product_id])
         qty = item[:quantity].to_i
         raise "#{product.name}: insufficient stock (#{product.stock_quantity} available, #{qty} requested)" if qty > product.stock_quantity
@@ -40,6 +40,7 @@ module Orders
     def build_order
       subtotal = calculated_subtotal
       shipping = @params[:shipping_amount].to_d
+      discount = [@params[:discount_amount].to_d, 0].max
       tax      = (subtotal * (GlobalSetting.tax_rate / 100.0)).round(2)
 
       @order = Order.new(
@@ -51,8 +52,9 @@ module Orders
         shipping_address: @params[:shipping_address].to_h,
         subtotal:         subtotal,
         shipping_amount:  shipping,
+        discount_amount:  discount,
         tax_amount:       tax,
-        grand_total:      subtotal + shipping + tax,
+        grand_total:      [subtotal + shipping + tax - discount, 0].max,
         notes:            @params[:notes].presence,
         delivery_zone_id: @params[:delivery_zone_id].presence
       )
