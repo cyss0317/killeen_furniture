@@ -161,7 +161,7 @@ module Admin
         :short_description, :description,
         :base_cost, :markup_percentage,
         :stock_quantity, :status, :featured,
-        :weight, :material, :color,
+        :weight, :material, :color, :page_url,
         dimensions: [:width, :height, :depth],
         images: [],
         vendor_image_urls: []

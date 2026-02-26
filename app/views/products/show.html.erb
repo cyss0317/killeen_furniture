@@ -18,14 +18,16 @@
           <%= image_tag @product.vendor_image_urls.first,
               class: "w-full h-full object-cover",
               alt: @product.name,
-              id: "main-product-image" %>
+              id: "main-product-image",
+              loading: "eager",
+              onerror: "this.onerror=null;this.style.display='none';this.parentElement.classList.add('flex','items-center','justify-center');this.parentElement.innerHTML='<svg class=\'w-24 h-24 text-gray-300\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg>';" %>
         </div>
         <% if @product.vendor_image_urls.size > 1 %>
           <div class="grid grid-cols-4 gap-2">
-            <% @product.vendor_image_urls.each do |url| %>
-              <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-amber-500 transition-colors"
-                   onclick="document.getElementById('main-product-image').src = '<%= url %>'">
-                <%= image_tag url, class: "w-full h-full object-cover", alt: @product.name %>
+            <% @product.vendor_image_urls.each_with_index do |url, idx| %>
+              <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 <%= idx == 0 ? 'border-amber-500' : 'border-transparent' %> hover:border-amber-500 transition-colors"
+                   onclick="document.getElementById('main-product-image').src = '<%= url %>'; this.parentElement.querySelectorAll('div').forEach(d => d.classList.replace('border-amber-500','border-transparent')); this.classList.replace('border-transparent','border-amber-500');">
+                <%= image_tag url, class: "w-full h-full object-cover", alt: @product.name, loading: "lazy" %>
               </div>
             <% end %>
           </div>
@@ -69,7 +71,7 @@
       </div>
 
       <% if @product.short_description.present? %>
-        <p class="text-gray-600 mb-6"><%= @product.short_description %></p>
+        <p class="text-gray-600 leading-relaxed mb-6"><%= @product.short_description %></p>
       <% end %>
 
       <!-- Stock Status -->
@@ -147,10 +149,17 @@
   </div>
 
   <!-- Full Description -->
-  <% if @product.description.body.present? %>
-    <div class="mt-12 prose max-w-none border-t border-gray-100 pt-8">
+  <% has_rich_description = @product.description&.body&.present? %>
+  <% if has_rich_description || @product.short_description.present? %>
+    <div class="mt-12 border-t border-gray-100 pt-8">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Product Description</h2>
-      <%= @product.description %>
+      <% if has_rich_description %>
+        <div class="prose max-w-none">
+          <%= @product.description %>
+        </div>
+      <% elsif @product.short_description.present? %>
+        <p class="text-gray-600 leading-relaxed text-base"><%= @product.short_description %></p>
+      <% end %>
     </div>
   <% end %>
 

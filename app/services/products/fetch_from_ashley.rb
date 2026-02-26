@@ -110,7 +110,10 @@ module Products
 
         data[:name]        = product_entry["name"].presence
         data[:description] = ActionController::Base.helpers.strip_tags(product_entry["description"].to_s).presence
-        data[:image_url]   = Array(product_entry["image"]).first.presence
+        data[:image_urls]  = Array(product_entry["image"])
+                               .map { |img| img.is_a?(Hash) ? (img["url"] || img["contentUrl"]).to_s : img.to_s }
+                               .select { |u| u.match?(/\Ahttps?:\/\//) }
+                               .first(8)
 
         # Weight — may be a string like "55 lbs" or a nested object
         weight_raw = product_entry.dig("weight")
@@ -125,10 +128,24 @@ module Products
       end
 
       # 2) Fall back to Open Graph meta tags
-      data[:name]      ||= doc.at_css('meta[property="og:title"]')&.attr("content").presence
-      data[:image_url] ||= doc.at_css('meta[property="og:image"]')&.attr("content").presence
+      data[:name] ||= doc.at_css('meta[property="og:title"]')&.attr("content").presence
 
-      Rails.logger.info("HELLOWORLD: #{data[:image_url]}")
+      if data[:image_urls].blank?
+        og_imgs = doc.css('meta[property="og:image"], meta[name="og:image"]')
+                     .map { |m| m["content"].to_s }
+                     .select { |u| u.match?(/\Ahttps?:\/\//) }
+        data[:image_urls] = og_imgs.first(8) if og_imgs.any?
+      end
+
+      # 3) Ashley CDN image tags as last resort
+      if data[:image_urls].blank?
+        cdn_imgs = doc.css("img[src]").map { |img|
+          img["data-zoom-image"] || img["data-src"] || img["src"]
+        }.select { |u|
+          u.to_s.match?(/\Ahttps?:\/\/(cdn|s7d2|images)\.ashleyfurniture\.com|akamaized\.net/i)
+        }.uniq.first(8)
+        data[:image_urls] = cdn_imgs if cdn_imgs.any?
+      end
 
       data.compact
     end
@@ -137,6 +154,11 @@ module Products
       updates = {}
       updates[:name]   = data[:name]   if data[:name].present? && @product.name != data[:name]
       updates[:weight] = data[:weight] if data[:weight].present? && @product.weight.nil?
+
+      # Save scraped image URLs if the product doesn't already have any
+      if data[:image_urls].present? && @product.vendor_image_urls.blank?
+        updates[:vendor_image_urls] = data[:image_urls]
+      end
 
       @product.update!(updates) if updates.any?
 

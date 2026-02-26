@@ -201,6 +201,7 @@ export default class extends Controller {
     this.setField("product_dimensions_width",  data.dimensions_width)
     this.setField("product_dimensions_height", data.dimensions_height)
     this.setField("product_dimensions_depth",  data.dimensions_depth)
+    this.setField("product_page_url",          data.page_url)
 
     // ActionText / Trix rich text editor
     if (data.description) {
