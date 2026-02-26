@@ -72,7 +72,9 @@ class Admin::PurchaseOrdersController < Admin::BaseController
     end
 
     ActiveRecord::Base.transaction do
-      @po = PurchaseOrder.create!(po_params.merge(created_by: current_user))
+      # Use the brand of the first product as the brand for the PO
+      first_product = Product.find(line_items.first[:product_id])
+      @po = PurchaseOrder.create!(po_params.merge(created_by: current_user, brand: first_product.brand))
 
       line_items.each do |item|
         product = Product.find(item[:product_id])
@@ -160,8 +162,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
       reference_number: params[:reference_number].presence,
       ordered_at:       params[:ordered_at].presence,
       notes:            params[:notes].presence,
-      created_by:       current_user,
-      supplier:         params[:supplier].presence || "ashley"
+      created_by:       current_user
     )
 
     if result.success?
@@ -170,7 +171,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
       parts << "#{result.updated_products.size} product(s) updated"               if result.updated_products.any?
       parts << "#{result.skipped_rows.size} row(s) skipped"                       if result.skipped_rows.any?
 
-      notice = "PO #{result.purchase_order.reference_number} imported — #{result.purchase_order.purchase_order_items.size} items. #{parts.join(', ')}."
+      notice = "PO #{result.purchase_order.reference_number} from #{result.supplier_name} imported — #{result.purchase_order.purchase_order_items.size} items. #{parts.join(', ')}."
       redirect_to admin_purchase_order_path(result.purchase_order), notice: notice
     else
       flash.now[:alert] = result.error

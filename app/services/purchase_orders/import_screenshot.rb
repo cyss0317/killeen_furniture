@@ -1,6 +1,6 @@
 module PurchaseOrders
   class ImportScreenshot
-    Result = Struct.new(:purchase_order, :created_products, :updated_products, :skipped_rows, :error, keyword_init: true) do
+    Result = Struct.new(:purchase_order, :created_products, :updated_products, :skipped_rows, :supplier_name, :error, keyword_init: true) do
       def success? = error.nil?
     end
 
@@ -12,11 +12,12 @@ module PurchaseOrders
       "image/webp" => "image/webp"
     }.freeze
 
-    ASHLEY_PROMPT = <<~PROMPT.freeze
-      This is an Ashley Furniture order document (order confirmation, invoice, or dealer portal screenshot).
-      Extract the invoice/order number and all product line items. Return ONLY valid JSON — no markdown, no explanation:
+    EXTRACTION_PROMPT = <<~PROMPT.freeze
+      This is a furniture order document (order confirmation, invoice, or dealer portal screenshot) from a supplier (e.g., Ashley Furniture or Generation Trade).
+      Extract the supplier name, invoice/order number, and all product line items. Return ONLY valid JSON — no markdown, no explanation:
 
       {
+        "supplier": "ashley",
         "invoice_number": "ASH-2026-001",
         "items": [
           {
@@ -31,61 +32,27 @@ module PurchaseOrders
       }
 
       Rules:
+      - supplier: string identifying the supplier (e.g., "ashley", "generation_trade", etc.) based on logos or text. Use "ashley" for Ashley Furniture, "generation_trade" for Generation Trade.
       - invoice_number: the order/invoice/PO number shown on the document (empty string "" if not visible)
-      - item_code: Ashley SKU / item code (e.g. "B1190-31", "8376-92")
+      - item_code: The SKU / item code (e.g. "B1190-31" for Ashley, "GT-1234" for Generation Trade)
       - description: product name or description text
       - series: furniture collection or series name (empty string "" if not shown)
       - color: color or finish name (empty string "" if not shown)
       - qty: integer quantity from the Qty or Ordered column
-      - price: unit wholesale price as a decimal (use the "Price" column, NOT "Ext. Price")
+      - price: unit wholesale price as a decimal (use the "Price" or unit price column, NOT extended/total)
       - Skip rows that are section headers, subtotals, shipping lines, or blank
       - items must be an empty array [] if no valid line items are found
     PROMPT
-
-    GENERATION_TRADE_PROMPT = <<~PROMPT.freeze
-      This is a Generation Trade order document (order confirmation, invoice, or portal screenshot).
-      Extract the invoice/order number and all product line items. Return ONLY valid JSON — no markdown, no explanation:
-
-      {
-        "invoice_number": "GT-2026-001",
-        "items": [
-          {
-            "item_code": "GT-1234",
-            "description": "Accent Chair",
-            "series": "",
-            "color": "Gray",
-            "qty": 2,
-            "price": 245.00
-          }
-        ]
-      }
-
-      Rules:
-      - invoice_number: the order/invoice/PO number shown on the document (empty string "" if not visible)
-      - item_code: Generation Trade SKU / item code
-      - description: product name or description text
-      - series: collection or series name (empty string "" if not shown)
-      - color: color or finish name (empty string "" if not shown)
-      - qty: integer quantity
-      - price: unit wholesale price as a decimal (unit price, NOT extended/total)
-      - Skip rows that are section headers, subtotals, shipping lines, or blank
-      - items must be an empty array [] if no valid line items are found
-    PROMPT
-
-    SUPPLIER_PROMPTS = {
-      "ashley"           => ASHLEY_PROMPT,
-      "generation_trade" => GENERATION_TRADE_PROMPT
-    }.freeze
 
     def self.call(...) = new(...).call
 
-    def initialize(file:, reference_number: nil, ordered_at: nil, notes: nil, created_by: nil, supplier: "ashley")
+    def initialize(file:, reference_number: nil, ordered_at: nil, notes: nil, created_by: nil)
       @file             = file
       @reference_number = reference_number.to_s.strip.presence
       @ordered_at       = ordered_at
       @notes            = notes
       @created_by       = created_by
-      @supplier         = supplier.to_s.presence || "ashley"
+      @supplier         = nil
     end
 
     def call
@@ -94,6 +61,9 @@ module PurchaseOrders
 
       extracted = extract_via_claude(image_data, media_type)
       return Result.new(error: extracted) if extracted.is_a?(String)  # error message
+
+      @supplier      = extracted["supplier"].to_s.strip.downcase
+      @supplier      = "ashley" if @supplier.blank?
 
       invoice_number = extracted["invoice_number"].to_s.strip.presence
       raw_items      = Array(extracted["items"])
@@ -176,7 +146,8 @@ module PurchaseOrders
           status:           :submitted,
           ordered_at:       @ordered_at,
           notes:            @notes,
-          created_by:       @created_by
+          created_by:       @created_by,
+          brand:            supplier_category_name
         )
 
         line_items.each { |attrs| po.purchase_order_items.create!(attrs) }
@@ -186,7 +157,8 @@ module PurchaseOrders
         purchase_order:   po,
         created_products: created_products,
         updated_products: updated_products,
-        skipped_rows:     skipped_rows
+        skipped_rows:     skipped_rows,
+        supplier_name:    supplier_category_name
       )
     rescue ActiveRecord::RecordInvalid => e
       Result.new(error: e.message)
@@ -220,7 +192,7 @@ module PurchaseOrders
     end
 
     def extraction_prompt
-      SUPPLIER_PROMPTS[@supplier] || ASHLEY_PROMPT
+      EXTRACTION_PROMPT
     end
 
     def extract_via_claude(image_data, media_type)

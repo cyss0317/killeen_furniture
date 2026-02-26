@@ -78,20 +78,24 @@ module PurchaseOrders
           line_items << {
             product:          product,
             quantity_ordered: qty,
-            unit_cost:        price,
-            product_name:     product.name,
+            unit_cost:        cost,
+            product_name:     product.reload.name,
             product_sku:      product.sku
           }
         end
 
-        raise "No valid line items found in the file." if line_items.empty?
+        raise "No valid line items found in the CSV." if line_items.empty?
+
+        # Use the brand of the first product as the brand for the PO
+        brand = line_items.first[:product].brand
 
         po = PurchaseOrder.create!(
           reference_number: @reference_number,
           status:           :submitted,
           ordered_at:       @ordered_at,
           notes:            @notes,
-          created_by:       @created_by
+          created_by:       @created_by,
+          brand:            brand
         )
 
         line_items.each { |attrs| po.purchase_order_items.create!(attrs) }

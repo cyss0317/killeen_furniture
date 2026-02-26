@@ -163,6 +163,10 @@
           <dd class="mt-0.5"><%= @po.ordered_at&.strftime("%B %d, %Y") || "—" %></dd>
         </div>
         <div>
+          <dt class="text-gray-500">Brand</dt>
+          <dd class="mt-0.5 font-medium text-gray-900"><%= @po.brand.presence || "—" %></dd>
+        </div>
+        <div>
           <dt class="text-gray-500">Created</dt>
           <dd class="mt-0.5"><%= @po.created_at.strftime("%B %d, %Y at %l:%M %p") %></dd>
         </div>

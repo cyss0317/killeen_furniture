@@ -23,16 +23,6 @@
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
         <h2 class="font-semibold text-gray-900">Upload Screenshot</h2>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Supplier <span class="text-red-500">*</span>
-          </label>
-          <select name="supplier"
-                  class="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-            <option value="ashley"           <%= params[:supplier].blank? || params[:supplier] == "ashley" ? "selected" : "" %>>Ashley Furniture</option>
-            <option value="generation_trade" <%= params[:supplier] == "generation_trade" ? "selected" : "" %>>Generation Trade</option>
-          </select>
-        </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -87,7 +77,7 @@
       <ol class="text-sm text-gray-600 space-y-3 list-none">
         <li class="flex gap-3">
           <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center">1</span>
-          <span>Select the supplier (Ashley Furniture or Generation Trade), then upload a screenshot of your order.</span>
+          <span>Upload a screenshot of your order confirmation, invoice, or dealer portal page.</span>
         </li>
         <li class="flex gap-3">
           <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center">2</span>
