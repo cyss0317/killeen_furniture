@@ -68,10 +68,11 @@ nav.pagy a[aria-disabled="true"][aria-label] {
     animation: kf-fade-up 0.18s ease-out backwards;
   }
 
-  /* Suppress animation during Turbo cache preview/restore to prevent flicker */
-  body[data-turbo-preview] turbo-frame,
-  body[data-turbo-preview] main > *,
-  body[data-turbo-preview] .page-content {
+  /* Suppress animation during Turbo cache preview to prevent double-firing.
+     NOTE: Turbo sets data-turbo-preview on <html>, NOT <body>. */
+  html[data-turbo-preview] turbo-frame,
+  html[data-turbo-preview] main > *,
+  html[data-turbo-preview] .page-content {
     animation: none;
   }
 
