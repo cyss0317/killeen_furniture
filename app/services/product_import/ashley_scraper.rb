@@ -70,18 +70,28 @@ module ProductImport
       end
 
       # Fallback 2: Scene7 CDN pattern fallback (Very robust for Ashley)
-      # Detailed suffixes for specific views (CLSD-ANGLE, HEAD-ON, SIDE, BACK)
+      # Exhaustive list from user-provided site HTML
       suffixes = [
-        "", "-1", "-2", "-3", "-ANGLE", "-ROOM",
-        "-CLSD-ANGLE-SW-P1-KO", "-HEAD-ON-SW-P1-KO", "-SIDE-SW-P1-KO", "-BACK-SW-P1-KO",
-        "-DIM"
+        "", "-1", "-2", "-3", "-ANGLE", "-ROOM", "-CLSD-ANGLE-SW-P1-KO",
+        "-ANGLE-SW-P1-KO", "-ANGLE-NM-SW-P1-KO", "-ANGLE-ALT-SW-P1-KO",
+        "-CLSD-ANGLE-SW-P1-KO", "-HEAD-ON-SW-P1-KO", "-SIDE-SW-P1-KO",
+        "-SIDE-ALT-SW-P1-KO", "-BACK-SW-P1-KO", "-HDBD-DETAIL", "-DIM"
       ]
       imgs = suffixes.map { |s| "https://ashleyfurniture.scene7.com/is/image/AshleyFurniture/#{@sku}#{s}?wid=1200&hei=900" }
+      imgs.select! do |url|
+        uri = URI.parse(url)
+        Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 2, read_timeout: 2) do |http|
+          http.head(uri.request_uri).code == "200"
+        end
+      rescue
+        false
+      end
 
-      # Handle {SERIES}-SWATCH-500 (e.g., B2589-SWATCH-500)
+      # Handle {SERIES} swatches and finishes
       series = @sku.split("-").first
       if series && series != @sku
         imgs << "https://ashleyfurniture.scene7.com/is/image/AshleyFurniture/#{series}-SWATCH-500?wid=500&hei=500"
+        imgs << "https://ashleyfurniture.scene7.com/is/image/AshleyFurniture/#{series}-FINISH-500?wid=500&hei=500"
       end
 
       # Also try the numeric pattern if it looks like a 7+ digit SKU
@@ -157,17 +167,30 @@ module ProductImport
     end
 
     def extract_images(doc)
-      # Open Graph image tags
-      og = doc.css('meta[property="og:image"], meta[name="og:image"]').map { |m| m["content"].to_s }
-              .select { |u| u.match?(/\Ahttps?:\/\//) }
-      return og if og.any?
+      # Search for all image-related attributes
+      urls = []
+      doc.css("img").each do |img|
+        # Check src, data-src, etc.
+        [img["src"], img["data-src"], img["data-zoom-image"]].each do |u|
+          urls << u if u.to_s.match?(/\Ahttps?:\/\/.*(ashleyfurniture|scene7|akamaized)/i)
+        end
 
-      # Ashley CDN image tags
-      doc.css("img[src]").map { |img|
-        img["data-zoom-image"] || img["data-src"] || img["src"]
-      }.select { |u|
-        u.to_s.match?(/\Ahttps?:\/\/(cdn|s7d2|images|ashleyfurniture\.scene7)\.ashleyfurniture\.com|akamaized\.net/i)
-      }.uniq
+        # Parse srcset (very common in Ashley's modern layout)
+        if img["srcset"].present?
+          img["srcset"].split(",").each do |src_part|
+            u = src_part.strip.split(/\s+/).first
+            urls << u if u.to_s.match?(/\Ahttps?:\/\/.*(ashleyfurniture|scene7|akamaized)/i)
+          end
+        end
+      end
+
+      # Also check Open Graph tags
+      doc.css('meta[property="og:image"], meta[name="og:image"]').each do |meta|
+        u = meta["content"].to_s
+        urls << u if u.match?(/\Ahttps?:\/\//)
+      end
+
+      urls.compact.map { |u| u.gsub(/\?.*\z/, "") }.uniq
     end
   end
 end
