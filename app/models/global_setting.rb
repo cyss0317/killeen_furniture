@@ -7,7 +7,8 @@ class GlobalSetting < ApplicationRecord
   end
 
   def self.global_markup
-    self["global_markup_percentage"].to_f
+    val = self["global_markup_percentage"]&.to_f
+    (val && val > 0) ? val : 250.0
   end
 
   def self.tax_rate

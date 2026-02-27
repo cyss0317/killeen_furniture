@@ -91,6 +91,8 @@
                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Remaining</th>
                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase w-32">Qty Received Now</th>
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase w-36">Unit Cost</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Markup %</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Selling Price</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -121,10 +123,16 @@
                       </button>
                     </div>
                   </td>
+                  <td class="px-6 py-3 text-right text-sm text-gray-600">
+                    <%= number_to_currency(item.unit_cost) %>
+                  </td>
+                  <td class="px-6 py-3 text-right text-sm text-gray-500">
+                    <%= number_to_percentage(item.product.markup_percentage, precision: 1) %>
+                  </td>
                   <td class="px-6 py-3 text-right">
                     <input type="number"
-                           name="items[<%= item.id %>][unit_cost]"
-                           min="0" step="0.01" value="<%= item.unit_cost %>"
+                           name="items[<%= item.id %>][selling_price]"
+                           min="0" step="0.01" value="<%= item.product.selling_price %>"
                            class="w-28 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-500">
                   </td>
                 </tr>

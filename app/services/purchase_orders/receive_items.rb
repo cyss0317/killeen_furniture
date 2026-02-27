@@ -15,22 +15,25 @@ module PurchaseOrders
     def call
       ActiveRecord::Base.transaction do
         @receive_params.each do |item_id, attrs|
-          qty  = attrs[:qty_to_receive].to_i
-          cost = attrs[:unit_cost].to_d
+          qty           = attrs[:qty_to_receive].to_i
+          selling_price = attrs[:selling_price].to_d
           next if qty <= 0
 
           item = @purchase_order.purchase_order_items.find(item_id)
+          cost = item.unit_cost # Use the PO's fixed unit cost
 
           item.update!(
-            quantity_received: item.quantity_received + qty,
-            unit_cost:         cost
+            quantity_received: item.quantity_received + qty
           )
 
-          # Sync base_cost → before_save :calculate_selling_price recalculates selling_price
-          item.product.update!(
+          # Update stock quantity and sync base_cost from PO unit_cost
+          # Then update selling price (which also updates markup_percentage)
+          product = item.product
+          product.update!(
             base_cost:      cost,
-            stock_quantity: item.product.stock_quantity + qty
+            stock_quantity: product.stock_quantity + qty
           )
+          product.update_selling_price(selling_price) if selling_price > 0
         end
 
         @purchase_order.reload

@@ -3,7 +3,7 @@ puts "Seeding database..."
 
 # === Global Settings ===
 [
-  ["global_markup_percentage", "35.0"],
+  ["global_markup_percentage", "250.0"],
   ["tax_rate",                 "8.25"],
   ["admin_notification_email", "admin@killeenfurniture.com"]
 ].each do |key, value|

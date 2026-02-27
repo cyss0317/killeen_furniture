@@ -1,6 +1,6 @@
 module Admin
   class ProductsController < BaseController
-    before_action :set_product, only: [:show, :edit, :update, :destroy, :update_stock, :toggle_featured, :publish, :archive]
+    before_action :set_product, only: [:show, :edit, :update, :destroy, :update_stock, :toggle_featured, :publish, :archive, :update_price]
 
     SORTABLE_COLUMNS = %w[name selling_price stock_quantity created_at status].freeze
 
@@ -107,6 +107,18 @@ module Admin
         end
       else
         redirect_back(fallback_location: admin_product_path(@product), alert: adjustment.errors.full_messages.to_sentence)
+      end
+    end
+
+    def update_price
+      new_price = params[:selling_price]
+      if @product.update_selling_price(new_price)
+        respond_to do |format|
+          format.turbo_stream
+          format.html { redirect_to admin_product_path(@product), notice: "Price updated." }
+        end
+      else
+        redirect_to admin_product_path(@product), alert: "Failed to update price."
       end
     end
 

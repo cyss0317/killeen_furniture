@@ -73,6 +73,15 @@ class Product < ApplicationRecord
     ActionController::Base.helpers.number_to_currency(base_cost)
   end
 
+  def update_selling_price(new_price)
+    new_price = new_price.to_f
+    return false if new_price <= 0 || base_cost.to_f <= 0
+
+    self.selling_price = new_price.round(2)
+    self.markup_percentage = (((selling_price / base_cost.to_f) - 1) * 100).round(2)
+    save
+  end
+
   private
 
   def generate_qr_token

@@ -1,0 +1,59 @@
+<div id="product-price-section-<%= product.id %>" class="space-y-3"
+     data-controller="product-price"
+     data-product-price-base-cost-value="<%= product.base_cost %>">
+  <div>
+    <dt class="text-gray-500">Base Cost</dt>
+    <dd class="font-medium"><%= number_to_currency(product.base_cost) %></dd>
+  </div>
+  <div>
+    <dt class="text-gray-500">Markup</dt>
+    <dd class="flex items-center gap-2">
+      <span class="font-medium"><%= product.markup_percentage %>%</span>
+      <div class="py-0.5 px-2 bg-amber-100/50 rounded-md border border-amber-200 hidden flex items-center gap-1" data-product-price-target="liveMarkupContainer">
+        <span class="text-[10px] font-bold text-gray-400 line-through tracking-wider"><%= product.markup_percentage %>%</span>
+        <span class="text-gray-400 text-[10px]">→</span>
+        <span class="text-[10px] uppercase font-bold text-amber-900 tracking-wider" data-product-price-target="liveMarkup"></span>
+      </div>
+    </dd>
+  </div>
+  <div class="relative">
+    <dt class="text-gray-500">Selling Price</dt>
+    <dd class="mt-1">
+      <div data-product-price-target="display" class="flex items-center gap-2">
+        <span class="text-lg font-bold text-amber-800"><%= number_to_currency(product.selling_price) %></span>
+
+        <button data-action="click->product-price#showForm" class="p-1 text-gray-400 hover:text-amber-700 transition-colors rounded-full hover:bg-amber-50" title="Edit price">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </button>
+      </div>
+
+      <div data-product-price-target="form" class="hidden mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-inner"
+           data-product-price-original-markup-value="<%= product.markup_percentage %>">
+        <%= form_with url: update_price_admin_product_path(product), method: :patch do |f| %>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none text-sm">$</span>
+                <%= f.number_field :selling_price, value: product.selling_price, step: 0.01,
+                    class: "block w-full border-gray-300 rounded-md pl-7 pr-3 py-2 text-sm focus:ring-amber-500 focus:border-amber-500 bg-white placeholder-gray-400 font-medium",
+                    data: { action: "input->product-price#calculateMarkup" } %>
+              </div>
+
+              <button type="submit" class="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors cursor-pointer">
+                Save Price
+              </button>
+            </div>
+
+            <div class="flex items-center justify-end">
+              <button type="button" data-action="click->product-price#hideForm" class="text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors uppercase tracking-widest">
+                Cancel
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </dd>
+  </div>
+</div>

@@ -53,7 +53,6 @@
           <% end %>
         </div>
       <% end %>
-
       <% unless @product.vendor_image_urls.present? || @product.images.attached? %>
         <p class="text-sm text-gray-400">No images. <%= link_to "Edit product", edit_admin_product_path(@product), class: "text-amber-700 hover:underline" %> to add images.</p>
       <% end %>
@@ -132,18 +131,7 @@
           <dt class="text-gray-500">Category</dt>
           <dd><%= @product.category.name %></dd>
         </div>
-        <div>
-          <dt class="text-gray-500">Base Cost</dt>
-          <dd class="font-medium"><%= number_to_currency(@product.base_cost) %></dd>
-        </div>
-        <div>
-          <dt class="text-gray-500">Markup</dt>
-          <dd><%= @product.markup_percentage %>%</dd>
-        </div>
-        <div>
-          <dt class="text-gray-500">Selling Price</dt>
-          <dd class="text-lg font-bold text-amber-800"><%= number_to_currency(@product.selling_price) %></dd>
-        </div>
+        <%= render "admin/products/price_section", product: @product %>
         <div>
           <dt class="text-gray-500">Current Stock</dt>
           <dd id="stock-display-<%= @product.id %>"><%= render "admin/products/stock_display", product: @product %></dd>
