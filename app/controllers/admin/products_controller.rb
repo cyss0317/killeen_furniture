@@ -1,6 +1,6 @@
 module Admin
   class ProductsController < BaseController
-    before_action :set_product, only: [:show, :edit, :update, :destroy, :update_stock, :toggle_featured, :publish, :archive, :update_price]
+    before_action :set_product, only: [:show, :edit, :update, :destroy, :update_stock, :toggle_featured, :publish, :archive, :update_price, :move]
 
     SORTABLE_COLUMNS = %w[name selling_price stock_quantity created_at status].freeze
 
@@ -120,6 +120,16 @@ module Admin
       else
         redirect_to admin_product_path(@product), alert: "Failed to update price."
       end
+    end
+
+    def move
+      category = Category.find(params[:category_id])
+      @product.update!(category: category)
+      render json: { ok: true }
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "Category not found" }, status: :not_found
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
 
     def toggle_featured

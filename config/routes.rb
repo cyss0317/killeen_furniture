@@ -67,6 +67,7 @@ Rails.application.routes.draw do
         patch :publish
         patch :archive
         patch :update_price
+        patch :move
       end
       collection do
         post :import_screenshot
