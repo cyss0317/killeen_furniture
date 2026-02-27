@@ -1,9 +1,9 @@
 module Admin
   class CategoriesController < BaseController
-    before_action :set_category, only: [:show, :edit, :update, :destroy]
+    before_action :set_category, only: [:edit, :update, :destroy]
 
     def index
-      @categories = Category.includes(:subcategories, :products).ordered
+      @root_categories = Category.root_categories.includes(:products, subcategories: [ :products ])
     end
 
     def new
@@ -46,7 +46,9 @@ module Admin
     private
 
     def set_category
-      @category = Category.find(params[:id])
+      @category = Category.friendly.find(params[:id])
+    rescue ActiveRecord::RecordNotFound, FriendlyId::SlugNotFoundException
+      redirect_to admin_categories_path, alert: "Category not found."
     end
 
     def category_params

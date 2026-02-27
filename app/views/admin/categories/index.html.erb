@@ -10,33 +10,54 @@
     <thead class="bg-gray-50">
       <tr>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Parent</th>
         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Products</th>
         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
-      <% @categories.each do |category| %>
-        <tr class="hover:bg-gray-50">
-          <td class="px-6 py-4 text-sm font-medium text-gray-900">
-            <%= category.name %>
-            <% if category.subcategories.any? %>
-              <span class="text-xs text-gray-400 ml-2">(<%= category.subcategories.count %> subcategories)</span>
+      <% @root_categories.each do |parent| %>
+        <%# Parent row %>
+        <tr class="bg-gray-50/70 hover:bg-gray-100/60">
+          <td class="px-6 py-3 text-sm font-semibold text-gray-900">
+            <%= parent.name %>
+            <% if parent.subcategories.any? %>
+              <span class="ml-1.5 text-xs font-normal text-gray-400">
+                (<%= parent.subcategories.size %> subcategories)
+              </span>
             <% end %>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-600"><%= category.parent&.name || "—" %></td>
-          <td class="px-6 py-4 text-center text-sm"><%= category.products.count %></td>
-          <td class="px-6 py-4 text-right">
-            <div class="flex justify-end items-center gap-2">
-              <%= link_to "Edit", edit_admin_category_path(category), class: "text-sm text-amber-700 hover:underline font-medium" %>
-              <% unless category.products.any? %>
-                <%= button_to "Delete", admin_category_path(category), method: :delete,
-                    form: { class: "contents", data: { turbo_confirm: "Delete '#{category.name}'?" } },
+          <td class="px-6 py-3 text-center text-sm text-gray-600"><%= parent.products.size %></td>
+          <td class="px-6 py-3 text-right">
+            <div class="flex justify-end items-center gap-3">
+              <%= link_to "Edit", edit_admin_category_path(parent), class: "text-sm text-amber-700 hover:underline font-medium" %>
+              <% if parent.products.empty? && parent.subcategories.empty? %>
+                <%= button_to "Delete", admin_category_path(parent), method: :delete,
+                    form: { class: "contents", data: { turbo_confirm: "Delete '#{parent.name}'?" } },
                     class: "text-sm text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0" %>
               <% end %>
             </div>
           </td>
         </tr>
+        <%# Child rows %>
+        <% parent.subcategories.sort_by { |s| [s.position.to_i, s.name] }.each do |child| %>
+          <tr class="hover:bg-gray-50">
+            <td class="py-3 text-sm text-gray-800">
+              <span class="inline-block w-10 text-center text-gray-300 select-none">└</span>
+              <%= child.name %>
+            </td>
+            <td class="px-6 py-3 text-center text-sm text-gray-600"><%= child.products.size %></td>
+            <td class="px-6 py-3 text-right">
+              <div class="flex justify-end items-center gap-3">
+                <%= link_to "Edit", edit_admin_category_path(child), class: "text-sm text-amber-700 hover:underline font-medium" %>
+                <% if child.products.empty? %>
+                  <%= button_to "Delete", admin_category_path(child), method: :delete,
+                      form: { class: "contents", data: { turbo_confirm: "Delete '#{child.name}'?" } },
+                      class: "text-sm text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0" %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
       <% end %>
     </tbody>
   </table>

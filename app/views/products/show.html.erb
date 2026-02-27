@@ -122,13 +122,10 @@
             <span class="text-gray-900"><%= @product.color %></span>
           </div>
         <% end %>
-        <% if @product.dimensions.present? && @product.dimensions.any? %>
+        <% if (dims = @product.formatted_dimensions) %>
           <div class="flex text-sm">
             <span class="w-28 text-gray-500 font-medium">Dimensions</span>
-            <span class="text-gray-900">
-              <% d = @product.dimensions %>
-              <%= [d["width"], d["height"], d["depth"]].compact.join(" × ") %>"
-            </span>
+            <span class="text-gray-900"><%= dims %></span>
           </div>
         <% end %>
         <% if @product.weight.present? %>

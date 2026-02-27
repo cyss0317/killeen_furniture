@@ -154,13 +154,10 @@
             <dd><%= @product.color %></dd>
           </div>
         <% end %>
-        <% if @product.dimensions.present? && @product.dimensions.values.any?(&:present?) %>
+        <% if (dims = @product.formatted_dimensions) %>
           <div>
             <dt class="text-gray-500">Dimensions</dt>
-            <dd>
-              <% d = @product.dimensions %>
-              <%= [d["width"], d["depth"], d["height"]].select(&:present?).join(" × ") %> in
-            </dd>
+            <dd><%= dims %></dd>
           </div>
         <% end %>
         <% if @product.weight.present? %>

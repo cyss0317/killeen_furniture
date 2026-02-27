@@ -73,6 +73,17 @@ class Product < ApplicationRecord
     ActionController::Base.helpers.number_to_currency(base_cost)
   end
 
+  def formatted_dimensions
+    return nil unless dimensions.present?
+    d = dimensions
+    parts = [
+      d["depth"].present?  ? "D:#{d["depth"]}"  : nil,
+      d["width"].present?  ? "W:#{d["width"]}"  : nil,
+      d["height"].present? ? "H:#{d["height"]}" : nil
+    ].compact
+    parts.any? ? "#{parts.join(" × ")} in" : nil
+  end
+
   def update_selling_price(new_price)
     new_price = new_price.to_f
     return false if new_price <= 0 || base_cost.to_f <= 0
