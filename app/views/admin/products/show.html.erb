@@ -60,10 +60,17 @@
     </div>
 
     <!-- Description -->
-    <% if @product.description.body.present? %>
+    <% if @product.short_description.present? || @product.description.body.present? %>
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 class="font-semibold text-gray-900 mb-3">Description</h3>
-        <div class="prose text-sm max-w-none"><%= @product.description %></div>
+        <% if @product.short_description.present? %>
+          <div class="text-sm text-gray-600 mb-4 pb-4 border-b border-gray-50 italic">
+            <%= @product.short_description %>
+          </div>
+        <% end %>
+        <% if @product.description.body.present? %>
+          <div class="prose text-sm max-w-none"><%= @product.description %></div>
+        <% end %>
       </div>
     <% end %>
 
@@ -141,6 +148,33 @@
           <dt class="text-gray-500">Current Stock</dt>
           <dd id="stock-display-<%= @product.id %>"><%= render "admin/products/stock_display", product: @product %></dd>
         </div>
+        <% if @product.brand.present? %>
+          <div>
+            <dt class="text-gray-500">Brand</dt>
+            <dd class="font-medium"><%= @product.brand %></dd>
+          </div>
+        <% end %>
+        <% if @product.material.present? %>
+          <div>
+            <dt class="text-gray-500">Material</dt>
+            <dd><%= @product.material %></dd>
+          </div>
+        <% end %>
+        <% if @product.color.present? %>
+          <div>
+            <dt class="text-gray-500">Color</dt>
+            <dd><%= @product.color %></dd>
+          </div>
+        <% end %>
+        <% if @product.dimensions.present? && @product.dimensions.values.any?(&:present?) %>
+          <div>
+            <dt class="text-gray-500">Dimensions</dt>
+            <dd>
+              <% d = @product.dimensions %>
+              <%= [d["width"], d["depth"], d["height"]].select(&:present?).join(" × ") %> in
+            </dd>
+          </div>
+        <% end %>
         <% if @product.weight.present? %>
           <div>
             <dt class="text-gray-500">Weight</dt>

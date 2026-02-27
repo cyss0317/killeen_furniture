@@ -23,6 +23,7 @@ module PurchaseOrders
           {
             "item_code": "B1190-31",
             "description": "Six Drawer Dresser",
+            "category": "Dresser",
             "series": "Gerridan",
             "color": "White/Gray",
             "qty": 1,
@@ -36,9 +37,11 @@ module PurchaseOrders
       - invoice_number: the order/invoice/PO number shown on the document (empty string "" if not visible)
       - item_code: The SKU / item code (e.g. "B1190-31" for Ashley, "GT-1234" for Generation Trade)
       - description: product name or description text
+      - category: a 1-2 word category name (e.g. "Sofa", "Dresser", "Dining Table", "Bed"). Guess based on the description if not explicitly labeled and it shouldnt't be the same as brand.
       - series: furniture collection or series name (empty string "" if not shown)
       - color: color or finish name (empty string "" if not shown)
       - qty: integer quantity from the Qty or Ordered column
+      - brand: "Ashley Furniture" or "Generation Trade" based on the supplier
       - price: unit wholesale price as a decimal (use the "Price" or unit price column, NOT extended/total)
       - Skip rows that are section headers, subtotals, shipping lines, or blank
       - items must be an empty array [] if no valid line items are found
@@ -99,25 +102,30 @@ module PurchaseOrders
           end
 
           description = item["description"].to_s.strip
+          category_name = item["category"].to_s.strip
           series      = item["series"].to_s.strip
           color       = item["color"].to_s.strip
 
           product = Product.find_by(sku: sku)
+          brand_name = supplier_category_name # "Ashley Furniture" or "Generation Trade"
 
           if product
             updates = {}
             updates[:name]  = description if description.present? && product.name != description
-            updates[:brand] = series       if series.present? && product.brand != series
+            updates[:brand] = brand_name  if product.brand != brand_name
             updates[:color] = color        if color.present? && product.color != color
             product.update!(updates) if updates.any?
             product.increment!(:stock_quantity, qty)
             updated_products << product unless updated_products.include?(product)
           else
-            supplier_category ||= Category.find_or_create_by!(name: supplier_category_name)
+            # Use the category from Claude if available, else fallback to supplier name
+            target_category_name = category_name.presence || supplier_category_name
+            supplier_category    = Category.find_or_create_by!(name: target_category_name)
+
             product = Product.create!(
               sku:            sku,
               name:           description.presence || sku,
-              brand:          series.presence,
+              brand:          brand_name,
               color:          color.presence,
               base_cost:      price,
               stock_quantity: qty,
@@ -176,6 +184,7 @@ module PurchaseOrders
     end
 
     def enrich_product!(product, series:, description:)
+      # binding.pry
       case @supplier
       when "generation_trade"
         Products::FetchFromGenerationTrade.enrich!(product, series: series, description: description)

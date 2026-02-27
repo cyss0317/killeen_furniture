@@ -74,15 +74,24 @@ export default class extends Controller {
           }
           return
         }
-        if (!json.image_urls?.length) {
+        if (!json.image_urls?.length && !json.data) {
           if (this.hasScrapeStatusTarget) {
-            this.scrapeStatusTarget.textContent = "No images found on vendor website."
+            this.scrapeStatusTarget.textContent = "No data or images found on vendor website."
           }
           return
         }
-        this.renderImagePicker(json.image_urls)
+        
+        // Populate form with any extra data found (dimensions, description, etc.)
+        if (json.data) {
+          this.fillForm(json.data)
+        }
+
+        if (json.image_urls?.length) {
+          this.renderImagePicker(json.image_urls)
+        }
+
         if (this.hasScrapeStatusTarget) {
-          this.scrapeStatusTarget.textContent = json.warning ? "⚠ " + json.warning : ""
+          this.scrapeStatusTarget.textContent = json.warning ? "⚠ " + json.warning : (json.data ? "✓ Details fetched" : "")
         }
       })
       .catch(err => {

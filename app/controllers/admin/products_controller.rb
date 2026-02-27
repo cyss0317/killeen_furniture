@@ -143,7 +143,11 @@ module Admin
       if result.error && result.image_urls.blank?
         render json: { error: result.error }, status: :unprocessable_entity
       else
-        render json: { image_urls: result.image_urls || [], warning: result.error }
+        render json: {
+          image_urls: result.image_urls || [],
+          data: result.data || {},
+          warning: result.error
+        }
       end
     end
 

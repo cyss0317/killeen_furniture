@@ -23,6 +23,7 @@ module Products
     end
 
     def enrich!
+      # binding.pry
       html = fetch_product_html
       return false unless html
 
@@ -115,18 +116,31 @@ module Products
       updates[:name]   = data[:name]   if data[:name].present? && @product.name != data[:name]
       updates[:weight] = data[:weight] if data[:weight].present? && @product.weight.nil?
 
+      # Map Brand: Prefer "Ashley Furniture" if we successfully scraped the page
+      # The @series passed in might just be a collection name (e.g. "Gerridan")
+      updates[:brand] = "Ashley Furniture" if @product.brand.blank? || !@product.brand.match?(/ashley/i)
+
+      # Map Dimensions
+      # binding.pry
+      if data[:dimensions_width].present? || data[:dimensions_height].present? || data[:dimensions_depth].present?
+        new_dims = (@product.dimensions || {}).dup
+        new_dims["width"]  = data[:dimensions_width]  if data[:dimensions_width].present?
+        new_dims["height"] = data[:dimensions_height] if data[:dimensions_height].present?
+        new_dims["depth"]  = data[:dimensions_depth]  if data[:dimensions_depth].present?
+        updates[:dimensions] = new_dims if new_dims != @product.dimensions
+      end
+
       # Save scraped image URLs if the product doesn't already have any
       if data[:image_urls].present? && @product.vendor_image_urls.blank?
         updates[:vendor_image_urls] = data[:image_urls]
       end
 
-      @product.update!(updates) if updates.any?
 
-      # ActionText rich description — only set if currently blank
-      if data[:description].present? && @product.description.body.blank?
-        @product.description = data[:description]
-        @product.save!
+      if data[:description].present? && @product.description.blank?
+        updates[:description] = data[:description]
       end
+
+      @product.update!(updates) if updates.any?
     end
   end
 end
