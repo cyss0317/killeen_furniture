@@ -51,7 +51,7 @@ gem "devise", "~> 4.9"
 gem "pundit", "~> 2.3"
 
 # Payments
-gem "stripe", "~> 13.0"
+gem "stripe", "~> 18.4"
 
 # File Storage (S3)
 gem "aws-sdk-s3", require: false
