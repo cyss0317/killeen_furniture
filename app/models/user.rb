@@ -1,8 +1,28 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
-  devise :database_authenticatable, :registerable,
+  devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :validatable
+
+  EMAIL_COOLDOWN = 2.minutes
+
+  # Throttle confirmation email resends — allow the initial post-create send
+  # (account < 1 minute old) but block any resend within the cooldown window.
+  def send_confirmation_instructions
+    if confirmation_sent_at.present? &&
+       confirmation_sent_at > EMAIL_COOLDOWN.ago &&
+       created_at < 1.minute.ago
+      return
+    end
+    super
+  end
+
+  # Throttle password-reset emails — reset_password_sent_at is only written
+  # inside super, so we can safely gate on its existing value.
+  def send_reset_password_instructions
+    return if reset_password_sent_at.present? && reset_password_sent_at > EMAIL_COOLDOWN.ago
+    super
+  end
 
   enum :role,       { customer: 0, admin: 1, super_admin: 2 }, default: :customer
   enum :admin_kind, { ops: 0, delivery: 1 }, prefix: :kind, allow_nil: true

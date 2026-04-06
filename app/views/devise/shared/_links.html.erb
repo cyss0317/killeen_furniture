@@ -12,7 +12,7 @@
   <% end %>
 
   <%- if devise_mapping.confirmable? && controller_name != 'confirmations' %>
-    <p><%= link_to "Didn't receive confirmation instructions?", new_confirmation_path(resource_name), class: "text-amber-700 hover:text-amber-900 font-medium" %></p>
+    <p><%= link_to "Didn't receive confirmation instructions?", send(:"new_#{resource_name}_confirmation_path"), class: "text-amber-700 hover:text-amber-900 font-medium" %></p>
   <% end %>
 
   <%- if devise_mapping.lockable? && resource_class.unlock_strategy_enabled?(:email) && controller_name != 'unlocks' %>
