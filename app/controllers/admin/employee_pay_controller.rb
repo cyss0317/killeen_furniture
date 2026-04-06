@@ -25,19 +25,35 @@ module Admin
                         else              anchor.strftime("%B %Y")
                         end
 
-      @entries       = EmployeePayEntry.for_period(@period_range).recent.includes(:created_by)
+      @employees     = User.where(role: [:admin, :super_admin]).order(:first_name, :last_name)
+      @entries       = EmployeePayEntry.for_period(@period_range).recent.includes(:created_by, :user)
       @period_total  = @entries.sum(:amount)
       @entry         = EmployeePayEntry.new(paid_on: Date.current)
     end
 
     def create
-      @entry = EmployeePayEntry.new(pay_params.merge(created_by: current_user))
+      user = User.find_by(id: params[:employee_pay_entry][:user_id])
+
+      # For hourly employees, compute amount from hours × rate
+      entry_params = pay_params
+      if params[:pay_type_hint] == "hourly" && params[:hours_worked].present? && params[:rate].present?
+        hours  = params[:hours_worked].to_f
+        rate   = params[:rate].to_f
+        amount = (hours * rate).round(2)
+        entry_params = entry_params.merge(amount: amount, hours_worked: hours)
+      end
+
+      # Set employee_name from the selected user (fallback to whatever was supplied)
+      if user
+        entry_params = entry_params.merge(employee_name: user.full_name, user_id: user.id)
+      end
+
+      @entry = EmployeePayEntry.new(entry_params.merge(created_by: current_user))
 
       if @entry.save
         redirect_to admin_employee_pay_index_path(period: params[:period], offset: params[:offset]),
                     notice: "Pay entry added."
       else
-        # Re-render index with the form errors
         @period = params[:period].presence_in(%w[week month year]) || "month"
         @offset = params[:offset].to_i
         redirect_to admin_employee_pay_index_path(period: @period, offset: @offset),
@@ -63,7 +79,7 @@ module Admin
     end
 
     def pay_params
-      params.require(:employee_pay_entry).permit(:amount, :employee_name, :description, :paid_on)
+      params.require(:employee_pay_entry).permit(:employee_name, :amount, :description, :paid_on, :user_id, :hours_worked)
     end
   end
 end

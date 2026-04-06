@@ -54,6 +54,12 @@ Rails.application.routes.draw do
     end
   end
 
+  # === Super Admin panel ===
+  namespace :super_admin do
+    resources :ashley_syncs, only: [:new, :create]
+    resources :employees,    only: [:index, :update]
+  end
+
   # === Admin panel ===
   namespace :admin do
     root "dashboard#index", as: :dashboard
@@ -72,6 +78,7 @@ Rails.application.routes.draw do
       collection do
         post :import_screenshot
         post :scrape_vendor
+        post :ashley_lookup
       end
       resources :stock_adjustments, only: [:create]
     end

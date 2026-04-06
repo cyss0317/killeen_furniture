@@ -1,0 +1,82 @@
+<% content_for :title, "Employees" %>
+
+<div class="flex items-center gap-4 mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
+  <span class="text-sm text-gray-400"><%= @employees.size %> staff member<%= "s" if @employees.size != 1 %></span>
+</div>
+
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-100">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kind</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pay Type</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Pay Rate</th>
+        <th class="px-6 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @employees.each do |employee| %>
+        <% form_id = "employee_form_#{employee.id}" %>
+        <tr class="hover:bg-gray-50">
+          <td class="hidden">
+            <%= form_with model: employee, url: super_admin_employee_path(employee),
+                 method: :patch, id: form_id,
+                 data: { controller: "save-button", action: "turbo:submit-start->save-button#onStart turbo:submit-end->save-button#onEnd" } do %><% end %>
+          </td>
+          <td class="px-6 py-4">
+            <p class="text-sm font-medium text-gray-900"><%= employee.full_name %></p>
+            <% if employee == current_user %>
+              <span class="text-xs text-amber-600 font-medium">(you)</span>
+            <% end %>
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-600"><%= employee.email %></td>
+          <td class="px-6 py-4 text-sm text-gray-600"><%= employee.phone.presence || "—" %></td>
+
+          <td class="px-6 py-4">
+            <%= select_tag "user[role]",
+                  options_for_select([["Admin", "admin"], ["Super Admin", "super_admin"]], employee.role),
+                  form: form_id,
+                  class: "text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
+          </td>
+
+          <td class="px-6 py-4">
+            <%= select_tag "user[admin_kind]",
+                  options_for_select([["—", ""], ["Ops", "ops"], ["Delivery", "delivery"]], employee.admin_kind.to_s),
+                  form: form_id,
+                  class: "text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
+          </td>
+
+          <td class="px-6 py-4">
+            <%= select_tag "user[pay_type]",
+                  options_for_select([["—", ""], ["Hourly", "hourly"], ["Monthly", "monthly"]], employee.pay_type.to_s),
+                  form: form_id,
+                  class: "text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
+          </td>
+
+          <td class="px-6 py-4">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm pointer-events-none">$</span>
+              <%= number_field_tag "user[pay_rate]",
+                    employee.pay_rate,
+                    step: 0.01, min: 0,
+                    form: form_id,
+                    placeholder: "0.00",
+                    class: "w-28 text-sm border border-gray-300 rounded-md pl-6 pr-2 py-1.5 text-right focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
+          </td>
+
+          <td class="px-6 py-4 text-right">
+            <button type="submit" form="<%= form_id %>" data-save-button-target="btn" class="w-[100px] inline-flex justify-center items-center text-sm px-3 py-1.5 bg-amber-700 text-white rounded-md hover:bg-amber-800 font-medium cursor-pointer transition-colors">
+              Save
+            </button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

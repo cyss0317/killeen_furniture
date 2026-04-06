@@ -1,0 +1,72 @@
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Ashley Furniture Product Sync</h1>
+    <p class="mt-2 text-sm text-gray-600">Manually trigger a sync from the Ashley API by SKU.</p>
+  </div>
+
+  <div class="bg-white shadow rounded-lg mb-8">
+    <div class="px-4 py-5 sm:p-6">
+      <%= form_with url: super_admin_ashley_syncs_path, method: :post, local: true, class: "space-y-4" do |f| %>
+        <div>
+          <%= f.label :sku, "Product SKU", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= f.text_field :sku, id: :sku, value: params[:sku], class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", required: true, placeholder: "e.g. 1234567" %>
+          </div>
+        </div>
+
+        <div>
+          <%= f.submit "Sync Product", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @product %>
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Sync Result</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">Matched product details for <%= @product.sku %></p>
+      </div>
+      <div class="px-4 py-5 sm:p-0">
+        <dl class="sm:divide-y sm:divide-gray-200">
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Name</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @product.name %></dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Brand</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @product.brand %></dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Price</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= number_to_currency(@product.price) %></dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Image URLs</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <% if @product.vendor_image_urls.present? %>
+                <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                  <% @product.vendor_image_urls.each do |url| %>
+                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                      <div class="w-0 flex-1 flex items-center">
+                        <span class="ml-2 flex-1 w-0 truncate"><%= link_to url, url, target: "_blank", class: "text-indigo-600 hover:text-indigo-500" %></span>
+                      </div>
+                    </li>
+                  <% end %>
+                </ul>
+              <% else %>
+                None
+              <% end %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Ashley Payload</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <pre class="whitespace-pre-wrap bg-gray-50 p-4 rounded text-xs border"><%= JSON.pretty_generate(@product.ashley_payload || {}) %></pre>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  <% end %>
+</div>

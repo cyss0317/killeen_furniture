@@ -118,6 +118,15 @@
                 Pay Tracker
               <% end %>
 
+              <%= link_to super_admin_employees_path,
+                  class: admin_nav_link_class("employees"),
+                  data: { action: "click->drawer#close" } do %>
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Employees
+              <% end %>
+
               <%= link_to admin_settings_path,
                   class: admin_nav_link_class("settings"),
                   data: { action: "click->drawer#close" } do %>
@@ -126,6 +135,15 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 Settings
+              <% end %>
+
+              <%= link_to new_super_admin_ashley_sync_path,
+                  class: admin_nav_link_class("ashley_syncs"),
+                  data: { action: "click->drawer#close" } do %>
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Ashley Sync
               <% end %>
             <% end %>
           <% end %>
@@ -252,6 +270,14 @@
                 Pay Tracker
               <% end %>
 
+              <%= link_to super_admin_employees_path,
+                  class: admin_nav_link_class("employees") do %>
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Employees
+              <% end %>
+
               <%= link_to admin_settings_path,
                   class: admin_nav_link_class("settings") do %>
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,6 +285,14 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 Settings
+              <% end %>
+
+              <%= link_to new_super_admin_ashley_sync_path,
+                  class: admin_nav_link_class("ashley_syncs") do %>
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Ashley Sync
               <% end %>
 
               <%= link_to root_path, target: "_blank",
@@ -310,5 +344,7 @@
         </main>
       </div>
     </div>
+
+    <%= render "shared/confirm_modal" %>
   </body>
 </html>

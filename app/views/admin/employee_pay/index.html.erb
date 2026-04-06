@@ -1,5 +1,12 @@
 <% content_for :title, "Employee Pay" %>
 
+<%
+  # Build a JSON map of employees for the Stimulus controller
+  employees_json = @employees.each_with_object({}) do |u, h|
+    h[u.id.to_s] = { pay_type: u.pay_type.to_s, pay_rate: u.pay_rate&.to_f, name: u.full_name }
+  end.to_json
+%>
+
 <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
   <div>
     <h1 class="text-2xl font-bold text-gray-900">Employee Pay</h1>
@@ -44,36 +51,90 @@
   <p class="text-xs text-gray-400 mt-1"><%= @entries.size %> <%= "entry".pluralize(@entries.size) %></p>
 </div>
 
-<%# Add new entry form %>
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-6">
+<%# Add new entry form — driven by employee-pay Stimulus controller %>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-6"
+     data-controller="employee-pay"
+     data-employee-pay-employees-value="<%= employees_json %>">
   <h2 class="text-sm font-semibold text-gray-900 mb-4">Add Pay Entry</h2>
+
   <%= form_with model: @entry, url: admin_employee_pay_index_path, method: :post do |f| %>
     <%= f.hidden_field :period, value: @period %>
     <%= f.hidden_field :offset, value: @offset %>
+
     <div class="flex flex-wrap gap-3 items-end">
-      <div class="flex-1 min-w-40">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Employee Name</label>
-        <%= f.text_field :employee_name, placeholder: "Full name",
-            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      <%# Employee dropdown %>
+      <div class="flex-1 min-w-48">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Employee</label>
+        <% employee_options = @employees.map { |u| [u.full_name + (u.pay_type ? " (#{u.pay_type})" : ""), u.id] } %>
+        <%= f.select :user_id,
+              options_for_select([["— Select employee —", ""]] + employee_options),
+              {},
+              class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white",
+            data: { "employee-pay-target": "employeeSelect", action: "change->employee-pay#refresh" } %>
       </div>
-      <div class="w-32">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Amount</label>
-        <%= f.number_field :amount, placeholder: "0.00", step: "0.01", min: "0.01",
-            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
-      </div>
+
+      <%# Date paid — always visible %>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Date Paid</label>
         <%= f.date_field :paid_on,
             class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
       </div>
+
+      <%# Description — always visible %>
       <div class="flex-1 min-w-48">
         <label class="block text-xs font-medium text-gray-500 mb-1">Description (optional)</label>
         <%= f.text_field :description, placeholder: "e.g. Weekly wages, delivery bonus…",
             class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
       </div>
-      <%= f.submit "Add Entry",
-          class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer transition-colors" %>
     </div>
+
+    <%# ── HOURLY SECTION ── %>
+    <div class="hidden mt-3 flex flex-wrap gap-3 items-end" data-employee-pay-target="hourlySection">
+      <input type="hidden" name="pay_type_hint" value="hourly">
+      <div class="w-28">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Hours Worked</label>
+        <input type="number" name="hours_worked" step="0.25" min="0" placeholder="0"
+               class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+               data-employee-pay-target="hoursInput"
+               data-action="input->employee-pay#calculateHourly">
+      </div>
+      <div class="w-28">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Rate / hr</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm pointer-events-none">$</span>
+          <input type="number" name="rate" step="0.01" min="0" placeholder="0.00"
+                 class="w-full border border-gray-300 rounded-md pl-6 pr-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                 data-employee-pay-target="rateInput"
+                 data-action="input->employee-pay#calculateHourly">
+        </div>
+      </div>
+      <div class="flex flex-col justify-end">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Total</label>
+        <div class="px-3 py-2 bg-amber-50 border border-amber-200 rounded-md text-sm font-semibold text-amber-900 min-w-24 text-right">
+          <span data-employee-pay-target="amountPreview">$0.00</span>
+        </div>
+        <%# Hidden field carrying the computed amount for hourly employees %>
+        <%= f.hidden_field :amount, value: 0, data: { "employee-pay-target": "amountOutput" } %>
+      </div>
+      <%= f.submit "Add Entry",
+          class: "self-end bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer transition-colors" %>
+    </div>
+
+    <%# ── SALARY / MONTHLY SECTION ── %>
+    <div class="hidden mt-3 flex flex-wrap gap-3 items-end" data-employee-pay-target="salarySection">
+      <div class="w-36">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Amount</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm pointer-events-none">$</span>
+          <%= f.number_field :amount, placeholder: "0.00", step: "0.01", min: "0.01",
+              class: "w-full border border-gray-300 rounded-md pl-6 pr-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+              data: { "employee-pay-target": "amountInput" } %>
+        </div>
+      </div>
+      <%= f.submit "Add Entry",
+          class: "self-end bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer transition-colors" %>
+    </div>
+
   <% end %>
 </div>
 
@@ -86,6 +147,7 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Paid</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hours</th>
           <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Added By</th>
           <th class="px-6 py-3"></th>
@@ -94,9 +156,17 @@
       <tbody class="divide-y divide-gray-100">
         <% @entries.each do |entry| %>
           <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= entry.employee_name %></td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">
+              <%= entry.employee_name %>
+              <% if entry.user&.pay_type %>
+                <span class="ml-1 text-xs text-gray-400 font-normal">(<%= entry.user.pay_type %>)</span>
+              <% end %>
+            </td>
             <td class="px-6 py-4 text-sm text-gray-500"><%= entry.description.presence || "—" %></td>
             <td class="px-6 py-4 text-sm text-gray-600"><%= entry.paid_on.strftime("%b %d, %Y") %></td>
+            <td class="px-6 py-4 text-sm text-right text-gray-500">
+              <%= entry.hours_worked ? number_with_precision(entry.hours_worked, precision: 2).gsub(/\.?0+$/, '') + " hrs" : "—" %>
+            </td>
             <td class="px-6 py-4 text-sm font-semibold text-right text-gray-900"><%= number_to_currency(entry.amount) %></td>
             <td class="px-6 py-4 text-xs text-gray-400"><%= entry.created_by&.full_name || "—" %></td>
             <td class="px-6 py-4 text-right">
@@ -105,12 +175,12 @@
                   method: :delete,
                   form: { class: "contents" },
                   class: "text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer",
-                  data: { confirm: "Delete this pay entry for #{entry.employee_name}?" } %>
+                  data: { turbo_confirm: "Delete this pay entry for #{entry.employee_name}?" } %>
             </td>
           </tr>
         <% end %>
         <tr class="bg-amber-50">
-          <td colspan="3" class="px-6 py-3 text-sm font-semibold text-gray-700">Period Total</td>
+          <td colspan="4" class="px-6 py-3 text-sm font-semibold text-gray-700">Period Total</td>
           <td class="px-6 py-3 text-sm font-bold text-right text-gray-900"><%= number_to_currency(@period_total) %></td>
           <td colspan="2"></td>
         </tr>

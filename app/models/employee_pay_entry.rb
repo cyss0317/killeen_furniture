@@ -1,9 +1,11 @@
 class EmployeePayEntry < ApplicationRecord
   belongs_to :created_by, class_name: "User", optional: true
+  belongs_to :user,        class_name: "User", optional: true
 
   validates :amount,        numericality: { greater_than: 0 }
   validates :employee_name, presence: true
   validates :paid_on,       presence: true
+  validates :hours_worked,  numericality: { greater_than: 0 }, allow_nil: true
 
   scope :for_period, ->(range) { where(paid_on: range) }
   scope :recent,     -> { order(paid_on: :desc, created_at: :desc) }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_06_014427) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_06_035645) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -130,8 +130,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_06_014427) do
     t.bigint "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.decimal "hours_worked", precision: 8, scale: 2
     t.index ["created_by_id"], name: "index_employee_pay_entries_on_created_by_id"
     t.index ["paid_on"], name: "index_employee_pay_entries_on_paid_on"
+    t.index ["user_id"], name: "index_employee_pay_entries_on_user_id"
   end
 
   create_table "global_settings", force: :cascade do |t|
@@ -399,6 +402,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_06_014427) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "admin_kind"
+    t.integer "pay_type"
+    t.decimal "pay_rate"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
@@ -411,6 +416,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_06_014427) do
   add_foreign_key "carts", "users"
   add_foreign_key "delivery_events", "orders"
   add_foreign_key "delivery_events", "users", column: "created_by_id"
+  add_foreign_key "employee_pay_entries", "users"
   add_foreign_key "employee_pay_entries", "users", column: "created_by_id"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"

@@ -173,6 +173,42 @@ module Admin
       end
     end
 
+    def ashley_lookup
+      sku = params[:sku].to_s.strip
+
+      if sku.blank?
+        render json: { error: "SKU is required" }, status: :unprocessable_entity and return
+      end
+
+      begin
+        product_data = Ashley::Client.new.get_product(sku)
+        images       = (product_data["images"] || []).map { |img| img["url"] }.compact
+
+        render json: {
+          data: {
+            name:              product_data["name"],
+            brand:             product_data["brand"],
+            sku:               product_data["sku"] || sku,
+            short_description: product_data["short_description"],
+            description:       product_data["description"],
+            color:             product_data["color"],
+            material:          product_data["material"],
+            weight:            product_data["weight"],
+            base_cost:         product_data["price"],
+            dimensions_width:  product_data.dig("dimensions", "width"),
+            dimensions_height: product_data.dig("dimensions", "height"),
+            dimensions_depth:  product_data.dig("dimensions", "depth")
+          },
+          image_urls:     images,
+          ashley_payload: product_data
+        }
+      rescue Ashley::Client::RecordNotFoundError
+        render json: { error: "No Ashley product found for SKU: #{sku}" }, status: :not_found
+      rescue Ashley::Client::Error => e
+        render json: { error: "Ashley API error: #{e.message}" }, status: :unprocessable_entity
+      end
+    end
+
     private
 
     def set_product

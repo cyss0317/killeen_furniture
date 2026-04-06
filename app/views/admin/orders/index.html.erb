@@ -20,7 +20,7 @@
     ["Canceled",        "canceled"],
     ["Refunded",        "refunded"]
   ].each do |label, status| %>
-    <%= link_to label, admin_orders_path(status: status, q: params[:q]),
+    <%= link_to label, admin_orders_path(status: status, q: params[:q], address: params[:address], min_price: params[:min_price], max_price: params[:max_price], month: @month),
         class: "px-3 py-1.5 rounded-md font-medium transition-colors #{params[:status].to_s == status.to_s ? 'bg-amber-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}" %>
   <% end %>
 </div>
@@ -44,6 +44,13 @@
             class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
       </div>
 
+      <%# Month Filter %>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Month</label>
+        <%= f.month_field :month, value: @month,
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
+
       <%# Price range %>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Total range</label>
@@ -58,8 +65,8 @@
 
       <div class="flex gap-2">
         <%= f.submit "Search", class: "bg-gray-800 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer" %>
-        <% if params.permit(:q, :address, :min_price, :max_price).values.any?(&:present?) %>
-          <%= link_to "Clear", admin_orders_path(status: params[:status]),
+        <% if params.permit(:q, :address, :min_price, :max_price, :month).values.any? { |v| v.present? } %>
+          <%= link_to "Clear", admin_orders_path(status: params[:status], month: ""),
               class: "text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50" %>
         <% end %>
       </div>

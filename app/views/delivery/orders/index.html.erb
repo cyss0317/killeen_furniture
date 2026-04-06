@@ -79,7 +79,7 @@
                       method: :patch,
                       form: { class: "contents" },
                       class: "text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors cursor-pointer",
-                      data: { confirm: "Mark order #{order.order_number} as delivered?" } %>
+                      data: { turbo_confirm: "Mark order #{order.order_number} as delivered?" } %>
                 <% end %>
               </div>
             </td>
@@ -113,7 +113,7 @@
                 method: :patch,
                 form: { class: "flex-1" },
                 class: "w-full text-sm font-medium bg-green-600 text-white rounded-md py-2 hover:bg-green-700 transition-colors cursor-pointer",
-                data: { confirm: "Mark order #{order.order_number} as delivered?" } %>
+                data: { turbo_confirm: "Mark order #{order.order_number} as delivered?" } %>
           <% end %>
         </div>
       </div>
