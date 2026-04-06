@@ -1,4 +1,39 @@
-<% content_for :title, "#{APP_NAME} — Quality Home Furnishings" %>
+<% content_for :title, "#{APP_NAME} — Furniture Store in Killeen, TX" %>
+<% content_for :description, "Warehouse Furniture is a local furniture store in Killeen, TX offering quality Ashley Furniture — sofas, beds, dining sets, and more. Shop online with local delivery available." %>
+<% content_for :structured_data do %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FurnitureStore",
+  "name": "Warehouse Furniture",
+  "description": "Local furniture store in Killeen, TX offering quality Ashley Furniture with local delivery.",
+  "url": "<%= root_url %>",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "1104 E Veterans Memorial Blvd",
+    "addressLocality": "Killeen",
+    "addressRegion": "TX",
+    "postalCode": "76541",
+    "addressCountry": "US"
+  },
+  "telephone": "+12546289088",
+  "areaServed": {
+    "@type": "City",
+    "name": "Killeen"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      "opens": "11:00",
+      "closes": "19:00"
+    }
+  ],
+  "priceRange": "$$",
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541"
+}
+</script>
+<% end %>
 
 <!-- Hero Section -->
 <section class="relative bg-amber-900 text-white overflow-hidden">

@@ -1,13 +1,37 @@
 <!DOCTYPE html>
 <html class="h-full">
   <head>
-    <title><%= content_for(:title) || APP_NAME %></title>
+    <title><%= meta_title %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-prefetch" content="false">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="stripe-key" content="<%= ENV.fetch('STRIPE_PUBLISHABLE_KEY', '') %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
+    <%# SEO %>
+    <meta name="description" content="<%= meta_description %>">
+    <link rel="canonical" href="<%= canonical_url %>">
+    <% if noindex_page? %>
+      <meta name="robots" content="noindex, nofollow">
+    <% end %>
+
+    <%# Open Graph %>
+    <meta property="og:site_name" content="<%= APP_NAME %>">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<%= meta_title %>">
+    <meta property="og:description" content="<%= meta_description %>">
+    <meta property="og:url" content="<%= canonical_url %>">
+    <meta property="og:image" content="<%= meta_image %>">
+
+    <%# Twitter Card %>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= meta_title %>">
+    <meta name="twitter:description" content="<%= meta_description %>">
+    <meta name="twitter:image" content="<%= meta_image %>">
+
+    <%# Structured data (JSON-LD) — injected per page via content_for :structured_data %>
+    <%= yield :structured_data %>
 
     <%= yield :head %>
 

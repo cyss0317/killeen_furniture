@@ -1,4 +1,30 @@
 <% content_for :title, "#{@product.name} — #{APP_NAME}" %>
+<% content_for :description, @product.short_description.presence || "Shop #{@product.name} at Warehouse Furniture. Quality Ashley Furniture with local delivery in the Killeen, TX area." %>
+<% if @product.vendor_image_urls.present? %>
+  <% content_for :og_image, @product.vendor_image_urls.first %>
+<% end %>
+<% content_for :structured_data do %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "<%= j @product.name %>",
+  "description": "<%= j(@product.short_description.presence || @product.name) %>",
+  "image": <%= @product.vendor_image_urls.presence&.to_json || "[]" %>,
+  "brand": {
+    "@type": "Brand",
+    "name": "<%= j(@product.brand.presence || "Ashley Furniture") %>"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "<%= product_url(@product) %>",
+    "priceCurrency": "USD",
+    "price": "<%= @product.selling_price %>",
+    "availability": "<%= @product.stock_quantity.to_i > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" %>"
+  }
+}
+</script>
+<% end %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <!-- Breadcrumb -->

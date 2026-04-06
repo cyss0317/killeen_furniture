@@ -5,6 +5,9 @@ Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # SEO
+  get "/sitemap.xml", to: "sitemap#index", format: :xml
+
   # Authentication
   devise_for :users, controllers: {
     registrations:  "users/registrations",

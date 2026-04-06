@@ -1,4 +1,29 @@
 module ApplicationHelper
+  DEFAULT_DESCRIPTION = "Shop quality Ashley Furniture at Warehouse Furniture — sofas, beds, " \
+                        "dining sets, and more with local delivery in the Killeen, TX area."
+
+  def meta_title
+    content_for?(:title) ? content_for(:title) : APP_NAME
+  end
+
+  def meta_description
+    content_for?(:description) ? content_for(:description) : DEFAULT_DESCRIPTION
+  end
+
+  def meta_image
+    content_for?(:og_image) ? content_for(:og_image) : "#{request.base_url}/icon.png"
+  end
+
+  def canonical_url
+    request.url.split("?").first
+  end
+
+  def noindex_page?
+    request.path.start_with?("/admin", "/super_admin", "/delivery", "/account",
+                             "/checkout", "/cart", "/users", "/webhooks")
+  end
+
+
   def google_maps_url(address_hash)
     parts = [
       address_hash["street_address"],

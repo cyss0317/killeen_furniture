@@ -1,1 +1,15 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+User-agent: *
+Disallow: /admin/
+Disallow: /super_admin/
+Disallow: /delivery/
+Disallow: /account/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /users/
+Disallow: /webhooks/
+Disallow: /qr/
+
+Allow: /
+
+# Replace with your production domain after deploying
+# Sitemap: https://yourdomain.com/sitemap.xml
