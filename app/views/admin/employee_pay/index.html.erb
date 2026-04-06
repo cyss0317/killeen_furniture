@@ -30,9 +30,18 @@
       <%= link_to admin_employee_pay_index_path(period: @period, offset: @offset - 1),
           class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
           title: "Previous #{@period}" do %>←<% end %>
-      <span class="px-3 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md min-w-36 text-center">
-        <%= @period_display %>
-      </span>
+          
+      <% if @period == "month" %>
+        <%= form_with url: admin_employee_pay_index_path, method: :get, data: { turbo: false } do |f| %>
+          <%= f.hidden_field :period, value: "month" %>
+          <%= f.month_field :month_val, value: (Time.current + @offset.months).strftime("%Y-%m"), onchange: "this.form.submit()",
+              class: "px-2 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md w-40 text-center focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer hover:bg-gray-50" %>
+        <% end %>
+      <% else %>
+        <span class="px-3 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md min-w-40 text-center">
+          <%= @period_display %>
+        </span>
+      <% end %>
       <% if @offset < 0 %>
         <%= link_to admin_employee_pay_index_path(period: @period, offset: @offset + 1),
             class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",

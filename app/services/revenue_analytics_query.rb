@@ -10,13 +10,20 @@ class RevenueAnalyticsQuery
     keyword_init: true
   )
 
-  def self.call(period:, offset: 0)
-    new(period: period, offset: offset).call
+  def self.call(period: nil, offset: 0, start_date: nil, end_date: nil)
+    new(period: period, offset: offset, start_date: start_date, end_date: end_date).call
   end
 
-  def initialize(period:, offset: 0)
-    @period = period.to_s.presence_in(%w[week month year]) || "month"
-    @offset = offset.to_i
+  def initialize(period: nil, offset: 0, start_date: nil, end_date: nil)
+    @period     = period.to_s.presence_in(%w[week month year custom]) || "month"
+    @offset     = offset.to_i
+    
+    if start_date.present? && end_date.present?
+      @period = "custom"
+      @start_date = Date.parse(start_date.to_s) rescue nil
+      @end_date   = Date.parse(end_date.to_s) rescue nil
+    end
+    
     @current_range, @previous_range = compute_ranges
   end
 
@@ -57,6 +64,16 @@ class RevenueAnalyticsQuery
   def compute_ranges
     now = Time.current
     case @period
+    when "custom"
+      if @start_date && @end_date
+        current  = @start_date.beginning_of_day..@end_date.end_of_day
+        duration = (@end_date - @start_date).to_i + 1
+        previous = (@start_date - duration.days).beginning_of_day..(@end_date - duration.days).end_of_day
+      else
+        anchor   = now + @offset.months
+        current  = anchor.beginning_of_month..anchor.end_of_month
+        previous = (anchor - 1.month).beginning_of_month..(anchor - 1.month).end_of_month
+      end
     when "week"
       anchor   = now + @offset.weeks
       current  = anchor.beginning_of_week..anchor.end_of_week
@@ -92,6 +109,10 @@ class RevenueAnalyticsQuery
 
   def build_chart_data(range)
     trunc  = @period == "year" ? "month" : "day"
+    if @period == "custom" && @start_date && @end_date
+      duration = (@end_date - @start_date).to_i
+      trunc = duration > 90 ? "month" : "day"
+    end
     orders = base_scope.where(created_at: range)
 
     revenue_rows = orders
@@ -107,7 +128,7 @@ class RevenueAnalyticsQuery
       .sum("order_items.unit_cost * order_items.quantity")
 
     all_keys = (revenue_rows.keys | cost_rows.keys).compact.sort
-    fmt      = @period == "year" ? "%b %Y" : "%b %-d"
+    fmt      = trunc == "month" ? "%b %Y" : "%b %-d"
 
     {
       labels:  all_keys.map { |k| k.to_date.strftime(fmt) },

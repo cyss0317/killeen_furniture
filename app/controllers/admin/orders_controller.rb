@@ -10,13 +10,24 @@ module Admin
       scope = scope.where(status: params[:status]) if params[:status].present?
       scope = scope.where(source: params[:source]) if params[:source].present?
 
-      @month = params.key?(:month) ? params[:month] : Time.current.strftime("%Y-%m")
-      if @month.present?
-        begin
-          start_date = Date.strptime(@month, "%Y-%m")
-          scope = scope.where(created_at: start_date.beginning_of_month.beginning_of_day..start_date.end_of_month.end_of_day)
-        rescue ArgumentError
-          # Invalid format, ignore
+      @year = params[:year].presence || Time.current.year.to_s
+      @month = params[:month].presence
+
+      if @year.present?
+        if @month.present?
+          begin
+            start_date = Date.strptime("#{@year}-#{@month}", "%Y-%m")
+            scope = scope.where(created_at: start_date.beginning_of_month.beginning_of_day..start_date.end_of_month.end_of_day)
+          rescue ArgumentError
+            # Invalid format, ignore
+          end
+        else
+          begin
+            start_date = Date.strptime(@year, "%Y")
+            scope = scope.where(created_at: start_date.beginning_of_year.beginning_of_day..start_date.end_of_year.end_of_day)
+          rescue ArgumentError
+            # Invalid format, ignore
+          end
         end
       end
 

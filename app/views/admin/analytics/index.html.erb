@@ -11,6 +11,18 @@
   period_display = case @period
                    when "week"  then "Week of #{anchor.beginning_of_week.strftime('%b %-d')} – #{anchor.end_of_week.strftime('%b %-d, %Y')}"
                    when "year"  then anchor.strftime('%Y')
+                   when "custom" then 
+                     if @start_date.present? && @end_date.present?
+                       start_d = Date.parse(@start_date) rescue nil
+                       end_d   = Date.parse(@end_date) rescue nil
+                       if start_d && end_d
+                         "#{start_d.strftime('%b %-d, %Y')} – #{end_d.strftime('%b %-d, %Y')}"
+                       else
+                         "Custom Range"
+                       end
+                     else
+                       "Custom Range"
+                     end
                    else              anchor.strftime('%B %Y')
                    end
 %>
@@ -32,23 +44,51 @@
             }" %>
       <% end %>
     </div>
+    
+    <%# Custom Date Range Form %>
+    <%= form_with url: admin_analytics_path, method: :get, data: { turbo: false }, class: "flex items-center gap-2" do |f| %>
+      <%= f.hidden_field :period, value: "custom" %>
+      <%= f.date_field :start_date, value: @start_date, class: "border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", required: true %>
+      <span class="text-gray-400 text-xs">to</span>
+      <%= f.date_field :end_date, value: @end_date, class: "border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", required: true %>
+      <%= f.submit "Filter", class: "bg-white border border-gray-200 text-sm font-medium px-3 py-1.5 rounded-md hover:bg-gray-50 cursor-pointer text-gray-700 transition-colors" %>
+    <% end %>
 
     <%# Prev / current label / next navigation %>
-    <div class="flex items-center gap-1">
-      <%= link_to admin_analytics_path(period: @period, offset: @offset - 1),
-          class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
-          title: "Previous #{@period}" do %>←<% end %>
-      <span class="px-3 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md min-w-36 text-center">
-        <%= period_display %>
-      </span>
-      <% if @offset < 0 %>
-        <%= link_to admin_analytics_path(period: @period, offset: @offset + 1),
+    <% if @period != "custom" %>
+      <div class="flex items-center gap-1">
+        <%= link_to admin_analytics_path(period: @period, offset: @offset - 1),
             class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
-            title: "Next #{@period}" do %>→<% end %>
-      <% else %>
-        <span class="px-2.5 py-1.5 rounded-md border border-gray-100 bg-gray-50 text-gray-300 text-sm font-medium cursor-default">→</span>
-      <% end %>
-    </div>
+            title: "Previous #{@period}" do %>←<% end %>
+            
+        <% if @period == "month" %>
+          <%= form_with url: admin_analytics_path, method: :get, data: { turbo: false } do |f| %>
+            <%= f.hidden_field :period, value: "month" %>
+            <%= f.month_field :month_val, value: (Time.current + @offset.months).strftime("%Y-%m"), onchange: "this.form.submit()",
+                class: "px-2 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md w-40 text-center focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer hover:bg-gray-50" %>
+          <% end %>
+        <% else %>
+          <span class="px-3 py-1.5 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-md min-w-40 text-center">
+            <%= period_display %>
+          </span>
+        <% end %>
+
+        <% if @offset < 0 %>
+          <%= link_to admin_analytics_path(period: @period, offset: @offset + 1),
+              class: "px-2.5 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors",
+              title: "Next #{@period}" do %>→<% end %>
+        <% else %>
+          <span class="px-2.5 py-1.5 rounded-md border border-gray-100 bg-gray-50 text-gray-300 text-sm font-medium cursor-default">→</span>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex items-center gap-1">
+        <span class="px-3 py-1.5 text-sm font-medium text-gray-800 bg-amber-50 border border-amber-200 rounded-md min-w-36 text-center">
+          <%= period_display %>
+        </span>
+        <%= link_to "Clear", admin_analytics_path, class: "px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 rounded-md transition-colors" %>
+      </div>
+    <% end %>
   </div>
 </div>
 

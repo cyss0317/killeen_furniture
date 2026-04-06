@@ -41,6 +41,7 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Address</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Driver</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
           <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
         </tr>
@@ -64,6 +65,18 @@
             </td>
             <td class="px-6 py-4 text-sm text-gray-600">
               <%= order.order_items.sum(:quantity) %> item(s)
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">
+              <% if order.assigned_to %>
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-800">
+                    <%= order.assigned_to.first_name[0] %><%= order.assigned_to.last_name[0] %>
+                  </div>
+                  <span class="font-medium"><%= order.assigned_to.full_name %></span>
+                </div>
+              <% else %>
+                <span class="text-gray-400 italic">Unassigned</span>
+              <% end %>
             </td>
             <td class="px-6 py-4">
               <span class="px-2 py-1 rounded-full text-xs font-medium <%= status_badge_class(order.status) %>">
@@ -104,7 +117,16 @@
         <p class="text-xs text-gray-400 mb-1"><%= order.customer_phone %></p>
         <%= link_to order.shipping_address_line, google_maps_url(order.shipping_address),
             target: "_blank", rel: "noopener",
-            class: "text-xs text-gray-500 mb-3 block hover:text-amber-700 hover:underline" %>
+            class: "text-xs text-gray-500 mb-2 block hover:text-amber-700 hover:underline" %>
+            
+        <div class="text-xs mb-3 flex items-center gap-1 border-gray-100">
+          <span class="text-gray-500">Driver:</span>
+          <% if order.assigned_to %>
+            <span class="font-semibold text-gray-700"><%= order.assigned_to.full_name %></span>
+          <% else %>
+            <span class="italic text-gray-400">Unassigned</span>
+          <% end %>
+        </div>
         <div class="flex gap-2">
           <%= link_to "View Details", delivery_order_path(order),
               class: "flex-1 text-center text-sm font-medium text-amber-700 border border-amber-300 rounded-md py-2 hover:bg-amber-50 transition-colors" %>

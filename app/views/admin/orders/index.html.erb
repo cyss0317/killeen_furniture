@@ -20,7 +20,7 @@
     ["Canceled",        "canceled"],
     ["Refunded",        "refunded"]
   ].each do |label, status| %>
-    <%= link_to label, admin_orders_path(status: status, q: params[:q], address: params[:address], min_price: params[:min_price], max_price: params[:max_price], month: @month),
+    <%= link_to label, admin_orders_path(status: status, q: params[:q], address: params[:address], min_price: params[:min_price], max_price: params[:max_price], year: @year, month: @month),
         class: "px-3 py-1.5 rounded-md font-medium transition-colors #{params[:status].to_s == status.to_s ? 'bg-amber-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}" %>
   <% end %>
 </div>
@@ -44,11 +44,16 @@
             class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
       </div>
 
-      <%# Month Filter %>
+      <%# Date Filters %>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Year</label>
+        <%= f.select :year, options_for_select(((Time.current.year - 5)..(Time.current.year + 1)).to_a.reverse, @year), {},
+            class: "w-24 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
+      </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Month</label>
-        <%= f.month_field :month, value: @month,
-            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+        <%= f.select :month, options_for_select((1..12).map { |m| [Date::MONTHNAMES[m], m.to_s.rjust(2, '0')] }, @month), { include_blank: "All Year" },
+            class: "w-32 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
       </div>
 
       <%# Price range %>
@@ -65,8 +70,8 @@
 
       <div class="flex gap-2">
         <%= f.submit "Search", class: "bg-gray-800 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer" %>
-        <% if params.permit(:q, :address, :min_price, :max_price, :month).values.any? { |v| v.present? } %>
-          <%= link_to "Clear", admin_orders_path(status: params[:status], month: ""),
+        <% if params.permit(:q, :address, :min_price, :max_price, :month).values.any? { |v| v.present? } || params[:year].present? && params[:year] != Time.current.year.to_s %>
+          <%= link_to "Clear", admin_orders_path(status: params[:status]),
               class: "text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50" %>
         <% end %>
       </div>
