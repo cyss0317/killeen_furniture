@@ -33,7 +33,7 @@ class PurchaseOrder < ApplicationRecord
       po.purchase_order_items.delete_all
     end
 
-    ["B2589-44",
+    [ "B2589-44",
      "B1190-44",
      "B1190-72",
      "B1190-97",
@@ -42,8 +42,8 @@ class PurchaseOrder < ApplicationRecord
      "B2589-53",
      "B2589-83",
      "B1190-92",
-     "B376-92"].each { |sku| Product.find_by(sku:)&.delete }
+     "B376-92" ].each { |sku| Product.find_by(sku:)&.delete }
 
-    PurchaseOrder.delete_all
+    super
   end
 end

@@ -82,6 +82,7 @@ module PurchaseOrders
       skipped_rows     = []
       po               = nil
       supplier_category = nil
+      enrich_queue      = []
 
       ActiveRecord::Base.transaction do
         line_items = []
@@ -101,24 +102,23 @@ module PurchaseOrders
             next
           end
 
-          description = item["description"].to_s.strip
+          description   = item["description"].to_s.strip
           category_name = item["category"].to_s.strip
-          series      = item["series"].to_s.strip
-          color       = item["color"].to_s.strip
+          series        = item["series"].to_s.strip
+          color         = item["color"].to_s.strip
 
-          product = Product.find_by(sku: sku)
-          brand_name = supplier_category_name # "Ashley Furniture" or "Generation Trade"
+          product    = Product.find_by(sku: sku)
+          brand_name = supplier_category_name
 
           if product
             updates = {}
             updates[:name]  = description if description.present? && product.name != description
             updates[:brand] = brand_name  if product.brand != brand_name
-            updates[:color] = color        if color.present? && product.color != color
+            updates[:color] = color       if color.present? && product.color != color
             product.update!(updates) if updates.any?
             product.increment!(:stock_quantity, qty)
             updated_products << product unless updated_products.include?(product)
           else
-            # Use the category from Claude if available, else fallback to supplier name
             target_category_name = category_name.presence || supplier_category_name
             supplier_category    = Category.find_or_create_by!(name: target_category_name)
 
@@ -135,14 +135,13 @@ module PurchaseOrders
             created_products << product
           end
 
-          # Best-effort: enrich product details from supplier website
-          enrich_product!(product, series: series, description: description)
+          enrich_queue << { product: product, series: series, description: description }
 
           line_items << {
             product:          product,
             quantity_ordered: qty,
             unit_cost:        price,
-            product_name:     product.reload.name,
+            product_name:     product.name,
             product_sku:      product.sku
           }
         end
@@ -160,6 +159,10 @@ module PurchaseOrders
 
         line_items.each { |attrs| po.purchase_order_items.create!(attrs) }
       end
+
+      # Enrich products after the transaction commits — HTTP calls must not run
+      # inside a DB transaction (holds connection open, risks rollback on network error)
+      enrich_queue.each { |args| enrich_product!(**args) }
 
       Result.new(
         purchase_order:   po,
@@ -183,8 +186,7 @@ module PurchaseOrders
       end
     end
 
-    def enrich_product!(product, series:, description:)
-      # binding.pry
+    def enrich_product!(product:, series:, description:)
       case @supplier
       when "generation_trade"
         Products::FetchFromGenerationTrade.enrich!(product, series: series, description: description)

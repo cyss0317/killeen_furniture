@@ -28,7 +28,7 @@
                 (<%= parent.subcategories.size %> subcategories)
               </span>
             <% end %>
-            <div class="flex flex-wrap gap-1 mt-1.5" data-pills-container>
+            <div class="flex flex-wrap gap-2 mt-2" data-pills-container>
               <% parent.products.sort_by(&:name).each do |product| %>
                 <%= link_to product.name, admin_product_path(product),
                     draggable: true,
@@ -46,10 +46,19 @@
           <td class="px-6 py-3 text-right">
             <div class="flex justify-end items-center gap-3">
               <%= link_to "Edit", edit_admin_category_path(parent), class: "text-sm text-amber-700 hover:underline font-medium" %>
-              <% if parent.products.empty? && parent.subcategories.empty? %>
+              <% blockers = []
+                 blockers << pluralize(parent.products.size,     "product")     if parent.products.any?
+                 blockers << pluralize(parent.subcategories.size, "subcategory") if parent.subcategories.any? %>
+              <% if blockers.empty? %>
                 <%= button_to "Delete", admin_category_path(parent), method: :delete,
                     form: { class: "contents", data: { turbo_confirm: "Delete '#{parent.name}'?" } },
                     class: "text-sm text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0" %>
+              <% else %>
+                <button type="button" disabled
+                        title="Move <%= blockers.to_sentence %> out first"
+                        class="text-sm text-gray-300 font-medium bg-transparent border-0 cursor-not-allowed p-0">
+                  Delete
+                </button>
               <% end %>
             </div>
           </td>
@@ -84,6 +93,12 @@
                   <%= button_to "Delete", admin_category_path(child), method: :delete,
                       form: { class: "contents", data: { turbo_confirm: "Delete '#{child.name}'?" } },
                       class: "text-sm text-red-600 hover:underline font-medium bg-transparent border-0 cursor-pointer p-0" %>
+                <% else %>
+                  <button type="button" disabled
+                          title="Move <%= pluralize(child.products.size, 'product') %> out first"
+                          class="text-sm text-gray-300 font-medium bg-transparent border-0 cursor-not-allowed p-0">
+                    Delete
+                  </button>
                 <% end %>
               </div>
             </td>

@@ -10,7 +10,7 @@ module Orders
         )
       end
 
-      OrderMailer.delivery_assigned(order, assigned_to).deliver_later
+      OrderMailer.delivery_assigned(order, assigned_to).deliver_now
 
       order
     end

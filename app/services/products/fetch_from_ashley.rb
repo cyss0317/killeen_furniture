@@ -42,7 +42,7 @@ module Products
     # Build the Ashley product page URL from SKU + name info.
     # Ashley URL pattern: /p/{series-description-slug}/{SKU}.html
     def product_url
-      slug_source = [@series, @description].select(&:present?).join(" ")
+      slug_source = [ @series, @description ].select(&:present?).join(" ")
       slug_source = @product.name if slug_source.blank?
 
       slug = slug_source
@@ -71,42 +71,6 @@ module Products
       nil
     end
 
-    # parse_product_data is now mostly handled by the scraper, but we keep the structure
-    def parse_product_data(scraper_result_data)
-      scraper_result_data
-    end
-
-    def safe_get(uri, redirects_left = 5)
-      return nil if redirects_left.zero?
-
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl      = (uri.scheme == "https")
-      http.verify_mode  = OpenSSL::SSL::VERIFY_PEER
-      http.open_timeout = TIMEOUT
-      http.read_timeout = TIMEOUT
-
-      req = Net::HTTP::Get.new(uri.request_uri)
-      req["User-Agent"]      = USER_AGENT
-      req["Accept"]          = "text/html,application/xhtml+xml"
-      req["Accept-Language"] = "en-US,en;q=0.9"
-
-      response = http.request(req)
-
-      case response
-      when Net::HTTPSuccess
-        response.body
-      when Net::HTTPRedirection
-        location = response["Location"]
-        return nil if location.blank?
-        redirect_uri = URI.parse(location.start_with?("http") ? location : "#{BASE_URL}#{location}")
-        safe_get(redirect_uri, redirects_left - 1)
-      else
-        nil
-      end
-    end
-
-    # Extract product data from the HTML — try JSON-LD first, then Open Graph.
-    # Map results — the scraper already does the heavy lifting
     def parse_product_data(data)
       data
     end

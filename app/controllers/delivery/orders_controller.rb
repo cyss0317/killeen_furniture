@@ -44,9 +44,9 @@ module Delivery
       admin_email = ENV["ADMIN_EMAIL"].presence
       if admin_email
         admin = User.find_by(email: admin_email)
-        OrderMailer.order_delivered(@order, admin).deliver_later if admin
+        OrderMailer.order_delivered(@order, admin).deliver_now if admin
       end
-      OrderMailer.order_delivered_customer(@order).deliver_later
+      OrderMailer.order_delivered_customer(@order).deliver_now
 
       redirect_to delivery_orders_path, notice: "Order #{@order.order_number} marked as delivered."
     rescue => e
@@ -72,7 +72,7 @@ module Delivery
       end
 
       if new_status == :out_for_delivery
-        OrderMailer.out_for_delivery(@order).deliver_later
+        OrderMailer.out_for_delivery(@order).deliver_now
       end
 
       redirect_to delivery_order_path(@order), notice: "Order status updated to #{new_status.to_s.humanize.downcase}."

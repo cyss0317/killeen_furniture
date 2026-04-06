@@ -44,8 +44,8 @@ class WebhooksController < ApplicationController
       clear_cart_for_order(order)
     end
 
-    OrderMailer.confirmation(order).deliver_later
-    OrderMailer.admin_notification(order).deliver_later
+    OrderMailer.confirmation(order).deliver_now
+    OrderMailer.admin_notification(order).deliver_now
   rescue => e
     Rails.logger.error "[Stripe Webhook] Failed to process payment success for #{intent.id}: #{e.message}"
     raise e
