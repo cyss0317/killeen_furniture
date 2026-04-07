@@ -1,35 +1,35 @@
 <div class="min-h-[70vh] flex items-center justify-center py-12 px-4">
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Welcome back</h1>
-      <p class="mt-2 text-gray-600">Sign in to your account</p>
+      <h1 class="text-3xl font-bold text-warm-950">Welcome back</h1>
+      <p class="mt-2 text-warm-700">Sign in to your account</p>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+    <div class="bg-warm-50 rounded-2xl border border-warm-400 p-8">
       <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
         <div class="space-y-5">
           <div>
-            <%= f.label :email, class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.label :email, class: "block text-sm font-medium text-warm-800 mb-1" %>
             <%= f.email_field :email, autofocus: true, autocomplete: "email",
-                class: "w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent",
+                class: "w-full px-4 py-2.5 border border-warm-400 rounded-xl bg-white text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent",
                 placeholder: "you@example.com" %>
           </div>
 
           <div>
-            <%= f.label :password, class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.label :password, class: "block text-sm font-medium text-warm-800 mb-1" %>
             <%= f.password_field :password, autocomplete: "current-password",
-                class: "w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent",
+                class: "w-full px-4 py-2.5 border border-warm-400 rounded-xl bg-white text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent",
                 placeholder: "••••••••" %>
           </div>
 
           <% if devise_mapping.rememberable? %>
             <div class="flex items-center">
-              <%= f.check_box :remember_me, class: "w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500" %>
-              <%= f.label :remember_me, class: "ml-2 text-sm text-gray-600" %>
+              <%= f.check_box :remember_me, class: "w-4 h-4 accent-warm-700 border-warm-400 rounded" %>
+              <%= f.label :remember_me, class: "ml-2 text-sm text-warm-600" %>
             </div>
           <% end %>
 
-          <%= f.submit "Sign in", class: "w-full bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer mt-2" %>
+          <%= f.submit "Sign in", class: "w-full bg-warm-800 hover:bg-warm-700 text-warm-50 font-semibold py-3 px-6 rounded-full transition-colors cursor-pointer mt-2" %>
         </div>
       <% end %>
 
@@ -37,17 +37,17 @@
     </div>
 
     <% if Rails.env.development? %>
-      <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-        <p class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-3">Dev Quick Login</p>
+      <div class="mt-6 p-4 bg-warm-100 border border-warm-400 rounded-xl">
+        <p class="text-xs font-semibold text-warm-600 uppercase tracking-wide mb-3">Dev Quick Login</p>
         <div class="flex flex-col gap-2">
           <button type="button"
                   onclick="quickLogin('cyss0317@gmail.com', 'asdfasdf')"
-                  class="w-full text-sm font-medium bg-white border border-amber-300 text-amber-800 py-2 px-4 rounded-lg hover:bg-amber-100 transition-colors text-left">
+                  class="w-full text-sm font-medium bg-white border border-warm-400 text-warm-800 py-2 px-4 rounded-lg hover:bg-warm-200 transition-colors text-left">
             Login as Admin (cyss0317@gmail.com)
           </button>
           <button type="button"
                   onclick="quickLogin('delivery@gmail.com', 'asdfasdf')"
-                  class="w-full text-sm font-medium bg-white border border-amber-300 text-amber-800 py-2 px-4 rounded-lg hover:bg-amber-100 transition-colors text-left">
+                  class="w-full text-sm font-medium bg-white border border-warm-400 text-warm-800 py-2 px-4 rounded-lg hover:bg-warm-200 transition-colors text-left">
             Login as Delivery (delivery@gmail.com)
           </button>
         </div>

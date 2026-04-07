@@ -3,118 +3,116 @@
 <% content_for :head do %><meta name="turbo-cache-control" content="no-store"><% end %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6">
-    <nav class="text-sm text-gray-400 mb-2">
-      <%= link_to "Home", root_path, class: "hover:text-gray-600" %>
-      <span class="mx-2">/</span>
-      <% if @category.parent %>
-        <%= link_to @category.parent.name, category_path(@category.parent), class: "hover:text-gray-600" %>
-        <span class="mx-2">/</span>
-      <% end %>
-      <span class="text-gray-900 font-medium"><%= @category.name %></span>
-    </nav>
-    <h1 class="text-3xl font-bold text-gray-900"><%= @category.name %></h1>
 
-    <%# Sub-category chips: on a subcategory page show all siblings; on a root page show own children %>
+  <!-- Breadcrumb -->
+  <div class="mb-6">
+    <nav class="flex items-center gap-2 text-sm text-warm-600 mb-3">
+      <%= link_to "Home", root_path, class: "hover:text-warm-700 transition-colors" %>
+      <span class="text-warm-300">/</span>
+      <% if @category.parent %>
+        <%= link_to @category.parent.name, category_path(@category.parent), class: "hover:text-warm-700 transition-colors" %>
+        <span class="text-warm-300">/</span>
+      <% end %>
+      <span class="text-warm-900 font-medium"><%= @category.name %></span>
+    </nav>
+    <h1 class="text-3xl font-bold text-warm-950"><%= @category.name %></h1>
+
+    <!-- Sub-category chips -->
     <% nav_subcats = @category.parent ? @category.parent.subcategories.ordered : @category.subcategories.ordered %>
     <% if nav_subcats.any? %>
-      <div class="flex flex-wrap gap-2 mt-3">
-        <%# "All [Parent]" pill so user can step back up %>
+      <div class="flex flex-wrap gap-2 mt-4">
         <% if @category.parent %>
           <%= link_to "All #{@category.parent.name}", category_path(@category.parent),
-              class: "text-sm px-3 py-1 bg-white text-gray-600 rounded-full border border-gray-300 hover:bg-gray-50 transition-colors" %>
+              class: "text-sm px-4 py-1.5 bg-warm-50 text-warm-600 rounded-full border border-warm-400 hover:bg-warm-200 transition-colors" %>
         <% end %>
         <% nav_subcats.each do |sub| %>
           <% if sub == @category %>
-            <span class="text-sm px-3 py-1 bg-amber-700 text-white rounded-full border border-amber-700 font-medium cursor-default select-none">
+            <span class="text-sm px-4 py-1.5 bg-warm-800 text-warm-50 rounded-full font-medium cursor-default select-none">
               <%= sub.name %>
             </span>
           <% else %>
             <%= link_to sub.name, category_path(sub),
-                class: "text-sm px-3 py-1 bg-amber-50 text-amber-800 rounded-full hover:bg-amber-100 border border-amber-200 transition-colors" %>
+                class: "text-sm px-4 py-1.5 bg-warm-50 text-warm-700 rounded-full border border-warm-400 hover:bg-warm-200 transition-colors" %>
           <% end %>
         <% end %>
       </div>
     <% end %>
   </div>
 
-  <%# Filter bar %>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+  <!-- Filter bar -->
+  <div class="bg-warm-50 rounded-2xl border border-warm-400 p-4 mb-6" data-controller="reveal">
     <%= form_with url: category_path(@category), method: :get, data: { turbo: false } do |f| %>
       <div class="flex flex-wrap gap-x-4 gap-y-3 items-end">
-        <%# Search by name / SKU %>
+
         <div class="flex-1 min-w-48">
-          <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+          <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-1.5">Search</label>
           <%= f.search_field :q, value: params[:q], placeholder: "Name or SKU…",
-              class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+              class: "w-full text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent" %>
         </div>
 
-        <%# In Stock — auto-submits on toggle %>
         <label class="flex items-center gap-2 cursor-pointer h-9">
           <%= f.check_box :in_stock, checked: params[:in_stock] == "1",
-              class: "rounded border-gray-300 text-amber-700 focus:ring-amber-500",
+              class: "rounded border-warm-400 accent-warm-700",
               onchange: "this.form.submit()" %>
-          <span class="text-sm text-gray-700">In Stock Only</span>
+          <span class="text-sm text-warm-700">In Stock Only</span>
         </label>
 
-        <%# Sort — auto-submits on change %>
         <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1">Sort by</label>
+          <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-1.5">Sort by</label>
           <%= f.select :sort,
               options_for_select([["Featured", ""], ["Price: Low to High", "price_asc"], ["Price: High to Low", "price_desc"]], params[:sort]),
               {},
-              class: "text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+              class: "text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 focus:outline-none focus:ring-2 focus:ring-warm-400",
               onchange: "this.form.submit()" %>
         </div>
 
-        <%# Color — auto-submits on change %>
         <% if @colors.any? %>
           <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">Color / Finish</label>
+            <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-1.5">Color / Finish</label>
             <%= f.select :color,
                 options_for_select([["All Colors", ""]] + @colors.map { |c| [c, c] }, params[:color]),
                 {},
-                class: "text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                class: "text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 focus:outline-none focus:ring-2 focus:ring-warm-400",
                 onchange: "this.form.submit()" %>
           </div>
         <% end %>
 
-        <%# Price Range — submit via button %>
         <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1">Price range</label>
+          <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-1.5">Price range</label>
           <div class="flex items-center gap-2">
             <%= f.number_field :min_price, value: params[:min_price], placeholder: "Min $", min: 0,
-                class: "w-24 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
-            <span class="text-gray-400 text-sm">–</span>
+                class: "w-24 text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400" %>
+            <span class="text-warm-300 text-sm">–</span>
             <%= f.number_field :max_price, value: params[:max_price], placeholder: "Max $", min: 0,
-                class: "w-24 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
-            <%= f.submit "Apply", class: "text-sm bg-amber-800 text-white px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer transition-colors" %>
+                class: "w-24 text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400" %>
+            <%= f.submit "Apply", class: "text-sm bg-warm-800 text-warm-50 px-5 py-2 rounded-full hover:bg-warm-700 cursor-pointer transition-colors" %>
           </div>
         </div>
 
         <% active_filters = params.permit(:q, :in_stock, :sort, :min_price, :max_price, :color).values.any?(&:present?) %>
         <% if active_filters %>
           <%= link_to "Clear filters", category_path(@category),
-              class: "text-sm text-gray-400 hover:text-gray-600 py-2 underline underline-offset-2" %>
+              class: "text-sm text-warm-600 hover:text-warm-900 py-2 underline underline-offset-2" %>
         <% end %>
       </div>
     <% end %>
   </div>
 
   <% if @products.empty? %>
-    <div class="text-center py-16 bg-white rounded-xl border border-gray-100">
-      <h3 class="text-gray-500 font-medium">No products in this category yet</h3>
-      <%= link_to "Browse All Products", products_path, class: "mt-4 inline-block text-amber-800 hover:underline" %>
+    <div class="text-center py-16 bg-warm-50 rounded-2xl border border-warm-400">
+      <h3 class="text-warm-700 font-medium">No products in this category yet</h3>
+      <%= link_to "Browse All Products", products_path, class: "mt-4 inline-block text-warm-700 hover:underline underline-offset-2" %>
     </div>
   <% else %>
-    <p class="text-sm text-gray-500 mb-4"><%= @pagy.count %> products</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <% @products.each do |product| %>
-        <%= render "products/product_card", product: product %>
+    <p class="text-sm text-warm-600 mb-4"><%= @pagy.count %> products</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <% @products.each_with_index do |product, i| %>
+        <%= render "products/product_card", product: product, reveal_delay: (i % 4) * 70 %>
       <% end %>
     </div>
     <% if @pagy.pages > 1 %>
       <div class="mt-8 flex justify-center"><%== @pagy.series_nav %></div>
     <% end %>
   <% end %>
+
 </div>

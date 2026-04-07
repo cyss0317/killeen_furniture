@@ -27,39 +27,41 @@
 <% end %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
   <!-- Breadcrumb -->
-  <nav class="flex mb-6 text-sm" aria-label="Breadcrumb">
-    <%= link_to "Home", root_path, class: "text-gray-400 hover:text-gray-600" %>
-    <span class="mx-2 text-gray-300">/</span>
-    <%= link_to "Shop", products_path, class: "text-gray-400 hover:text-gray-600" %>
-    <span class="mx-2 text-gray-300">/</span>
-    <span class="text-gray-900 font-medium"><%= @product.name %></span>
+  <nav class="flex items-center gap-2 mb-8 text-sm" aria-label="Breadcrumb">
+    <%= link_to "Home", root_path, class: "text-warm-600 hover:text-warm-900 transition-colors" %>
+    <span class="text-warm-300">/</span>
+    <%= link_to "Shop", products_path, class: "text-warm-600 hover:text-warm-900 transition-colors" %>
+    <span class="text-warm-300">/</span>
+    <span class="text-warm-800 font-medium truncate max-w-xs"><%= @product.name %></span>
   </nav>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12" data-controller="reveal">
+
     <!-- Images -->
     <div>
       <% if @product.vendor_image_urls.present? %>
-        <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4">
+        <div class="aspect-square bg-warm-200 rounded-2xl overflow-hidden mb-3">
           <%= image_tag @product.vendor_image_urls.first,
               class: "w-full h-full object-cover",
               alt: @product.name,
               id: "main-product-image",
               loading: "eager",
-              onerror: "this.onerror=null;this.style.display='none';this.parentElement.classList.add('flex','items-center','justify-center');this.parentElement.innerHTML='<svg class=\'w-24 h-24 text-gray-300\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg>';" %>
+              onerror: "this.onerror=null;this.style.display='none';this.parentElement.classList.add('flex','items-center','justify-center');this.parentElement.innerHTML='<svg class=\'w-24 h-24 text-warm-300\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg>';" %>
         </div>
         <% if @product.vendor_image_urls.size > 1 %>
           <div class="grid grid-cols-4 gap-2">
             <% @product.vendor_image_urls.each_with_index do |url, idx| %>
-              <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 <%= idx == 0 ? 'border-amber-500' : 'border-transparent' %> hover:border-amber-500 transition-colors"
-                   onclick="document.getElementById('main-product-image').src = '<%= url %>'; this.parentElement.querySelectorAll('div').forEach(d => d.classList.replace('border-amber-500','border-transparent')); this.classList.replace('border-transparent','border-amber-500');">
+              <div class="aspect-square bg-warm-200 rounded-xl overflow-hidden cursor-pointer border-2 <%= idx == 0 ? 'border-warm-600' : 'border-transparent' %> hover:border-warm-500 transition-colors"
+                   onclick="document.getElementById('main-product-image').src = '<%= url %>'; this.parentElement.querySelectorAll('div').forEach(d => d.classList.replace('border-warm-600','border-transparent')); this.classList.replace('border-transparent','border-warm-600');">
                 <%= image_tag url, class: "w-full h-full object-cover", alt: @product.name, loading: "lazy" %>
               </div>
             <% end %>
           </div>
         <% end %>
       <% elsif @product.images.attached? %>
-        <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4">
+        <div class="aspect-square bg-warm-200 rounded-2xl overflow-hidden mb-3">
           <%= image_tag @product.primary_image.variant(resize_to_fill: [600, 600]),
               class: "w-full h-full object-cover",
               alt: @product.name,
@@ -68,7 +70,7 @@
         <% if @product.images.count > 1 %>
           <div class="grid grid-cols-4 gap-2">
             <% @product.images.each do |image| %>
-              <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-amber-500 transition-colors"
+              <div class="aspect-square bg-warm-200 rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-warm-500 transition-colors"
                    onclick="document.getElementById('main-product-image').src = '<%= url_for(image.variant(resize_to_fill: [600, 600])) %>'">
                 <%= image_tag image.variant(resize_to_fill: [150, 150]), class: "w-full h-full object-cover", alt: @product.name %>
               </div>
@@ -76,39 +78,40 @@
           </div>
         <% end %>
       <% else %>
-        <div class="aspect-square bg-gray-100 rounded-xl flex items-center justify-center">
-          <svg class="w-24 h-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <div class="aspect-square bg-warm-200 rounded-2xl flex items-center justify-center">
+          <svg class="w-24 h-24 text-warm-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
         </div>
       <% end %>
     </div>
 
     <!-- Product Info -->
-    <div>
+    <div class="flex flex-col">
       <% if @product.brand.present? %>
-        <p class="text-sm text-amber-700 font-medium mb-2"><%= @product.brand %></p>
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-600 mb-3"><%= @product.brand %></p>
       <% end %>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @product.name %></h1>
-      <p class="text-sm text-gray-400 mb-4">SKU: <%= @product.sku %></p>
 
-      <div class="flex items-baseline gap-3 mb-6">
-        <span class="text-3xl font-bold text-gray-900"><%= number_to_currency(@product.selling_price) %></span>
+      <h1 class="text-3xl font-bold text-warm-950 leading-tight mb-2"><%= @product.name %></h1>
+      <p class="text-sm text-warm-600 mb-5">SKU: <%= @product.sku %></p>
+
+      <div class="mb-5">
+        <span class="text-3xl font-bold text-warm-900"><%= number_to_currency(@product.selling_price) %></span>
       </div>
 
       <% if @product.short_description.present? %>
-        <p class="text-gray-600 leading-relaxed mb-6"><%= @product.short_description %></p>
+        <p class="text-warm-600 leading-relaxed mb-6 text-sm"><%= @product.short_description %></p>
       <% end %>
 
       <!-- Stock Status -->
       <div class="mb-6">
         <% if @product.in_stock? %>
-          <span class="inline-flex items-center gap-1.5 text-green-700 bg-green-50 px-3 py-1 rounded-full text-sm font-medium">
+          <span class="inline-flex items-center gap-1.5 text-green-700 bg-green-50 border border-green-100 px-3 py-1 rounded-full text-sm font-medium">
             <span class="w-2 h-2 bg-green-500 rounded-full"></span>
             In Stock (<%= @product.stock_quantity %> available)
           </span>
         <% else %>
-          <span class="inline-flex items-center gap-1.5 text-red-600 bg-red-50 px-3 py-1 rounded-full text-sm font-medium">
+          <span class="inline-flex items-center gap-1.5 text-red-600 bg-red-50 border border-red-100 px-3 py-1 rounded-full text-sm font-medium">
             <span class="w-2 h-2 bg-red-400 rounded-full"></span>
             Out of Stock
           </span>
@@ -119,52 +122,44 @@
       <% if @product.in_stock? %>
         <%= form_with url: add_item_cart_path, method: :post, data: { turbo: true } do |f| %>
           <%= f.hidden_field :product_id, value: @product.id %>
-          <div class="flex gap-4 mb-4">
-            <div class="flex items-center border border-gray-300 rounded-md">
-              <button type="button" onclick="this.nextElementSibling.value = Math.max(1, parseInt(this.nextElementSibling.value) - 1)"
-                      class="px-3 py-2 text-gray-600 hover:text-gray-900 font-bold">−</button>
+          <div class="flex gap-3 mb-4">
+            <div class="flex items-center border border-warm-400 rounded-full bg-white overflow-hidden">
+              <button type="button"
+                      onclick="this.nextElementSibling.value = Math.max(1, parseInt(this.nextElementSibling.value) - 1)"
+                      class="px-4 py-2.5 text-warm-600 hover:text-warm-900 font-bold text-lg leading-none">−</button>
               <%= f.number_field :quantity, value: 1, min: 1, max: @product.stock_quantity,
-                  class: "w-16 text-center border-0 focus:ring-0 text-sm font-medium", id: "qty-field" %>
-              <button type="button" onclick="this.previousElementSibling.value = Math.min(<%= @product.stock_quantity %>, parseInt(this.previousElementSibling.value) + 1)"
-                      class="px-3 py-2 text-gray-600 hover:text-gray-900 font-bold">+</button>
+                  class: "w-12 text-center border-0 focus:ring-0 text-sm font-semibold text-warm-900 bg-transparent",
+                  id: "qty-field" %>
+              <button type="button"
+                      onclick="this.previousElementSibling.value = Math.min(<%= @product.stock_quantity %>, parseInt(this.previousElementSibling.value) + 1)"
+                      class="px-4 py-2.5 text-warm-600 hover:text-warm-900 font-bold text-lg leading-none">+</button>
             </div>
             <%= f.submit "Add to Cart",
-                class: "flex-1 bg-amber-800 text-white font-semibold py-3 px-6 rounded-md hover:bg-amber-900 transition-colors cursor-pointer text-center" %>
+                class: "flex-1 bg-warm-800 text-warm-50 font-semibold py-3 px-6 rounded-full hover:bg-warm-700 transition-colors cursor-pointer text-center" %>
           </div>
         <% end %>
       <% end %>
 
       <!-- Product Details -->
-      <div class="border-t border-gray-100 pt-6 space-y-3">
-        <% if @product.material.present? %>
-          <div class="flex text-sm">
-            <span class="w-28 text-gray-500 font-medium">Material</span>
-            <span class="text-gray-900"><%= @product.material %></span>
-          </div>
-        <% end %>
-        <% if @product.color.present? %>
-          <div class="flex text-sm">
-            <span class="w-28 text-gray-500 font-medium">Color</span>
-            <span class="text-gray-900"><%= @product.color %></span>
-          </div>
-        <% end %>
-        <% if (dims = @product.formatted_dimensions) %>
-          <div class="flex text-sm">
-            <span class="w-28 text-gray-500 font-medium">Dimensions</span>
-            <span class="text-gray-900"><%= dims %></span>
-          </div>
-        <% end %>
-        <% if @product.weight.present? %>
-          <div class="flex text-sm">
-            <span class="w-28 text-gray-500 font-medium">Weight</span>
-            <span class="text-gray-900"><%= @product.weight %> lbs</span>
-          </div>
+      <div class="border-t border-warm-200 pt-6 space-y-3 mt-2">
+        <% [
+          ["Material",   @product.material],
+          ["Color",      @product.color],
+          ["Dimensions", @product.try(:formatted_dimensions)],
+          ["Weight",     @product.weight.present? ? "#{@product.weight} lbs" : nil],
+        ].each do |label, value| %>
+          <% if value.present? %>
+            <div class="flex text-sm">
+              <span class="w-28 text-warm-600 font-medium"><%= label %></span>
+              <span class="text-warm-800"><%= value %></span>
+            </div>
+          <% end %>
         <% end %>
         <% if @product.category.present? %>
           <div class="flex text-sm">
-            <span class="w-28 text-gray-500 font-medium">Category</span>
+            <span class="w-28 text-warm-600 font-medium">Category</span>
             <%= link_to @product.category.name, category_path(@product.category),
-                class: "text-amber-800 hover:underline" %>
+                class: "text-warm-700 hover:text-warm-950 underline underline-offset-2" %>
           </div>
         <% end %>
       </div>
@@ -174,27 +169,31 @@
   <!-- Full Description -->
   <% has_rich_description = @product.description&.body&.present? %>
   <% if has_rich_description || @product.short_description.present? %>
-    <div class="mt-12 border-t border-gray-100 pt-8">
-      <h2 class="text-xl font-bold text-gray-900 mb-4">Product Description</h2>
+    <div class="mt-12 border-t border-warm-200 pt-8" data-controller="reveal">
+      <h2 class="text-xl font-bold text-warm-950 mb-4">Product Description</h2>
       <% if has_rich_description %>
-        <div class="prose max-w-none">
+        <div class="prose max-w-none text-warm-700">
           <%= @product.description %>
         </div>
       <% elsif @product.short_description.present? %>
-        <p class="text-gray-600 leading-relaxed text-base"><%= @product.short_description %></p>
+        <p class="text-warm-600 leading-relaxed text-base"><%= @product.short_description %></p>
       <% end %>
     </div>
   <% end %>
 
   <!-- Related Products -->
   <% if @related.any? %>
-    <section class="mt-16">
-      <h2 class="text-xl font-bold text-gray-900 mb-6">You Might Also Like</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <% @related.each do |product| %>
-          <%= render "products/product_card", product: product %>
+    <section class="mt-16" data-controller="reveal">
+      <div class="mb-6">
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-600 mb-1">More to Explore</p>
+        <h2 class="text-xl font-bold text-warm-950">You Might Also Like</h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <% @related.each_with_index do |product, i| %>
+          <%= render "products/product_card", product: product, reveal_delay: i * 80 %>
         <% end %>
       </div>
     </section>
   <% end %>
+
 </div>

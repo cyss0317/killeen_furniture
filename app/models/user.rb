@@ -24,6 +24,10 @@ class User < ApplicationRecord
     super
   end
 
+  def confirmation_required?
+    Rails.env.production?
+  end
+
   enum :role,       { customer: 0, admin: 1, super_admin: 2 }, default: :customer
   enum :admin_kind, { ops: 0, delivery: 1 }, prefix: :kind, allow_nil: true
   enum :pay_type,   { hourly: 0, monthly: 1 }, allow_nil: true

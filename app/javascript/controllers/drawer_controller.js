@@ -10,7 +10,7 @@ export default class extends Controller {
   }
 
   open() {
-    this.panelTarget.classList.remove("translate-x-full")
+    this.panelTarget.classList.remove("-translate-x-full")
     this.panelTarget.classList.add("translate-x-0")
     this.backdropTarget.classList.remove("opacity-0", "pointer-events-none")
     this.backdropTarget.classList.add("opacity-100")
@@ -21,7 +21,7 @@ export default class extends Controller {
 
   close() {
     this.panelTarget.classList.remove("translate-x-0")
-    this.panelTarget.classList.add("translate-x-full")
+    this.panelTarget.classList.add("-translate-x-full")
     this.backdropTarget.classList.remove("opacity-100")
     this.backdropTarget.classList.add("opacity-0", "pointer-events-none")
     document.body.style.overflow = ""

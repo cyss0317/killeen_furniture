@@ -107,7 +107,24 @@ module Admin
         return
       end
 
-      if @order.update(status: new_status)
+      attrs = { status: new_status }
+      if new_status == :delivered
+        attrs[:delivered_at] = Time.current
+        attrs[:delivered_by] = current_user
+      end
+
+      if @order.update(attrs)
+        case new_status
+        when :out_for_delivery
+          OrderMailer.out_for_delivery(@order).deliver_now
+        when :delivered
+          admin_email = ENV["ADMIN_EMAIL"].presence
+          if admin_email
+            admin = User.find_by(email: admin_email)
+            OrderMailer.order_delivered(@order, admin).deliver_now if admin
+          end
+          OrderMailer.order_delivered_customer(@order).deliver_now
+        end
         redirect_to admin_order_path(@order), notice: "Order status updated to #{@order.status.humanize.downcase}."
       else
         redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence

@@ -4,63 +4,66 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex flex-col lg:flex-row gap-8">
+
     <!-- Sidebar Filters -->
-    <aside class="lg:w-64 flex-shrink-0">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-20">
-        <h2 class="font-bold text-gray-900 mb-4">Filters</h2>
+    <aside class="lg:w-60 flex-shrink-0">
+      <div class="bg-warm-50 rounded-2xl border border-warm-400 p-6 sticky top-20" data-controller="reveal">
+        <h2 class="font-bold text-warm-900 text-sm uppercase tracking-widest mb-5">Filters</h2>
 
         <%= form_with url: products_path, method: :get, data: { turbo: false } do |f| %>
           <!-- Search -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+          <div class="mb-5">
+            <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-2">Search</label>
             <%= f.search_field :q, value: params[:q], placeholder: "Name, SKU, brand...",
-                class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent" %>
+                class: "w-full text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent" %>
           </div>
 
           <!-- Category -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <div class="mb-5">
+            <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-2">Category</label>
             <%= f.select :category_id,
                 options_for_select([["All Categories", ""]] + @categories.map { |c| [c.name, c.id] }, params[:category_id]),
                 {},
-                class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                class: "w-full text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 focus:outline-none focus:ring-2 focus:ring-warm-400",
                 onchange: "this.form.submit()" %>
           </div>
 
           <!-- Color / Finish -->
           <% if @colors.any? %>
-            <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Color / Finish</label>
+            <div class="mb-5">
+              <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-2">Color / Finish</label>
               <%= f.select :color,
                   options_for_select([["All Colors", ""]] + @colors.map { |c| [c, c] }, params[:color]),
                   {},
-                  class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  class: "w-full text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 focus:outline-none focus:ring-2 focus:ring-warm-400",
                   onchange: "this.form.submit()" %>
             </div>
           <% end %>
 
           <!-- Price Range -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+          <div class="mb-5">
+            <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-2">Price Range</label>
             <div class="flex gap-2">
               <%= f.number_field :min_price, value: params[:min_price], placeholder: "Min", min: 0,
-                  class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+                  class: "w-full text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400" %>
               <%= f.number_field :max_price, value: params[:max_price], placeholder: "Max", min: 0,
-                  class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+                  class: "w-full text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-warm-400" %>
             </div>
           </div>
 
           <!-- In Stock Only -->
-          <div class="mb-6">
+          <div class="mb-5">
             <label class="flex items-center gap-2 cursor-pointer">
-              <%= f.check_box :in_stock, checked: params[:in_stock] == "1", class: "rounded border-gray-300 text-amber-700 focus:ring-amber-500", onchange: "this.form.submit()" %>
-              <span class="text-sm text-gray-700">In Stock Only</span>
+              <%= f.check_box :in_stock, checked: params[:in_stock] == "1",
+                  class: "rounded border-warm-400 accent-warm-700",
+                  onchange: "this.form.submit()" %>
+              <span class="text-sm text-warm-700">In Stock Only</span>
             </label>
           </div>
 
           <!-- Sort -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+          <div class="mb-5">
+            <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-2">Sort By</label>
             <%= f.select :sort,
                 options_for_select([
                   ["Featured", ""],
@@ -69,12 +72,12 @@
                   ["Price: High to Low", "price_desc"]
                 ], params[:sort]),
                 {},
-                class: "w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
+                class: "w-full text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 focus:outline-none focus:ring-2 focus:ring-warm-400",
                 onchange: "this.form.submit()" %>
           </div>
 
-          <%= f.submit "Apply Filters", class: "w-full bg-amber-800 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-amber-900 transition-colors cursor-pointer" %>
-          <%= link_to "Clear Filters", products_path, class: "block text-center text-sm text-gray-500 hover:text-gray-700 mt-2" %>
+          <%= f.submit "Apply Filters", class: "w-full bg-warm-800 text-warm-50 text-sm font-semibold py-2.5 px-4 rounded-full hover:bg-warm-700 transition-colors cursor-pointer" %>
+          <%= link_to "Clear Filters", products_path, class: "block text-center text-sm text-warm-600 hover:text-warm-900 mt-3" %>
         <% end %>
       </div>
     </aside>
@@ -82,33 +85,34 @@
     <!-- Product Grid -->
     <div class="flex-1">
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">
-          <% if params[:q].present? %>
-            Results for "<%= params[:q] %>"
-          <% else %>
-            All Furniture
-          <% end %>
-        </h1>
-        <p class="text-sm text-gray-500"><%= @pagy.count %> products</p>
+        <div>
+          <h1 class="text-2xl font-bold text-warm-950">
+            <% if params[:q].present? %>
+              Results for "<%= params[:q] %>"
+            <% else %>
+              All Furniture
+            <% end %>
+          </h1>
+        </div>
+        <p class="text-sm text-warm-600"><%= @pagy.count %> products</p>
       </div>
 
       <% if @products.empty? %>
-        <div class="text-center py-16 bg-white rounded-xl border border-gray-100">
-          <svg class="mx-auto w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+        <div class="text-center py-16 bg-warm-50 rounded-2xl border border-warm-400">
+          <svg class="mx-auto w-12 h-12 text-warm-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
           </svg>
-          <h3 class="text-gray-500 font-medium">No products found</h3>
-          <p class="text-sm text-gray-400 mt-1">Try adjusting your filters</p>
-          <%= link_to "Clear Filters", products_path, class: "mt-4 inline-block text-amber-800 hover:underline text-sm" %>
+          <h3 class="text-warm-700 font-medium">No products found</h3>
+          <p class="text-sm text-warm-600 mt-1">Try adjusting your filters</p>
+          <%= link_to "Clear Filters", products_path, class: "mt-4 inline-block text-warm-700 hover:underline text-sm" %>
         </div>
       <% else %>
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-          <% @products.each do |product| %>
-            <%= render "products/product_card", product: product %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          <% @products.each_with_index do |product, i| %>
+            <%= render "products/product_card", product: product, reveal_delay: (i % 3) * 80 %>
           <% end %>
         </div>
 
-        <!-- Pagination -->
         <% if @pagy.pages > 1 %>
           <div class="mt-8 flex justify-center">
             <%== @pagy.series_nav %>
@@ -116,5 +120,6 @@
         <% end %>
       <% end %>
     </div>
+
   </div>
 </div>

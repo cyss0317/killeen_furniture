@@ -21,7 +21,7 @@ Open in Maps: <%= google_maps_url(@order.shipping_address) %>
 ITEMS DELIVERED
 <% @order_items.each do |item| %>
   - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %><% if item.product %>
-    <%= admin_product_url(item.product) %><% end %>
+    <%= product_url(item.product) %><% end %>
 <% end %>
 
 View order in admin panel:

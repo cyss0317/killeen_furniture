@@ -17,10 +17,7 @@
     "addressCountry": "US"
   },
   "telephone": "+12546289088",
-  "areaServed": {
-    "@type": "City",
-    "name": "Killeen"
-  },
+  "areaServed": { "@type": "City", "name": "Killeen" },
   "openingHoursSpecification": [
     {
       "@type": "OpeningHoursSpecification",
@@ -35,46 +32,108 @@
 </script>
 <% end %>
 
-<!-- Hero Section -->
-<section class="relative bg-amber-900 text-white overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-r from-amber-900 via-amber-800 to-amber-700 opacity-90"></div>
-  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-    <div class="max-w-2xl">
-      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl mb-6">
-        Furniture That Feels Like Home
-      </h1>
-      <p class="text-lg text-amber-100 mb-8">
-        Quality Ashley Furniture pieces with local delivery to the Killeen area. Browse our curated collection and get it delivered right to your door.
-      </p>
-      <div class="flex flex-col sm:flex-row gap-4">
-        <%= link_to "Shop All Furniture", products_path,
-            class: "inline-flex items-center justify-center px-8 py-3 bg-white text-amber-900 font-semibold rounded-md hover:bg-amber-50 transition-colors" %>
-        <% if DeliveryZone.active.any? %>
-          <div class="inline-flex items-center text-amber-100 text-sm">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            </svg>
-            Local delivery available
-          </div>
+<% hero_products = @featured_products.first(3) %>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="bg-warm-100 overflow-hidden">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10 text-center">
+    <p class="text-xs font-semibold tracking-[0.2em] uppercase text-warm-600 mb-6">
+      Killeen, TX · Local Delivery Available
+    </p>
+    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold text-warm-950 leading-[1.05] mb-6">
+      Nature in<br>your home.
+    </h1>
+    <p class="text-warm-700 text-base sm:text-lg max-w-md mx-auto mb-8 leading-relaxed">
+      Explore a premium collection of Ashley Furniture — perfect for adding warmth and style to every room.
+    </p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <%= link_to "See Collection", products_path,
+          class: "bg-warm-800 text-warm-50 px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
+      <%= link_to products_path, class: "text-warm-700 text-sm font-medium underline underline-offset-4 hover:text-warm-950 transition-colors" do %>
+        Browse All
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Hero image strip -->
+  <% if hero_products.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <% hero_products.each_with_index do |product, i| %>
+          <% img = product.vendor_image_urls&.first %>
+          <%= link_to product_path(product),
+              data: { controller: "reveal", "reveal-delay": i * 100 },
+              class: "group relative overflow-hidden rounded-2xl bg-warm-200 aspect-[4/3]" do %>
+            <% if img.present? %>
+              <%= image_tag img,
+                  class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-500",
+                  alt: product.name %>
+            <% end %>
+            <!-- Product label -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-warm-950/70 to-transparent">
+              <p class="text-warm-200 text-xs mb-0.5"><%= product.brand %></p>
+              <p class="text-white font-semibold text-sm leading-snug line-clamp-1"><%= product.name %></p>
+              <p class="text-warm-200 text-sm font-bold mt-0.5"><%= number_to_currency(product.selling_price) %></p>
+            </div>
+            <!-- Arrow badge -->
+            <div class="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <svg class="w-4 h-4 text-warm-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </div>
+          <% end %>
         <% end %>
       </div>
+    </div>
+  <% end %>
+</section>
+
+<!-- ── Feature highlights ────────────────────────────────────── -->
+<section class="border-y border-warm-300 bg-warm-50" data-controller="reveal">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <% [
+        ["Authentic Quality",    "Genuine Ashley Furniture",         "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"],
+        ["Local Delivery",       "Serving the Killeen area",         "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"],
+        ["Competitive Pricing",  "Everyday low prices",              "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"],
+        ["Personalized Service", "We help you find the right fit",   "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"],
+      ].each do |title, subtitle, path| %>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 bg-warm-200 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-warm-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="<%= path %>"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-warm-900"><%= title %></p>
+            <p class="text-xs text-warm-600 mt-0.5"><%= subtitle %></p>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 </section>
 
-<!-- Category Grid -->
+<!-- ── Shop by Room ──────────────────────────────────────────── -->
 <% if @categories.any? %>
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h2 class="text-2xl font-bold text-gray-900 mb-8">Shop by Room</h2>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <% @categories.each do |category| %>
-        <%= link_to category_path(category), class: "group relative bg-amber-50 rounded-xl p-6 hover:bg-amber-100 transition-colors border border-amber-100 hover:border-amber-300" do %>
-          <h3 class="font-semibold text-gray-900 group-hover:text-amber-800"><%= category.name %></h3>
+    <div class="flex items-end justify-between mb-8" data-controller="reveal">
+      <div>
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">Browse</p>
+        <h2 class="text-2xl font-bold text-warm-950">Shop by Room</h2>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <% @categories.each_with_index do |category, i| %>
+        <%= link_to category_path(category),
+            data: { controller: "reveal", "reveal-delay": i * 60 },
+            class: "group relative bg-warm-50 rounded-2xl p-5 hover:bg-warm-200 transition-colors border border-warm-400" do %>
+          <h3 class="font-semibold text-warm-800 group-hover:text-warm-950 text-sm pr-6"><%= category.name %></h3>
           <% if category.subcategories.any? %>
-            <p class="text-sm text-gray-500 mt-1"><%= category.subcategories.count %> subcategories</p>
+            <p class="text-xs text-warm-600 mt-1"><%= category.subcategories.count %> subcategories</p>
           <% end %>
-          <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-400 group-hover:text-amber-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-300 group-hover:text-warm-600 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         <% end %>
       <% end %>
@@ -82,31 +141,36 @@
   </section>
 <% end %>
 
-<!-- Featured Products -->
+<!-- ── Featured Pieces ──────────────────────────────────────── -->
 <% if @featured_products.any? %>
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-bold text-gray-900">Featured Pieces</h2>
-      <%= link_to "View All", products_path, class: "text-sm font-medium text-amber-800 hover:text-amber-700" %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="flex items-end justify-between mb-8" data-controller="reveal">
+      <div>
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">Handpicked</p>
+        <h2 class="text-2xl font-bold text-warm-950">Featured Pieces</h2>
+      </div>
+      <%= link_to "View All →", products_path, class: "text-sm text-warm-600 hover:text-warm-950 transition-colors" %>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <% @featured_products.each do |product| %>
-        <%= render "products/product_card", product: product %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <% @featured_products.each_with_index do |product, i| %>
+        <%= render "products/product_card", product: product, reveal_delay: i * 80 %>
       <% end %>
     </div>
   </section>
 <% end %>
 
-<!-- Delivery Zone Info -->
-<section class="bg-amber-50 border-y border-amber-100">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<!-- ── Delivery CTA ─────────────────────────────────────────── -->
+<section class="bg-warm-950 text-white" data-controller="reveal">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
     <div class="flex flex-col md:flex-row items-center justify-between gap-6">
       <div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Local Delivery Available</h3>
-        <p class="text-gray-600">We deliver to select ZIP codes in the Killeen area. Enter your ZIP at checkout to see delivery options and pricing.</p>
+        <h3 class="text-xl font-bold mb-2">Local Delivery Available</h3>
+        <p class="text-warm-300 text-sm leading-relaxed max-w-md">
+          We deliver to select ZIP codes in the Killeen area. Enter your ZIP at checkout to see delivery options and pricing.
+        </p>
       </div>
       <%= link_to "Start Shopping", products_path,
-          class: "flex-shrink-0 inline-flex items-center px-6 py-3 bg-amber-800 text-white font-medium rounded-md hover:bg-amber-900 transition-colors" %>
+          class: "shrink-0 bg-warm-700 hover:bg-warm-600 text-white font-semibold px-7 py-3 rounded-full transition-colors text-sm" %>
     </div>
   </div>
 </section>

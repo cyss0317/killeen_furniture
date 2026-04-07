@@ -1,7 +1,20 @@
-<p>Hello <%= @resource.email %>!</p>
+<div class="container">
+  <div class="header">
+    <p class="header-wordmark">Warehouse Furniture</p>
+    <p class="header-subtitle">Unlock your account</p>
+  </div>
+  <div class="body">
+    <p>Hi <%= @resource.email %>,</p>
+    <p>Your account has been locked due to an excessive number of unsuccessful sign-in attempts.</p>
 
-<p>Your account has been locked due to an excessive number of unsuccessful sign in attempts.</p>
+    <div style="text-align: center; margin: 28px 0;">
+      <%= link_to "Unlock my account", unlock_url(@resource, unlock_token: @token), class: "btn" %>
+    </div>
 
-<p>Click the link below to unlock your account:</p>
-
-<p><%= link_to 'Unlock my account', unlock_url(@resource, unlock_token: @token) %></p>
+    <p class="muted">If you didn't attempt to sign in, please contact us.</p>
+  </div>
+  <div class="footer">
+    <p>Warehouse Furniture · 1104 E Veterans Memorial Blvd, Killeen, TX 76541</p>
+    <p>© <%= Time.current.year %> Warehouse Furniture. All rights reserved.</p>
+  </div>
+</div>

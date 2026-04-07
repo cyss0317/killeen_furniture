@@ -1,7 +1,19 @@
-<p>Hello <%= @email %>!</p>
-
-<% if @resource.try(:unconfirmed_email?) %>
-  <p>We're contacting you to notify you that your email is being changed to <%= @resource.unconfirmed_email %>.</p>
-<% else %>
-  <p>We're contacting you to notify you that your email has been changed to <%= @resource.email %>.</p>
-<% end %>
+<div class="container">
+  <div class="header">
+    <p class="header-wordmark">Warehouse Furniture</p>
+    <p class="header-subtitle">Email address updated</p>
+  </div>
+  <div class="body">
+    <p>Hi <%= @resource.first_name rescue @email %>,</p>
+    <% if @resource.try(:unconfirmed_email?) %>
+      <p>We're letting you know that your email address is being changed to <strong><%= @resource.unconfirmed_email %></strong>.</p>
+    <% else %>
+      <p>We're letting you know that your email address has been changed to <strong><%= @resource.email %></strong>.</p>
+    <% end %>
+    <p class="muted">If you didn't make this change, please contact us immediately.</p>
+  </div>
+  <div class="footer">
+    <p>Warehouse Furniture · 1104 E Veterans Memorial Blvd, Killeen, TX 76541</p>
+    <p>© <%= Time.current.year %> Warehouse Furniture. All rights reserved.</p>
+  </div>
+</div>

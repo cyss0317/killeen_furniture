@@ -1,13 +1,44 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <style>
-      /* Email styles need to be inline */
-    </style>
-  </head>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Warm palette */
+    /* warm-50:#faf7f3  warm-100:#f5efe6  warm-200:#ede3d4  warm-300:#ddd0bc */
+    /* warm-400:#c4a98a warm-600:#8c6844  warm-700:#725335  warm-800:#5e4229 */
+    /* warm-900:#3d2b1a warm-950:#1e1208 */
 
-  <body>
+    body { margin: 0; padding: 0; background-color: #f5efe6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #3d2b1a; }
+    .wrapper { padding: 32px 16px; }
+    .container { max-width: 600px; margin: 0 auto; background: #faf7f3; border-radius: 12px; overflow: hidden; border: 1px solid #ddd0bc; }
+    .header { background-color: #5e4229; padding: 28px 32px; }
+    .header-wordmark { color: #faf7f3; font-size: 18px; font-weight: 700; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .header-subtitle { color: #c4a98a; font-size: 13px; margin: 0; }
+    .body { padding: 32px; }
+    .body p { font-size: 15px; line-height: 1.65; color: #3d2b1a; margin: 0 0 16px; }
+    .body p:last-child { margin-bottom: 0; }
+    .info-box { background: #f5efe6; border: 1px solid #c4a98a; border-radius: 8px; padding: 16px; margin: 20px 0; }
+    .info-box p { margin: 0 0 6px; font-size: 13px; color: #725335; }
+    .info-box p:last-child { margin-bottom: 0; }
+    .section { margin: 24px 0 0; }
+    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #8c6844; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid #ede3d4; }
+    table.items { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table.items td { padding: 10px 0; border-bottom: 1px solid #ede3d4; vertical-align: top; color: #3d2b1a; }
+    table.items tr:last-child td { border-bottom: none; }
+    .item-meta { color: #8c6844; font-size: 12px; display: block; margin-top: 2px; }
+    .total-row td { border-top: 2px solid #c4a98a !important; border-bottom: none !important; font-weight: 700; font-size: 15px; padding-top: 12px; color: #3d2b1a; }
+    .btn { display: inline-block; background-color: #5e4229; color: #faf7f3 !important; text-decoration: none; padding: 13px 28px; border-radius: 999px; font-weight: 600; font-size: 14px; margin: 8px 0; }
+    .btn:hover { background-color: #725335; }
+    .muted { font-size: 13px; color: #8c6844; }
+    a { color: #725335; }
+    .footer { background-color: #ede3d4; padding: 18px 32px; text-align: center; font-size: 12px; color: #8c6844; border-top: 1px solid #ddd0bc; }
+    .footer p { margin: 0 0 2px; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
     <%= yield %>
-  </body>
+  </div>
+</body>
 </html>

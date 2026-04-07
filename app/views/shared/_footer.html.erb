@@ -1,63 +1,65 @@
-<footer class="bg-gray-900 text-gray-300 mt-auto">
+<footer class="bg-warm-950 text-warm-300 mt-auto">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
 
       <%# Brand + Contact %>
       <div>
-        <h3 class="text-white font-bold text-lg mb-4"><%= APP_NAME %></h3>
-        <ul class="space-y-3 text-sm text-gray-400">
-          <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 mt-0.5 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <h3 class="text-white font-bold text-base mb-4">Warehouse Furniture</h3>
+        <ul class="space-y-3 text-sm text-warm-400">
+          <li class="flex items-start gap-2.5">
+            <svg class="w-4 h-4 mt-0.5 shrink-0 text-warm-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
             <%= link_to "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
                 target: "_blank", rel: "noopener noreferrer",
-                class: "hover:text-white transition-colors leading-snug" do %>
-              1104 E Veterans Memorial Blvd<br>Killeen, TX 76541<br>United States
+                class: "hover:text-white transition-colors leading-relaxed" do %>
+              1104 E Veterans Memorial Blvd<br>Killeen, TX 76541, United States
             <% end %>
           </li>
-          <li class="flex items-center gap-2">
-            <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          <li class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 shrink-0 text-warm-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
             </svg>
             <%= link_to "+1 254-628-9088", "tel:+12546289088", class: "hover:text-white transition-colors" %>
           </li>
         </ul>
       </div>
 
-      <%# Business Hours %>
+      <%# Hours %>
       <div>
-        <h4 class="text-white font-semibold mb-4">Hours</h4>
-        <ul class="space-y-1.5 text-sm text-gray-400">
-          <li class="flex justify-between gap-4">
+        <h4 class="text-white font-semibold text-sm mb-4">Store Hours</h4>
+        <ul class="space-y-2 text-sm text-warm-400">
+          <li class="flex justify-between gap-6">
             <span>Mon – Sat</span>
-            <span class="text-gray-300">11:00 AM – 7:00 PM</span>
+            <span class="text-warm-300">11:00 AM – 7:00 PM</span>
           </li>
-          <li class="flex justify-between gap-4">
+          <li class="flex justify-between gap-6">
             <span>Sunday</span>
-            <span class="text-gray-500">Closed</span>
+            <span class="text-warm-600">Closed</span>
           </li>
         </ul>
       </div>
 
-      <%# Account links %>
+      <%# Account %>
       <div>
-        <h4 class="text-white font-semibold mb-4">Account</h4>
+        <h4 class="text-white font-semibold text-sm mb-4">Account</h4>
         <ul class="space-y-2 text-sm">
           <% if user_signed_in? %>
-            <%= link_to "My Orders", account_orders_path, class: "block hover:text-white transition-colors" %>
-            <%= link_to "My Profile", account_profile_path, class: "block hover:text-white transition-colors" %>
+            <%= link_to "My Orders", account_orders_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+            <%= link_to "My Profile", account_profile_path, class: "block text-warm-400 hover:text-white transition-colors" %>
           <% else %>
-            <%= link_to "Sign In", new_user_session_path, class: "block hover:text-white transition-colors" %>
-            <%= link_to "Create Account", new_user_registration_path, class: "block hover:text-white transition-colors" %>
+            <%= link_to "Sign In", new_user_session_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+            <%= link_to "Create Account", new_user_registration_path, class: "block text-warm-400 hover:text-white transition-colors" %>
           <% end %>
         </ul>
       </div>
 
     </div>
-    <div class="border-t border-gray-700 mt-8 pt-6 text-sm text-gray-500 text-center">
-      &copy; <%= Time.current.year %> <%= APP_NAME %>. All rights reserved.
+
+    <div class="border-t border-warm-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-warm-600">
+      <span>&copy; <%= Time.current.year %> Warehouse Furniture. All rights reserved.</span>
+      <span>Quality furniture, delivered to your door.</span>
     </div>
   </div>
 </footer>
