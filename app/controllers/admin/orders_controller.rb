@@ -180,7 +180,7 @@ module Admin
 
     def order_create_params
       line_items = params.require(:order).permit(
-        line_items: [ :product_id, :quantity ]
+        line_items: [ :product_id, :quantity, :custom_name, :unit_price ]
       )[:line_items] || []
 
       # shipping_address = params.require("[shipping_address]").permit(

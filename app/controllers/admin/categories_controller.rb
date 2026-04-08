@@ -7,7 +7,7 @@ module Admin
     end
 
     def new
-      @category  = Category.new
+      @category  = Category.new(parent_id: params[:parent_id])
       @parents   = Category.root_categories
     end
 

@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import Chart from "chart.js"
 
 const usd = (val) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(val)
 
@@ -22,7 +21,9 @@ export default class extends Controller {
   }
 
   renderChart() {
-    const ctx     = this.element.getContext("2d")
+    const Chart = window.Chart
+    if (!Chart) { console.error("Chart.js not loaded"); return }
+    const ctx   = this.element.getContext("2d")
     const revenue = this.revenueValue
     const cost    = this.costValue
     const profit  = revenue.map((r, i) => parseFloat((r - (cost[i] || 0)).toFixed(2)))

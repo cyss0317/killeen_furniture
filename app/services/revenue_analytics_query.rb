@@ -112,34 +112,119 @@ class RevenueAnalyticsQuery
     EmployeePayEntry.where(paid_on: date_range).sum(:amount).to_f
   end
 
-  def build_chart_data(range)
-    trunc  = @period == "year" ? "month" : "day"
-    if @period == "custom" && @start_date && @end_date
-      duration = (@end_date - @start_date).to_i
-      trunc = duration > 90 ? "month" : "day"
+  def build_chart_data(_range)
+    case @period
+    when "year"   then build_yearly_chart
+    when "week"   then build_weekly_chart
+    when "custom" then build_custom_chart
+    else               build_monthly_chart
     end
-    orders = base_scope.where(created_at: range)
+  end
 
-    revenue_rows = orders
-      .group("date_trunc('#{trunc}', created_at)")
-      .order("1")
-      .sum(:grand_total)
+  # Last 5 years (including the offset year)
+  def build_yearly_chart
+    anchor       = Time.current + @offset.years
+    current_year = anchor.year
+    years        = ((current_year - 4)..current_year).to_a
+    chart_start  = Time.zone.local(years.first).beginning_of_year
+    chart_end    = Time.zone.local(years.last).end_of_year
 
-    cost_rows = OrderItem.joins(:order)
-      .merge(base_scope.where(created_at: range))
-      .where.not(unit_cost: nil)
-      .group("date_trunc('#{trunc}', orders.created_at)")
-      .order("1")
-      .sum("order_items.unit_cost * order_items.quantity")
-
-    all_keys = (revenue_rows.keys | cost_rows.keys).compact.sort
-    fmt      = trunc == "month" ? "%b %Y" : "%b %-d"
+    rev_map  = revenue_by_extract("year", chart_start..chart_end)
+    cost_map = cost_by_extract("year", chart_start..chart_end)
 
     {
+      labels:  years.map(&:to_s),
+      revenue: years.map { |y| rev_map[y].to_f.round(2) },
+      cost:    years.map { |y| cost_map[y].to_f.round(2) }
+    }
+  end
+
+  # All 12 months of the selected year
+  def build_monthly_chart
+    anchor      = Time.current + @offset.months
+    year        = anchor.year
+    year_start  = anchor.beginning_of_year
+    year_end    = anchor.end_of_year
+
+    rev_map  = revenue_by_extract("month", year_start..year_end)
+    cost_map = cost_by_extract("month", year_start..year_end)
+
+    {
+      labels:  Date::ABBR_MONTHNAMES[1..],
+      revenue: (1..12).map { |m| rev_map[m].to_f.round(2) },
+      cost:    (1..12).map { |m| cost_map[m].to_f.round(2) }
+    }
+  end
+
+  # All weeks (Mon–Sun) that overlap with the selected month
+  def build_weekly_chart
+    anchor      = Time.current + @offset.weeks
+    month_start = anchor.beginning_of_month
+    month_end   = anchor.end_of_month
+
+    weeks = []
+    w = month_start.to_date.beginning_of_week(:monday)
+    while w <= month_end.to_date
+      weeks << w
+      w += 1.week
+    end
+
+    orders = base_scope.where(created_at: month_start..month_end)
+    rev_raw = orders.group("date_trunc('week', created_at)").sum(:grand_total)
+                    .transform_keys { |k| k.to_date }
+    cost_raw = OrderItem.joins(:order)
+                        .merge(base_scope.where(created_at: month_start..month_end))
+                        .where.not(unit_cost: nil)
+                        .group("date_trunc('week', orders.created_at)")
+                        .sum("order_items.unit_cost * order_items.quantity")
+                        .transform_keys { |k| k.to_date }
+
+    {
+      labels:  weeks.map { |w| "#{w.strftime('%b %-d')}–#{[w + 6.days, month_end.to_date].min.strftime('%-d')}" },
+      revenue: weeks.map { |w| rev_raw[w].to_f.round(2) },
+      cost:    weeks.map { |w| cost_raw[w].to_f.round(2) }
+    }
+  end
+
+  # Custom date range — daily or monthly depending on span
+  def build_custom_chart
+    return { labels: [], revenue: [], cost: [] } unless @start_date && @end_date
+
+    range    = @start_date.beginning_of_day..@end_date.end_of_day
+    duration = (@end_date - @start_date).to_i
+    trunc    = duration > 90 ? "month" : "day"
+    fmt      = trunc == "month" ? "%b %Y" : "%b %-d"
+
+    orders = base_scope.where(created_at: range)
+    rev_rows  = orders.group("date_trunc('#{trunc}', created_at)").order("1").sum(:grand_total)
+    cost_rows = OrderItem.joins(:order)
+                         .merge(base_scope.where(created_at: range))
+                         .where.not(unit_cost: nil)
+                         .group("date_trunc('#{trunc}', orders.created_at)").order("1")
+                         .sum("order_items.unit_cost * order_items.quantity")
+
+    all_keys = (rev_rows.keys | cost_rows.keys).compact.sort
+    {
       labels:  all_keys.map { |k| k.to_date.strftime(fmt) },
-      revenue: all_keys.map { |k| revenue_rows[k].to_f.round(2) },
+      revenue: all_keys.map { |k| rev_rows[k].to_f.round(2) },
       cost:    all_keys.map { |k| cost_rows[k].to_f.round(2) }
     }
+  end
+
+  def revenue_by_extract(part, range)
+    base_scope.where(created_at: range)
+              .group("EXTRACT(#{part} FROM created_at)")
+              .sum(:grand_total)
+              .transform_keys(&:to_i)
+  end
+
+  def cost_by_extract(part, range)
+    OrderItem.joins(:order)
+             .merge(base_scope.where(created_at: range))
+             .where.not(unit_cost: nil)
+             .group("EXTRACT(#{part} FROM orders.created_at)")
+             .sum("order_items.unit_cost * order_items.quantity")
+             .transform_keys(&:to_i)
   end
 
   def pct_change(old_val, new_val)

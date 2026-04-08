@@ -150,6 +150,27 @@ export default class extends Controller {
     this._addRow(null)
   }
 
+  addCustomRow() {
+    const template = document.getElementById("custom-item-template")
+    if (!template) return
+
+    const clone = template.content.cloneNode(true)
+    const idx = this.rowIndex++
+
+    clone.querySelectorAll("[data-idx]").forEach(el => {
+      const field = el.dataset.idx
+      el.name = `order[line_items][${idx}][${field}]`
+      el.id   = `line_item_${idx}_${field}`
+    })
+
+    this.lineItemsTarget.appendChild(clone)
+    // Focus the name field
+    const newRow = this.lineItemsTarget.lastElementChild
+    newRow?.querySelector("input[data-idx='custom_name']")?.focus()
+    this.updateEmptyState()
+    this.recalculate()
+  }
+
   _addRow(productId, qty = 1) {
     const template = document.getElementById("line-item-template")
     if (!template) return
@@ -241,20 +262,33 @@ export default class extends Controller {
     let subtotal = 0
 
     this.lineItemRowTargets.forEach(row => {
-      const select   = row.querySelector("select[data-idx='product_id']")
+      const lineTotalCell = row.querySelector("[data-cell='line-total']")
       const qtyInput = row.querySelector("input[data-idx='quantity']")
+      const qty = parseInt(qtyInput?.value) || 0
+
+      if (row.dataset.rowType === "custom") {
+        const priceInput = row.querySelector("input[data-custom-price]")
+        const price = parseFloat(priceInput?.value) || 0
+        if (price > 0 && qty > 0) {
+          const lineTotal = price * qty
+          subtotal += lineTotal
+          if (lineTotalCell) lineTotalCell.textContent = this.formatCurrency(lineTotal)
+        } else {
+          if (lineTotalCell) lineTotalCell.textContent = "—"
+        }
+        return
+      }
+
+      const select  = row.querySelector("select[data-idx='product_id']")
       if (!select || !qtyInput) return
 
       const product = this.products[select.value]
-      const qty = parseInt(qtyInput.value) || 0
 
       if (product && qty > 0) {
         const lineTotal = product.selling_price * qty
         subtotal += lineTotal
-        const lineTotalCell = row.querySelector("[data-cell='line-total']")
         if (lineTotalCell) lineTotalCell.textContent = this.formatCurrency(lineTotal)
       } else {
-        const lineTotalCell = row.querySelector("[data-cell='line-total']")
         if (lineTotalCell) lineTotalCell.textContent = "—"
       }
     })

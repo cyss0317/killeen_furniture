@@ -61,7 +61,7 @@
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:items-start">
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
 
     <%# ── LEFT COLUMN: Customer + Address + Products ── %>
     <div class="xl:col-span-2 space-y-6">
@@ -191,7 +191,7 @@
               Hide Browser
             </button>
             <button type="button"
-                    data-action="click->admin-order#addProduct"
+                    data-action="click->admin-order#addCustomRow"
                     class="inline-flex items-center gap-1.5 bg-amber-800 text-white text-sm font-medium px-3 py-1.5 rounded-md hover:bg-amber-900 transition-colors">
               + Add Row
             </button>
@@ -384,6 +384,39 @@
     </div>
   </div>
 <% end %>
+
+<%# Custom item row template %>
+<template id="custom-item-template">
+  <tr data-admin-order-target="lineItemRow" data-row-type="custom">
+    <td class="px-2 py-3 w-14 text-center text-xs text-gray-400 font-medium">Custom</td>
+    <td class="px-4 py-3" colspan="1">
+      <input type="text" data-idx="custom_name" placeholder="Item description"
+             class="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+    </td>
+    <td class="px-4 py-3">
+      <input type="number" data-idx="quantity" data-qty
+             data-action="input->admin-order#quantityChanged"
+             value="1" min="1" max="999"
+             class="w-16 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-500">
+    </td>
+    <td class="px-4 py-3 text-right">
+      <div class="flex items-center justify-end gap-1">
+        <span class="text-gray-400 text-sm">$</span>
+        <input type="number" data-idx="unit_price" data-custom-price
+               data-action="input->admin-order#quantityChanged"
+               value="0" min="0" step="0.01"
+               class="w-24 border border-gray-300 rounded-md px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+    </td>
+    <td class="px-4 py-3 text-right text-sm font-semibold text-amber-800 tabular-nums" data-cell="line-total">—</td>
+    <td class="px-4 py-3 text-center">
+      <button type="button" data-action="click->admin-order#removeItem"
+              class="text-gray-400 hover:text-red-500 transition-colors" title="Remove">
+        ✕
+      </button>
+    </td>
+  </tr>
+</template>
 
 <%# Line item row template (cloned by Stimulus) %>
 <template id="line-item-template">

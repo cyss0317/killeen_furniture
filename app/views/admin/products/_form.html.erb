@@ -1,7 +1,7 @@
 <%= form_with model: [:admin, product], multipart: true, data: { product_form: true }, class: "space-y-6" do |f| %>
   <%= render "shared/form_errors", object: product %>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
     <!-- Main Product Info -->
     <div class="lg:col-span-2 space-y-6">
       <!-- Basic Info -->
@@ -120,7 +120,7 @@
     </div>
 
     <!-- Pricing & Inventory Sidebar -->
-    <div class="space-y-6">
+    <div class="space-y-6 sticky top-6">
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 class="font-semibold text-gray-900 mb-4">Pricing</h3>
         <div class="space-y-4">

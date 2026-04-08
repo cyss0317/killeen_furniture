@@ -29,11 +29,21 @@ module Orders
 
     def validate_stock!
       @line_items_with_products = @params[:line_items]&.to_h.map do |_idx, item|
-        product = Product.find(item[:product_id])
         qty = item[:quantity].to_i
-        raise "#{product.name}: insufficient stock (#{product.stock_quantity} available, #{qty} requested)" if qty > product.stock_quantity
-        raise "#{product.name}: quantity must be at least 1" if qty < 1
-        { product: product, quantity: qty }
+
+        if item[:product_id].present?
+          product = Product.find(item[:product_id])
+          raise "#{product.name}: insufficient stock (#{product.stock_quantity} available, #{qty} requested)" if qty > product.stock_quantity
+          raise "#{product.name}: quantity must be at least 1" if qty < 1
+          { product: product, quantity: qty }
+        else
+          name  = item[:custom_name].to_s.strip
+          price = item[:unit_price].to_f
+          raise "Custom item is missing a name" if name.blank?
+          raise "Custom item '#{name}' must have a price greater than 0" if price <= 0
+          raise "Custom item '#{name}': quantity must be at least 1" if qty < 1
+          { custom: true, custom_name: name, unit_price: price, quantity: qty }
+        end
       end
     end
 
@@ -62,22 +72,37 @@ module Orders
 
     def build_order_items
       @line_items_with_products.each do |item|
-        product = item[:product]
-        @order.order_items.build(
-          product:           product,
-          quantity:          item[:quantity],
-          unit_price:        product.selling_price,
-          unit_cost:         product.base_cost,
-          markup_percentage: product.markup_percentage,
-          product_name:      product.name,
-          product_sku:       product.sku
-        )
+        if item[:custom]
+          @order.order_items.build(
+            product:      nil,
+            quantity:     item[:quantity],
+            unit_price:   item[:unit_price],
+            unit_cost:    0,
+            product_name: item[:custom_name],
+            product_sku:  "CUSTOM"
+          )
+        else
+          product = item[:product]
+          @order.order_items.build(
+            product:           product,
+            quantity:          item[:quantity],
+            unit_price:        product.selling_price,
+            unit_cost:         product.base_cost,
+            markup_percentage: product.markup_percentage,
+            product_name:      product.name,
+            product_sku:       product.sku
+          )
+        end
       end
     end
 
     def calculated_subtotal
       @line_items_with_products.sum do |item|
-        item[:product].selling_price * item[:quantity]
+        if item[:custom]
+          item[:unit_price] * item[:quantity]
+        else
+          item[:product].selling_price * item[:quantity]
+        end
       end
     end
   end
