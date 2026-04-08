@@ -54,17 +54,16 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
 
-  # Amazon SES via SMTP.
-  # Credentials are stored via: bin/rails credentials:edit
-  # Required keys: ses.smtp_username, ses.smtp_password, ses.region (e.g. us-east-1)
+  # Google SMTP. Set GMAIL_USERNAME and GMAIL_APP_PASSWORD in Render environment variables.
+  # Use a Gmail App Password (not your regular password): myaccount.google.com/apppasswords
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings   = {
-    address:              "email-smtp.#{ENV.fetch('AWS_REGION', 'us-east-1')}.amazonaws.com",
+    address:              "smtp.gmail.com",
     port:                 587,
     domain:               ENV.fetch("APP_HOST", "example.com"),
-    user_name:            Rails.application.credentials.dig(:ses, :smtp_username),
-    password:             Rails.application.credentials.dig(:ses, :smtp_password),
-    authentication:       :login,
+    user_name:            ENV["SMTP_USER"],
+    password:             ENV["SMTP_PASS"],
+    authentication:       :plain,
     enable_starttls_auto: true
   }
 
