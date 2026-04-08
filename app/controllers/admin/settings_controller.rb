@@ -8,10 +8,12 @@ module Admin
 
     def update
       params[:settings].each do |key, value|
-        setting = GlobalSetting.find_by(key: key)
-        setting&.update!(value: value.to_s.strip)
+        GlobalSetting.set(key, value.to_s.strip)
       end
       redirect_to admin_settings_path, notice: "Settings updated."
+    rescue => e
+      Rails.logger.error "[Settings] Update failed: #{e.message}"
+      redirect_to admin_settings_path, alert: "Failed to save settings: #{e.message}"
     end
 
     private

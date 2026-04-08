@@ -67,44 +67,38 @@ unless DeliveryZone.exists?
 end
 
 # === Categories ===
-unless Category.exists?
-  living_room = Category.create!(name: "Living Room", position: 1)
-  Category.create!([
-    { name: "Sofas & Sectionals", parent: living_room, position: 1 },
-    { name: "Coffee Tables",      parent: living_room, position: 2 },
-    { name: "TV Stands & Media",  parent: living_room, position: 3 },
-    { name: "Accent Chairs",      parent: living_room, position: 4 },
-    { name: "Ottomans",           parent: living_room, position: 5 }
-  ])
-
-  bedroom = Category.create!(name: "Bedroom", position: 2)
-  Category.create!([
-    { name: "Beds & Headboards",  parent: bedroom, position: 1 },
-    { name: "Dressers & Chests",  parent: bedroom, position: 2 },
-    { name: "Nightstands",        parent: bedroom, position: 3 },
-    { name: "Bedroom Sets",       parent: bedroom, position: 4 }
-  ])
-
-  dining = Category.create!(name: "Dining Room", position: 3)
-  Category.create!([
-    { name: "Dining Sets",        parent: dining, position: 1 },
-    { name: "Dining Tables",      parent: dining, position: 2 },
-    { name: "Dining Chairs",      parent: dining, position: 3 },
-    { name: "Buffets & Sideboards", parent: dining, position: 4 }
-  ])
-
-  office = Category.create!(name: "Home Office", position: 4)
-  Category.create!([
-    { name: "Desks",              parent: office, position: 1 },
-    { name: "Office Chairs",      parent: office, position: 2 },
-    { name: "Bookcases",          parent: office, position: 3 }
-  ])
-
-  Category.create!(name: "Outdoor", position: 5)
-  Category.create!(name: "Mattresses", position: 6)
-
-  puts "  ✓ Categories created"
+def find_or_create_category!(name:, position:, parent: nil)
+  Category.find_or_create_by!(name: name) { |c| c.position = position; c.parent = parent }
 end
+
+living_room = find_or_create_category!(name: "Living Room", position: 1)
+find_or_create_category!(name: "Sofas & Sectionals", position: 1, parent: living_room)
+find_or_create_category!(name: "Coffee Tables",      position: 2, parent: living_room)
+find_or_create_category!(name: "TV Stands & Media",  position: 3, parent: living_room)
+find_or_create_category!(name: "Accent Chairs",      position: 4, parent: living_room)
+find_or_create_category!(name: "Ottomans",           position: 5, parent: living_room)
+
+bedroom = find_or_create_category!(name: "Bedroom", position: 2)
+find_or_create_category!(name: "Beds & Headboards", position: 1, parent: bedroom)
+find_or_create_category!(name: "Dressers & Chests", position: 2, parent: bedroom)
+find_or_create_category!(name: "Nightstands",       position: 3, parent: bedroom)
+find_or_create_category!(name: "Bedroom Sets",      position: 4, parent: bedroom)
+
+dining = find_or_create_category!(name: "Dining Room", position: 3)
+find_or_create_category!(name: "Dining Sets",          position: 1, parent: dining)
+find_or_create_category!(name: "Dining Tables",        position: 2, parent: dining)
+find_or_create_category!(name: "Dining Chairs",        position: 3, parent: dining)
+find_or_create_category!(name: "Buffets & Sideboards", position: 4, parent: dining)
+
+office = find_or_create_category!(name: "Home Office", position: 4)
+find_or_create_category!(name: "Desks",         position: 1, parent: office)
+find_or_create_category!(name: "Office Chairs", position: 2, parent: office)
+find_or_create_category!(name: "Bookcases",     position: 3, parent: office)
+
+find_or_create_category!(name: "Outdoor",    position: 5)
+find_or_create_category!(name: "Mattresses", position: 6)
+
+puts "  ✓ Categories seeded"
 
 # === Ashley Furniture Product Catalog ===
 load Rails.root.join("db/seeds/ashley_products.rb")
