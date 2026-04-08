@@ -6,7 +6,9 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # SEO
-  get "/sitemap.xml", to: "sitemap#index", format: :xml
+  get "/sitemap.xml",              to: "sitemap#index",                 format: :xml
+  get "/killeen-furniture-store",  to: "pages#killeen_furniture_store", as: :killeen_furniture_store
+  get "/ashley-furniture-killeen", to: "pages#ashley_furniture_killeen", as: :ashley_furniture_killeen
 
   # Authentication
   devise_for :users, controllers: {

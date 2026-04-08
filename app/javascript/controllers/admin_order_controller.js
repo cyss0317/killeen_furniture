@@ -20,6 +20,18 @@ export default class extends Controller {
 
     this.rowIndex = this.lineItemRowTargets.length
     this.shippingCost = this.hasShippingAmountTarget ? (parseFloat(this.shippingAmountTarget.value) || 0) : 0
+
+    // Restore products submitted before a validation failure
+    const submittedEl = document.getElementById("submitted-items-data")
+    if (submittedEl) {
+      const items = JSON.parse(submittedEl.textContent)
+      if (items && items.length > 0) {
+        items.forEach(item => {
+          if (item.product_id) this._addRow(item.product_id, item.quantity || 1)
+        })
+      }
+    }
+
     this.recalculate()
   }
 
@@ -138,7 +150,7 @@ export default class extends Controller {
     this._addRow(null)
   }
 
-  _addRow(productId) {
+  _addRow(productId, qty = 1) {
     const template = document.getElementById("line-item-template")
     if (!template) return
 
@@ -155,9 +167,11 @@ export default class extends Controller {
 
     if (productId) {
       const newRow = this.lineItemsTarget.lastElementChild
-      const select = newRow?.querySelector("select[data-idx='product_id']")
+      const select  = newRow?.querySelector("select[data-idx='product_id']")
+      const qtyInput = newRow?.querySelector("input[data-idx='quantity']")
       if (select) {
         select.value = productId
+        if (qtyInput) qtyInput.value = qty
         this._populateRow(newRow, productId)
         this.recalculate()
       }
@@ -199,14 +213,25 @@ export default class extends Controller {
     const sellPriceCell = row.querySelector("[data-cell='sell-price']")
     const stockCell     = row.querySelector("[data-cell='stock']")
     const qtyInput      = row.querySelector("[data-qty]")
+    const imageEl       = row.querySelector("[data-cell='product-image']")
 
     if (product) {
       if (sellPriceCell) sellPriceCell.textContent = this.formatCurrency(product.selling_price)
       if (stockCell)     stockCell.textContent     = product.stock_quantity + " in stock"
       if (qtyInput)      qtyInput.max = product.stock_quantity
+      if (imageEl) {
+        if (product.image_url) {
+          imageEl.src = product.image_url
+          imageEl.alt = product.name
+          imageEl.classList.remove("hidden")
+        } else {
+          imageEl.classList.add("hidden")
+        }
+      }
     } else {
       if (sellPriceCell) sellPriceCell.textContent = "—"
       if (stockCell)     stockCell.textContent     = ""
+      if (imageEl)       imageEl.classList.add("hidden")
     }
   }
 

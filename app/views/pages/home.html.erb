@@ -1,13 +1,15 @@
-<% content_for :title, "#{APP_NAME} — Furniture Store in Killeen, TX" %>
-<% content_for :description, "Warehouse Furniture is a local furniture store in Killeen, TX offering quality Ashley Furniture — sofas, beds, dining sets, and more. Shop online with local delivery available." %>
+<% content_for :title, "Warehouse Furniture Killeen TX – Ashley Furniture Dealer" %>
+<% content_for :description, "Authorized Ashley Furniture dealer in Killeen, TX. Shop sofas, bedroom sets, dining tables & more at Warehouse Furniture on Veterans Memorial Blvd. Local delivery to Killeen, Harker Heights & Copperas Cove." %>
 <% content_for :structured_data do %>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FurnitureStore",
   "name": "Warehouse Furniture",
-  "description": "Local furniture store in Killeen, TX offering quality Ashley Furniture with local delivery.",
+  "description": "Authorized Ashley Furniture dealer in Killeen, TX. Shop sofas, bedroom sets, dining tables, and more with local delivery to Killeen, Harker Heights, and Copperas Cove.",
   "url": "<%= root_url %>",
+  "logo": "<%= request.base_url %>/icon.png",
+  "image": "<%= request.base_url %>/icon.png",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "1104 E Veterans Memorial Blvd",
@@ -16,8 +18,22 @@
     "postalCode": "76541",
     "addressCountry": "US"
   },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 31.1171,
+    "longitude": -97.7278
+  },
   "telephone": "+12546289088",
-  "areaServed": { "@type": "City", "name": "Killeen" },
+  "areaServed": [
+    { "@type": "City", "name": "Killeen", "sameAs": "https://en.wikipedia.org/wiki/Killeen,_Texas" },
+    { "@type": "City", "name": "Harker Heights" },
+    { "@type": "City", "name": "Copperas Cove" },
+    { "@type": "City", "name": "Fort Cavazos" },
+    { "@type": "City", "name": "Florence" },
+    { "@type": "City", "name": "Temple" },
+    { "@type": "City", "name": "Belton" },
+    { "@type": "City", "name": "Waco" }
+  ],
   "openingHoursSpecification": [
     {
       "@type": "OpeningHoursSpecification",
@@ -27,7 +43,16 @@
     }
   ],
   "priceRange": "$$",
-  "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541"
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
+  "brand": {
+    "@type": "Brand",
+    "name": "Ashley Furniture"
+  },
+  {
+    "@type": "Brand",
+    "name": "Generation Trade"
+  },
+  "knowsAbout": ["Ashley Furniture", "Generation Trade", "furniture", "home", "home furniture", "home decor", "sofa","sofas", "couch", "couches", "mattress", "mattresses", "sectional", "sectionals", "bedroom furniture", "dining table", "dining tables", "dining sets", "living room furniture"]
 }
 </script>
 <% end %>

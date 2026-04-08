@@ -1,0 +1,139 @@
+<% content_for :title, "Furniture Store in Killeen TX – Living Room, Bedroom & Dining | Warehouse Furniture" %>
+<% content_for :description, "Warehouse Furniture is Killeen's trusted local furniture store. Shop sofas, bedroom sets, dining tables & more. Visit us at 1104 E Veterans Memorial Blvd, Killeen, TX 76541." %>
+<% content_for :structured_data do %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FurnitureStore",
+  "name": "Warehouse Furniture – Killeen Furniture Store",
+  "url": "<%= killeen_furniture_store_url %>",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "1104 E Veterans Memorial Blvd",
+    "addressLocality": "Killeen",
+    "addressRegion": "TX",
+    "postalCode": "76541",
+    "addressCountry": "US"
+  },
+  "telephone": "+12546289088",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      "opens": "11:00",
+      "closes": "19:00"
+    }
+  ],
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541"
+}
+</script>
+<% end %>
+
+<!-- ── Hero ───────────────────────────────────────────────────── -->
+<section class="bg-warm-100">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 text-center">
+    <p class="text-xs font-semibold tracking-[0.2em] uppercase text-warm-600 mb-4">
+      Killeen, TX · Local Delivery Available
+    </p>
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-warm-950 leading-tight mb-5">
+      Killeen's Local<br>Furniture Store
+    </h1>
+    <p class="text-warm-700 text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
+      Warehouse Furniture is Killeen's go-to destination for quality furniture — from living room sofas to bedroom sets and dining room tables. Serving Killeen, Harker Heights, Copperas Cove, and the Fort Cavazos community.
+    </p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <%= link_to "Shop All Furniture", products_path,
+          class: "bg-warm-800 text-warm-50 px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
+      <%= link_to "Ashley Furniture →", ashley_furniture_killeen_path,
+          class: "text-warm-700 text-sm font-medium underline underline-offset-4 hover:text-warm-950 transition-colors" %>
+    </div>
+  </div>
+</section>
+
+<!-- ── Shop by Room ──────────────────────────────────────────── -->
+<% if @categories.any? %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-8">
+      <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">Browse by Room</p>
+      <h2 class="text-2xl font-bold text-warm-950">Bedroom, Living Room & Dining Furniture in Killeen</h2>
+      <p class="text-warm-600 text-sm mt-2 max-w-xl">Find the perfect furniture for every room in your Killeen home. From living room sets to bedroom furniture and dining tables — we have it all in store and ready for local delivery.</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <% @categories.each_with_index do |category, i| %>
+        <%= link_to category_path(category),
+            data: { controller: "reveal", "reveal-delay": i * 60 },
+            class: "group relative bg-warm-50 rounded-2xl p-5 hover:bg-warm-200 transition-colors border border-warm-400" do %>
+          <h3 class="font-semibold text-warm-800 group-hover:text-warm-950 text-sm pr-6"><%= category.name %></h3>
+          <% if category.subcategories.any? %>
+            <p class="text-xs text-warm-600 mt-1"><%= category.subcategories.count %> subcategories</p>
+          <% end %>
+          <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-300 group-hover:text-warm-600 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<!-- ── Featured Products ─────────────────────────────────────── -->
+<% if @featured_products.any? %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">In Stock Now</p>
+        <h2 class="text-2xl font-bold text-warm-950">Popular Furniture in Killeen</h2>
+      </div>
+      <%= link_to "View All →", products_path, class: "text-sm text-warm-600 hover:text-warm-950 transition-colors" %>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <% @featured_products.each_with_index do |product, i| %>
+        <%= render "products/product_card", product: product, reveal_delay: i * 80 %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<!-- ── Why Shop Local ─────────────────────────────────────────── -->
+<section class="bg-warm-50 border-y border-warm-300">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-10">
+      <h2 class="text-2xl font-bold text-warm-950">Why Killeen Shops at Warehouse Furniture</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+      <% [
+        ["Local Delivery", "We deliver to Killeen, Harker Heights, Copperas Cove, and surrounding areas — no national freight delays.", "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"],
+        ["Authorized Ashley Dealer", "We carry the full Ashley Furniture lineup — the same quality you'd find anywhere, with local service and expertise.", "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"],
+        ["Personalized Service", "Come into our Killeen showroom on Veterans Memorial Blvd and let our team help you find the perfect fit.", "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"],
+      ].each do |title, body, path| %>
+        <div class="flex flex-col items-start gap-3">
+          <div class="w-10 h-10 bg-warm-200 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-warm-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="<%= path %>"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold text-warm-900 mb-1"><%= title %></p>
+            <p class="text-sm text-warm-600 leading-relaxed"><%= body %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<!-- ── Visit Our Showroom ─────────────────────────────────────── -->
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="bg-warm-950 text-white rounded-3xl p-10 text-center">
+    <h2 class="text-2xl font-bold mb-3">Visit Our Killeen Showroom</h2>
+    <p class="text-warm-300 text-sm mb-2">1104 E Veterans Memorial Blvd, Killeen, TX 76541</p>
+    <p class="text-warm-400 text-sm mb-6">Mon–Sat: 11:00 AM – 7:00 PM &nbsp;·&nbsp; (254) 628-9088</p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <%= link_to "Get Directions", "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
+          target: "_blank", rel: "noopener noreferrer",
+          class: "bg-warm-700 hover:bg-warm-600 text-white font-semibold px-7 py-3 rounded-full transition-colors text-sm" %>
+      <%= link_to "Shop Online", products_path,
+          class: "text-warm-300 hover:text-white text-sm font-medium underline underline-offset-4 transition-colors" %>
+    </div>
+  </div>
+</section>

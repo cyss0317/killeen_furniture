@@ -19,7 +19,11 @@
         <% @order_items.each do |item| %>
           <tr>
             <td>
-              <strong><%= item.product_name %></strong>
+              <% if item.product %>
+                <a href="<%= product_url(item.product) %>" style="font-weight: 600;"><%= item.product_name %></a>
+              <% else %>
+                <strong><%= item.product_name %></strong>
+              <% end %>
               <span class="item-meta">SKU: <%= item.product_sku %></span>
             </td>
             <td style="text-align: right; white-space: nowrap;">&times; <%= item.quantity %></td>

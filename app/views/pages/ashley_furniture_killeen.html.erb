@@ -1,0 +1,129 @@
+<% content_for :title, "Ashley Furniture Dealer in Killeen TX – Warehouse Furniture" %>
+<% content_for :description, "Authorized Ashley Furniture dealer in Killeen, TX. Shop the full Ashley lineup — sofas, beds, recliners, dining sets & more — at Warehouse Furniture on Veterans Memorial Blvd." %>
+<% content_for :structured_data do %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FurnitureStore",
+  "name": "Warehouse Furniture – Authorized Ashley Furniture Dealer",
+  "url": "<%= ashley_furniture_killeen_url %>",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "1104 E Veterans Memorial Blvd",
+    "addressLocality": "Killeen",
+    "addressRegion": "TX",
+    "postalCode": "76541",
+    "addressCountry": "US"
+  },
+  "telephone": "+12546289088",
+  "brand": { "@type": "Brand", "name": "Ashley Furniture" },
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541"
+}
+</script>
+<% end %>
+
+<!-- ── Hero ───────────────────────────────────────────────────── -->
+<section class="bg-warm-100">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 text-center">
+    <p class="text-xs font-semibold tracking-[0.2em] uppercase text-warm-600 mb-4">
+      Authorized Dealer · Killeen, TX
+    </p>
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-warm-950 leading-tight mb-5">
+      Shop Ashley Furniture<br>in Killeen, TX
+    </h1>
+    <p class="text-warm-700 text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
+      We are an authorized Ashley Furniture dealer serving Killeen and the surrounding Central Texas area. Browse the full Ashley collection — sofas, sectionals, bedroom sets, dining tables, recliners, and mattresses — all available in our Killeen showroom with local delivery.
+    </p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <%= link_to "Shop Ashley Furniture", products_path,
+          class: "bg-warm-800 text-warm-50 px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
+      <%= link_to "All Furniture →", killeen_furniture_store_path,
+          class: "text-warm-700 text-sm font-medium underline underline-offset-4 hover:text-warm-950 transition-colors" %>
+    </div>
+  </div>
+</section>
+
+<!-- ── Ashley Products Grid ──────────────────────────────────── -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <% if @ashley_products.any? %>
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">In Stock Now</p>
+        <h2 class="text-2xl font-bold text-warm-950">Ashley Furniture — Available in Killeen</h2>
+        <p class="text-warm-600 text-sm mt-2">All Ashley pieces below are available for purchase online or in our Killeen showroom, with local delivery available.</p>
+      </div>
+      <%= link_to "View All →", products_path, class: "text-sm text-warm-600 hover:text-warm-950 transition-colors shrink-0" %>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <% @ashley_products.each_with_index do |product, i| %>
+        <%= render "products/product_card", product: product, reveal_delay: i * 80 %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <p class="text-warm-600 mb-4">Browse our full Ashley Furniture selection in store or online.</p>
+      <%= link_to "Shop All Products", products_path,
+          class: "bg-warm-800 text-warm-50 px-7 py-3 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
+    </div>
+  <% end %>
+</section>
+
+<!-- ── Ashley Collections ────────────────────────────────────── -->
+<section class="bg-warm-50 border-y border-warm-300">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-10">
+      <h2 class="text-2xl font-bold text-warm-950">Ashley Furniture Collections in Killeen</h2>
+      <p class="text-warm-600 text-sm mt-2 max-w-xl mx-auto">As an authorized Ashley Furniture dealer, we carry the complete range of Ashley collections for every room and style.</p>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <% [
+        ["Ashley Living Room Sofas", "Sectionals, sofas & loveseats", categories_path],
+        ["Ashley Bedroom Sets",      "Beds, dressers & nightstands",  categories_path],
+        ["Ashley Dining Tables",     "Tables, chairs & buffets",      categories_path],
+        ["Ashley Recliners",         "Power & manual recliners",      categories_path],
+        ["Ashley Mattresses",        "Memory foam & innerspring",     categories_path],
+        ["Ashley Accent Furniture",  "Accent chairs & ottomans",      categories_path],
+      ].each do |title, subtitle, path| %>
+        <%= link_to path,
+            class: "group bg-warm-100 hover:bg-warm-200 rounded-2xl p-5 transition-colors border border-warm-300" do %>
+          <p class="font-semibold text-warm-900 text-sm group-hover:text-warm-950"><%= title %></p>
+          <p class="text-xs text-warm-600 mt-1"><%= subtitle %></p>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<!-- ── Authorized Dealer Trust Block ─────────────────────────── -->
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+    <div>
+      <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-3">Why Buy Ashley From Us</p>
+      <h2 class="text-2xl font-bold text-warm-950 mb-4">Authorized Ashley Furniture Dealer in Killeen</h2>
+      <p class="text-warm-600 text-sm leading-relaxed mb-4">
+        Warehouse Furniture is an authorized Ashley Furniture dealer in Killeen, Texas. That means you get the same genuine Ashley quality — manufacturer warranty included — with the added benefit of local delivery and in-person service from a team that knows the Killeen community.
+      </p>
+      <p class="text-warm-600 text-sm leading-relaxed mb-6">
+        Skip the big-box experience. Visit our showroom at 1104 E Veterans Memorial Blvd and see Ashley Furniture in person before you buy.
+      </p>
+      <%= link_to "Visit Our Showroom", "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
+          target: "_blank", rel: "noopener noreferrer",
+          class: "inline-block bg-warm-800 text-warm-50 px-7 py-3 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
+    </div>
+    <div class="bg-warm-100 rounded-3xl p-8 border border-warm-300">
+      <dl class="space-y-5">
+        <% [
+          ["Manufacturer Warranty",  "All Ashley Furniture products include the full manufacturer warranty."],
+          ["Local Delivery",         "Delivering Ashley Furniture to Killeen, Harker Heights & Copperas Cove."],
+          ["In-Store Selection",     "See Ashley sofas, beds & dining sets in person before you buy."],
+          ["Expert Staff",           "Our team helps you find the right Ashley piece for your home and budget."],
+        ].each do |term, desc| %>
+          <div>
+            <dt class="text-sm font-semibold text-warm-900 mb-0.5"><%= term %></dt>
+            <dd class="text-sm text-warm-600"><%= desc %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+  </div>
+</section>

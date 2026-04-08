@@ -1,6 +1,6 @@
 module Admin
   class OrdersController < BaseController
-    before_action :set_order, only: [:show, :update_status, :assign_delivery]
+    before_action :set_order, only: [ :show, :update_status, :assign_delivery ]
 
     SORTABLE_COLUMNS = %w[order_number created_at grand_total status].freeze
 
@@ -86,6 +86,7 @@ module Admin
       result = Orders::AdminCreate.call(params: order_create_params, admin: current_user)
 
       if result.success?
+        OrderMailer.confirmation(result.order).deliver_now
         redirect_to admin_order_path(result.order), notice: "Order #{result.order.order_number} created successfully."
       else
         @order          = Order.new
@@ -94,6 +95,9 @@ module Admin
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
         @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+        @submitted_line_items = (params.dig(:order, :line_items) || {}).values
+                                  .select { |i| i[:product_id].present? }
+                                  .map { |i| { product_id: i[:product_id], quantity: i[:quantity].to_i } }
         flash.now[:alert] = result.error
         render :new, status: :unprocessable_entity
       end
@@ -166,7 +170,7 @@ module Admin
 
     def order_create_params
       line_items = params.require(:order).permit(
-        line_items: [:product_id, :quantity]
+        line_items: [ :product_id, :quantity ]
       )[:line_items] || []
 
       # shipping_address = params.require("[shipping_address]").permit(

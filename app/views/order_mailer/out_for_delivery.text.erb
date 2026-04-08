@@ -12,7 +12,8 @@ DELIVERY ADDRESS
 
 ITEMS BEING DELIVERED
 <% @order_items.each do |item| %>
-  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %>
+  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %><% if item.product %>
+    <%= product_url(item.product) %><% end %>
 <% end %>
 
 Please ensure someone is available to receive the delivery.

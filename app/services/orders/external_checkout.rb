@@ -22,7 +22,7 @@ module Orders
       shipping_result = ShippingCalculator.call(cart: @cart, zip_code: @checkout_params[:zip_code])
       return Result.new(order: nil, error: shipping_result.error) unless shipping_result.success?
 
-      ActiveRecord::Base.transaction do
+      result = ActiveRecord::Base.transaction do
         order = build_order(shipping_result)
         order.save!
         build_order_items(order)
@@ -31,6 +31,9 @@ module Orders
 
         Result.new(order: order, error: nil)
       end
+
+      OrderMailer.confirmation(result.order).deliver_now
+      result
     rescue ActiveRecord::RecordInvalid => e
       Result.new(order: nil, error: e.message)
     rescue => e

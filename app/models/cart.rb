@@ -8,11 +8,11 @@ class Cart < ApplicationRecord
   end
 
   def subtotal
-    cart_items.includes(:product).sum { |item| item.product.selling_price * item.quantity }
+    cart_items.joins(:product).sum("products.selling_price * cart_items.quantity")
   end
 
   def total_weight
-    cart_items.includes(:product).sum { |item| (item.product.weight || 0) * item.quantity }
+    cart_items.joins(:product).sum("COALESCE(products.weight, 0) * cart_items.quantity")
   end
 
   def empty?

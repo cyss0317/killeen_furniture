@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
-  helper_method :current_cart
+  helper_method :current_cart, :navbar_categories
 
   protected
 
@@ -21,6 +21,11 @@ class ApplicationController < ActionController::Base
 
   def current_cart
     @current_cart ||= find_or_create_cart
+  end
+
+  def navbar_categories
+    @navbar_categories ||= Category.where(name: ["Living Room", "Bedroom", "Dining Room"])
+                                   .order(Arel.sql("CASE name WHEN 'Living Room' THEN 0 WHEN 'Bedroom' THEN 1 WHEN 'Dining Room' THEN 2 END"))
   end
 
   def find_or_create_cart

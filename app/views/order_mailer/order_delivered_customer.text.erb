@@ -7,7 +7,8 @@ Delivered On: <%= @order.delivered_at&.strftime("%B %d, %Y") || "Today" %>
 
 ITEMS DELIVERED
 <% @order_items.each do |item| %>
-  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %>
+  - <%= item.product_name %> (SKU: <%= item.product_sku %>) × <%= item.quantity %><% if item.product %>
+    <%= product_url(item.product) %><% end %>
 <% end %>
 
 Thank you for choosing Warehouse Furniture.

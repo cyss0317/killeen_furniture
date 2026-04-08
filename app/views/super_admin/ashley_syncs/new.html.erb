@@ -1,72 +1,106 @@
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
   <div class="mb-8">
     <h1 class="text-2xl font-bold text-gray-900">Ashley Furniture Product Sync</h1>
-    <p class="mt-2 text-sm text-gray-600">Manually trigger a sync from the Ashley API by SKU.</p>
+    <p class="mt-2 text-sm text-gray-600">Sync one or more products from the Ashley API. Enter SKUs separated by commas or new lines.</p>
   </div>
 
   <div class="bg-white shadow rounded-lg mb-8">
     <div class="px-4 py-5 sm:p-6">
       <%= form_with url: super_admin_ashley_syncs_path, method: :post, local: true, class: "space-y-4" do |f| %>
         <div>
-          <%= f.label :sku, "Product SKU", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.label :sku, "Product SKU(s)", class: "block text-sm font-medium text-gray-700" %>
+          <p class="text-xs text-gray-500 mt-0.5">One per line, or comma-separated.</p>
           <div class="mt-1">
-            <%= f.text_field :sku, id: :sku, value: params[:sku], class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", required: true, placeholder: "e.g. 1234567" %>
+            <%= f.text_area :sku,
+                id: :sku,
+                value: params[:sku],
+                rows: 5,
+                class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md font-mono",
+                placeholder: "e.g.\B2589-53\nGT-DK1001, AF-H200-14" %>
           </div>
         </div>
 
         <div>
-          <%= f.submit "Sync Product", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+          <%= f.submit "Sync Products", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
         </div>
       <% end %>
     </div>
   </div>
 
-  <% if @product %>
+  <% if @results.any? %>
+    <%# Summary counts %>
+    <% succeeded = @results.count { |r| r[:error].nil? } %>
+    <% failed    = @results.count { |r| r[:error].present? } %>
+    <div class="mb-4 flex items-center gap-4 text-sm">
+      <% if succeeded > 0 %>
+        <span class="inline-flex items-center gap-1.5 text-green-700 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <%= succeeded %> synced
+        </span>
+      <% end %>
+      <% if failed > 0 %>
+        <span class="inline-flex items-center gap-1.5 text-red-600 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <%= failed %> failed
+        </span>
+      <% end %>
+    </div>
+
     <div class="bg-white shadow rounded-lg overflow-hidden">
-      <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Sync Result</h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500">Matched product details for <%= @product.sku %></p>
-      </div>
-      <div class="px-4 py-5 sm:p-0">
-        <dl class="sm:divide-y sm:divide-gray-200">
-          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Name</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @product.name %></dd>
-          </div>
-          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Brand</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @product.brand %></dd>
-          </div>
-          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Price</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= number_to_currency(@product.price) %></dd>
-          </div>
-          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Image URLs</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <% if @product.vendor_image_urls.present? %>
-                <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
-                  <% @product.vendor_image_urls.each do |url| %>
-                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                      <div class="w-0 flex-1 flex items-center">
-                        <span class="ml-2 flex-1 w-0 truncate"><%= link_to url, url, target: "_blank", class: "text-indigo-600 hover:text-indigo-500" %></span>
-                      </div>
-                    </li>
-                  <% end %>
-                </ul>
-              <% else %>
-                None
-              <% end %>
-            </dd>
-          </div>
-          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Ashley Payload</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <pre class="whitespace-pre-wrap bg-gray-50 p-4 rounded text-xs border"><%= JSON.pretty_generate(@product.ashley_payload || {}) %></pre>
-            </dd>
-          </div>
-        </dl>
-      </div>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Images</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @results.each do |result| %>
+            <tr class="<%= result[:error] ? 'bg-red-50' : 'hover:bg-gray-50' %>">
+              <td class="px-6 py-4 text-sm font-mono text-gray-900 whitespace-nowrap"><%= result[:sku] %></td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <% if result[:product] %>
+                  <%= link_to result[:product].name, admin_product_path(result[:product]), class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                <%= result[:product] ? number_to_currency(result[:product].selling_price) : "—" %>
+              </td>
+              <td class="px-6 py-4 text-sm whitespace-nowrap">
+                <% if result[:error] %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <%= result[:error] %>
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Synced
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <% if result[:product]&.vendor_image_urls&.any? %>
+                  <div class="flex items-center gap-2">
+                    <% result[:product].vendor_image_urls.first(3).each do |url| %>
+                      <%= image_tag url, class: "w-10 h-10 object-cover rounded border border-gray-200", alt: "" %>
+                    <% end %>
+                    <% extra = result[:product].vendor_image_urls.size - 3 %>
+                    <% if extra > 0 %>
+                      <span class="text-xs text-gray-400">+<%= extra %> more</span>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
   <% end %>
 </div>
