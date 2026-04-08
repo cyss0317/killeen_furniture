@@ -95,6 +95,8 @@ Rails.application.routes.draw do
       member do
         patch :update_status
         patch :assign_delivery
+        post  :resend_confirmation
+        get   :print_receipt
       end
       collection do
         post :calculate_shipping

@@ -80,6 +80,7 @@
 </div>
 
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
   <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50">
       <tr>
@@ -137,6 +138,7 @@
       <% end %>
     </tbody>
   </table>
+  </div>
   <% if @orders.empty? %>
     <div class="py-12 text-center text-gray-400 text-sm">No orders found</div>
   <% end %>

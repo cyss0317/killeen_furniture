@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= content_for?(:title) ? yield(:title) : APP_NAME %></title>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <style>
+      @media print {
+        body { margin: 0; }
+        .no-print { display: none !important; }
+      }
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #fff; color: #111; }
+    </style>
+  </head>
+  <body>
+    <%= yield %>
+  </body>
+</html>

@@ -149,6 +149,7 @@
 
 <%# Entries table %>
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
   <% if @entries.any? %>
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
@@ -195,6 +196,7 @@
         </tr>
       </tbody>
     </table>
+  </div>
   <% else %>
     <div class="py-12 text-center text-gray-400 text-sm">
       <p class="font-medium">No pay entries for this period</p>

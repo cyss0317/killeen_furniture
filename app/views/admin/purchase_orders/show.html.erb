@@ -18,6 +18,7 @@
       <div class="px-6 py-4 border-b border-gray-200">
         <h2 class="font-semibold text-gray-900">Ordered Items</h2>
       </div>
+      <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-100">
         <thead class="bg-gray-50">
           <tr>
@@ -66,6 +67,7 @@
           <% end %>
         </tbody>
       </table>
+      </div>
       <div class="px-6 py-3 border-t border-gray-100 flex justify-end">
         <p class="text-sm font-bold text-gray-900">
           Grand Total: <%= number_to_currency(@po.total_cost) %>
@@ -84,6 +86,7 @@
         </div>
 
         <%= form_with url: receive_admin_purchase_order_path(@po), method: :patch do |f| %>
+          <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-100">
             <thead class="bg-gray-50">
               <tr>
@@ -150,6 +153,7 @@
               <% end %>
             </tbody>
           </table>
+          </div>
 
           <div class="px-6 py-4 border-t border-amber-200 bg-amber-50">
             <%= f.submit "Record Receipt & Update Stock",

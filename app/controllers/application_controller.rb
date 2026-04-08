@@ -13,8 +13,8 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up,        keys: [:first_name, :last_name, :phone])
-    devise_parameter_sanitizer.permit(:account_update, keys: [:first_name, :last_name, :phone])
+    devise_parameter_sanitizer.permit(:sign_up,        keys: [ :first_name, :last_name, :phone ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :first_name, :last_name, :phone ])
   end
 
   private
@@ -24,7 +24,7 @@ class ApplicationController < ActionController::Base
   end
 
   def navbar_categories
-    @navbar_categories ||= Category.where(name: ["Living Room", "Bedroom", "Dining Room"])
+    @navbar_categories ||= Category.where(name: [ "Living Room", "Bedroom", "Dining Room" ])
                                    .order(Arel.sql("CASE name WHEN 'Living Room' THEN 0 WHEN 'Bedroom' THEN 1 WHEN 'Dining Room' THEN 2 END"))
   end
 
@@ -44,6 +44,19 @@ class ApplicationController < ActionController::Base
     cart = Cart.create!(session_id: SecureRandom.hex)
     session[:cart_id] = cart.id
     cart
+  end
+
+  # Returns the ordered list of color group names present in the given raw color array.
+  def color_groups_for(raw_colors)
+    present = raw_colors.map { |c| ApplicationHelper::COLOR_GROUP_MAP[c] }.compact.uniq
+    ApplicationHelper::COLOR_GROUP_SWATCHES.map(&:first).select { |g| present.include?(g) }
+  end
+
+  # Expands a color group name (from params[:color]) back to the raw DB values it covers.
+  # Returns nil if blank so by_color scope is a no-op.
+  def expand_color_group(group)
+    return nil if group.blank?
+    ApplicationHelper.colors_in_group(group).presence || group
   end
 
   def user_not_authorized

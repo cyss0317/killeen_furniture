@@ -14,6 +14,25 @@
     <% end %>
   </div>
 
+  <!-- Receipt Actions -->
+  <div class="flex items-center gap-2">
+    <%= link_to print_receipt_admin_order_path(@order), target: "_blank",
+        class: "inline-flex items-center gap-1.5 text-sm px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+      </svg>
+      Print Receipt
+    <% end %>
+    <%= button_to resend_confirmation_admin_order_path(@order), method: :post,
+        form: { data: { turbo_confirm: "Resend confirmation email to #{@order.customer_email}?" } },
+        class: "inline-flex items-center gap-1.5 text-sm px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      Resend Email
+    <% end %>
+  </div>
+
   <!-- Status Update -->
   <% if @order.editable_by_admin? && @order.allowed_next_statuses.any? %>
     <%= form_with url: update_status_admin_order_path(@order), method: :patch, class: "flex gap-2 items-center" do |f| %>
@@ -33,6 +52,7 @@
       <div class="px-6 py-4 border-b border-gray-200">
         <h2 class="font-semibold text-gray-900">Order Items</h2>
       </div>
+      <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-100">
         <thead class="bg-gray-50">
           <tr>
@@ -83,6 +103,7 @@
           <% end %>
         </tbody>
       </table>
+      </div>
 
       <div class="px-6 py-4 border-t border-gray-100 space-y-1">
         <div class="flex justify-between text-sm text-gray-600">
@@ -157,6 +178,32 @@
 
   <!-- Sidebar Info -->
   <div class="space-y-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="font-semibold text-gray-900 mb-4">Order Info</h3>
+      <dl class="space-y-2 text-sm">
+        <div>
+          <dt class="text-gray-500">Placed</dt>
+          <dd><%= @order.created_at.strftime("%B %d, %Y at %l:%M %p") %></dd>
+        </div>
+        <div>
+          <dt class="text-gray-500">Source</dt>
+          <dd><%= @order.source.humanize %></dd>
+        </div>
+        <% if @order.stripe_payment_intent_id.present? %>
+          <div>
+            <dt class="text-gray-500">Stripe ID</dt>
+            <dd class="font-mono text-xs truncate"><%= @order.stripe_payment_intent_id %></dd>
+          </div>
+        <% end %>
+        <% if @order.notes.present? %>
+          <div>
+            <dt class="text-gray-500">Notes</dt>
+            <dd class="text-gray-700 mt-1"><%= @order.notes %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+    
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 class="font-semibold text-gray-900 mb-4">Customer</h3>
       <dl class="space-y-2 text-sm">
@@ -240,30 +287,5 @@
       </div>
     <% end %>
 
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 class="font-semibold text-gray-900 mb-4">Order Info</h3>
-      <dl class="space-y-2 text-sm">
-        <div>
-          <dt class="text-gray-500">Placed</dt>
-          <dd><%= @order.created_at.strftime("%B %d, %Y at %l:%M %p") %></dd>
-        </div>
-        <div>
-          <dt class="text-gray-500">Source</dt>
-          <dd><%= @order.source.humanize %></dd>
-        </div>
-        <% if @order.stripe_payment_intent_id.present? %>
-          <div>
-            <dt class="text-gray-500">Stripe ID</dt>
-            <dd class="font-mono text-xs truncate"><%= @order.stripe_payment_intent_id %></dd>
-          </div>
-        <% end %>
-        <% if @order.notes.present? %>
-          <div>
-            <dt class="text-gray-500">Notes</dt>
-            <dd class="text-gray-700 mt-1"><%= @order.notes %></dd>
-          </div>
-        <% end %>
-      </dl>
-    </div>
   </div>
 </div>

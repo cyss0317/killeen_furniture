@@ -69,11 +69,24 @@
         <% if @colors.any? %>
           <div>
             <label class="block text-xs font-semibold text-warm-700 uppercase tracking-wide mb-1.5">Color / Finish</label>
-            <%= f.select :color,
-                options_for_select([["All Colors", ""]] + @colors.map { |c| [c, c] }, params[:color]),
-                {},
-                class: "text-sm border border-warm-400 rounded-xl bg-white px-3 py-2 text-warm-900 focus:outline-none focus:ring-2 focus:ring-warm-400",
-                onchange: "this.form.submit()" %>
+            <%= f.hidden_field :color, value: params[:color], id: "color-filter-value" %>
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button"
+                      onclick="document.getElementById('color-filter-value').value = ''; this.closest('form').submit();"
+                      class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs border transition-colors <%= params[:color].blank? ? 'border-warm-700 bg-warm-100 font-semibold text-warm-900' : 'border-warm-300 text-warm-600 hover:border-warm-500' %>">
+                All
+              </button>
+              <% @colors.each do |color| %>
+                <button type="button"
+                        onclick="document.getElementById('color-filter-value').value = '<%= j color %>'; this.closest('form').submit();"
+                        title="<%= color %>"
+                        class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs border transition-colors <%= params[:color] == color ? 'border-warm-700 bg-warm-100 font-semibold text-warm-900' : 'border-warm-300 text-warm-600 hover:border-warm-500' %>">
+                  <span class="w-3.5 h-3.5 rounded-full border border-black/10 flex-shrink-0"
+                        style="background: <%= color_swatch_for_group(color) %>;"></span>
+                  <%= color %>
+                </button>
+              <% end %>
+            </div>
           </div>
         <% end %>
 

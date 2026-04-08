@@ -1,6 +1,6 @@
 module Admin
   class OrdersController < BaseController
-    before_action :set_order, only: [ :show, :update_status, :assign_delivery ]
+    before_action :set_order, only: [ :show, :update_status, :assign_delivery, :resend_confirmation, :print_receipt ]
 
     SORTABLE_COLUMNS = %w[order_number created_at grand_total status].freeze
 
@@ -133,6 +133,16 @@ module Admin
       else
         redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence
       end
+    end
+
+    def resend_confirmation
+      OrderMailer.confirmation(@order).deliver_now
+      redirect_to admin_order_path(@order), notice: "Confirmation email resent to #{@order.customer_email}."
+    end
+
+    def print_receipt
+      @order_items = @order.order_items.includes(:product)
+      render layout: "print"
     end
 
     def assign_delivery
