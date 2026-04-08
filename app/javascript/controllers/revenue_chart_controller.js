@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 import Chart from "chart.js"
 
+const usd = (val) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(val)
+
 export default class extends Controller {
   static values = {
     labels:  Array,
@@ -20,7 +22,10 @@ export default class extends Controller {
   }
 
   renderChart() {
-    const ctx = this.element.getContext("2d")
+    const ctx     = this.element.getContext("2d")
+    const revenue = this.revenueValue
+    const cost    = this.costValue
+    const profit  = revenue.map((r, i) => parseFloat((r - (cost[i] || 0)).toFixed(2)))
 
     this.chart = new Chart(ctx, {
       type: "line",
@@ -29,9 +34,9 @@ export default class extends Controller {
         datasets: [
           {
             label: "Revenue",
-            data: this.revenueValue,
+            data: revenue,
             borderColor: "#b45309",
-            backgroundColor: "rgba(180, 83, 9, 0.08)",
+            backgroundColor: "rgba(180, 83, 9, 0.07)",
             borderWidth: 2,
             tension: 0.3,
             fill: true,
@@ -41,13 +46,25 @@ export default class extends Controller {
           },
           {
             label: "Cost",
-            data: this.costValue,
-            borderColor: "#6b7280",
-            backgroundColor: "rgba(107, 114, 128, 0.06)",
+            data: cost,
+            borderColor: "#9ca3af",
+            backgroundColor: "rgba(107, 114, 128, 0.05)",
             borderWidth: 2,
             tension: 0.3,
             fill: true,
-            pointBackgroundColor: "#6b7280",
+            pointBackgroundColor: "#9ca3af",
+            pointRadius: 3,
+            pointHoverRadius: 5
+          },
+          {
+            label: "Profit",
+            data: profit,
+            borderColor: "#15803d",
+            backgroundColor: "rgba(21, 128, 61, 0.10)",
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: "#15803d",
             pointRadius: 3,
             pointHoverRadius: 5
           }
@@ -64,10 +81,7 @@ export default class extends Controller {
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => {
-                const val = ctx.parsed.y
-                return ` ${ctx.dataset.label}: ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(val)}`
-              }
+              label: (ctx) => ` ${ctx.dataset.label}: ${usd(ctx.parsed.y)}`
             }
           }
         },

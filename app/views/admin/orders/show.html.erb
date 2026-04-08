@@ -36,11 +36,20 @@
   <!-- Status Update -->
   <% if @order.editable_by_admin? && @order.allowed_next_statuses.any? %>
     <%= form_with url: update_status_admin_order_path(@order), method: :patch, class: "flex gap-2 items-center" do |f| %>
+      <%
+        current_label = "#{@order.status.humanize} ✦ current"
+        next_options  = @order.allowed_next_statuses.map { |s| [s.to_s.humanize, s] }
+        all_options   = [[current_label, @order.status]] + next_options
+      %>
       <%= f.select :status,
-          options_for_select(@order.allowed_next_statuses.map { |s| [s.to_s.humanize, s] }),
+          options_for_select(all_options, @order.status),
           {},
-          class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
-      <%= f.submit "Update Status", class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer" %>
+          class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+          data: { current: @order.status },
+          onchange: "this.nextElementSibling.disabled = (this.value === this.dataset.current)" %>
+      <%= f.submit "Update Status",
+          disabled: true,
+          class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" %>
     <% end %>
   <% end %>
 </div>
@@ -90,10 +99,33 @@
               <td class="px-6 py-4 text-right text-sm"><%= number_to_currency(item.unit_price) %></td>
               <td class="px-6 py-4 text-right text-sm">
                 <% if item.margin %>
-                  <span class="text-green-600 font-medium"><%= number_to_currency(item.margin) %></span>
-                  <% if item.margin_percentage %>
-                    <span class="block text-xs text-green-500">(<%= item.margin_percentage %>%)</span>
-                  <% end %>
+                  <span data-controller="peekable" class="inline-flex flex-col items-end gap-0.5">
+                    <span class="inline-flex items-center gap-1">
+                      <button type="button" data-action="click->peekable#toggle"
+                              class="text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer flex items-center justify-center" title="Show margin">
+                        <%# Eye open (shown when hidden) %>
+                        <svg data-peekable-target="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <%# Eye off (shown when revealed) %>
+                        <svg data-peekable-target="eyeOff" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.966 9.966 0 012.122-3.368M6.53 6.53A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.978 9.978 0 01-4.512 5.478M6.53 6.53L3 3m3.53 3.53l11.94 11.94M3 3l18 18"/>
+                        </svg>
+                      </button>
+                      <span data-peekable-target="value" class="hidden text-green-600 font-medium">
+                        <%= number_to_currency(item.margin) %>
+                      </span>
+                    </span>
+                    <% if item.margin_percentage %>
+                      <span data-peekable-target="value" class="hidden text-xs text-green-500">
+                        (<%= item.margin_percentage %>%)
+                      </span>
+                    <% end %>
+                  </span>
                 <% else %>
                   <span class="text-gray-400">—</span>
                 <% end %>
@@ -133,9 +165,26 @@
               <span>Total Cost (COGS)</span>
               <span><%= number_to_currency(order_cogs) %></span>
             </div>
-            <div class="flex justify-between text-sm font-semibold text-green-700">
+            <div class="flex justify-between text-sm font-semibold text-green-700" data-controller="peekable">
               <span>Gross Profit</span>
-              <span><%= number_to_currency(order_profit) %> (<%= profit_pct %>%)</span>
+              <span class="inline-flex items-center gap-1.5">
+                <button type="button" data-action="click->peekable#toggle"
+                        class="text-green-500 hover:text-green-700 focus:outline-none cursor-pointer flex items-center justify-center" title="Show gross profit">
+                  <svg data-peekable-target="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg data-peekable-target="eyeOff" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.966 9.966 0 012.122-3.368M6.53 6.53A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.978 9.978 0 01-4.512 5.478M6.53 6.53L3 3m3.53 3.53l11.94 11.94M3 3l18 18"/>
+                  </svg>
+                </button>
+                <span data-peekable-target="value" class="hidden">
+                  <%= number_to_currency(order_profit) %> (<%= profit_pct %>%)
+                </span>
+              </span>
             </div>
           </div>
         <% end %>

@@ -3,7 +3,9 @@ class RevenueAnalyticsQuery
 
   Result = Struct.new(
     :current_sales, :current_cost, :current_profit, :current_margin, :current_count,
+    :current_tax,
     :prev_sales, :prev_cost, :prev_profit, :prev_margin, :prev_count,
+    :prev_tax,
     :sales_change, :profit_change, :margin_change,
     :chart_labels, :chart_revenue, :chart_cost,
     :current_labor_cost, :prev_labor_cost, :current_net_profit, :prev_net_profit,
@@ -41,11 +43,13 @@ class RevenueAnalyticsQuery
       current_profit:     current[:profit],
       current_margin:     current[:margin],
       current_count:      current[:count],
+      current_tax:        current[:tax],
       prev_sales:         prev[:sales],
       prev_cost:          prev[:cost],
       prev_profit:        prev[:profit],
       prev_margin:        prev[:margin],
       prev_count:         prev[:count],
+      prev_tax:           prev[:tax],
       sales_change:       pct_change(prev[:sales], current[:sales]),
       profit_change:      pct_change(prev[:profit], current[:profit]),
       margin_change:      (current[:margin] - prev[:margin]).round(1),
@@ -93,13 +97,14 @@ class RevenueAnalyticsQuery
   def aggregate(range)
     orders = base_scope.where(created_at: range)
     sales  = orders.sum(:grand_total).to_f
+    tax    = orders.sum(:tax_amount).to_f
     cost   = OrderItem.joins(:order)
                       .merge(orders)
                       .where.not(unit_cost: nil)
                       .sum("order_items.unit_cost * order_items.quantity").to_f
     profit = sales - cost
     margin = sales > 0 ? (profit / sales * 100).round(1) : 0.0
-    { sales: sales, cost: cost, profit: profit, margin: margin, count: orders.count }
+    { sales: sales, cost: cost, profit: profit, margin: margin, count: orders.count, tax: tax }
   end
 
   def labor_cost(range)

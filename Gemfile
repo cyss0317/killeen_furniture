@@ -48,9 +48,6 @@ gem "pundit", "~> 2.3"
 # Payments
 gem "stripe", "~> 13.0"
 
-# File Storage (S3)
-gem "aws-sdk-s3", require: false
-
 # Pagination
 gem "pagy", "~> 43.2"
 
