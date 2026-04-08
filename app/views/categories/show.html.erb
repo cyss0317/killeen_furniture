@@ -73,14 +73,14 @@
             <div class="flex flex-wrap gap-1.5">
               <button type="button"
                       onclick="document.getElementById('color-filter-value').value = ''; this.closest('form').submit();"
-                      class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs border transition-colors <%= params[:color].blank? ? 'border-warm-700 bg-warm-100 font-semibold text-warm-900' : 'border-warm-300 text-warm-600 hover:border-warm-500' %>">
+                      class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs border transition-colors cursor-pointer <%= params[:color].blank? ? 'border-warm-700 bg-warm-100 font-semibold text-warm-900' : 'border-warm-300 text-warm-600 hover:border-warm-500' %>">
                 All
               </button>
               <% @colors.each do |color| %>
                 <button type="button"
                         onclick="document.getElementById('color-filter-value').value = '<%= j color %>'; this.closest('form').submit();"
                         title="<%= color %>"
-                        class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs border transition-colors <%= params[:color] == color ? 'border-warm-700 bg-warm-100 font-semibold text-warm-900' : 'border-warm-300 text-warm-600 hover:border-warm-500' %>">
+                        class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs border transition-colors cursor-pointer <%= params[:color] == color ? 'border-warm-700 bg-warm-100 font-semibold text-warm-900' : 'border-warm-300 text-warm-600 hover:border-warm-500' %>">
                   <span class="w-3.5 h-3.5 rounded-full border border-black/10 flex-shrink-0"
                         style="background: <%= color_swatch_for_group(color) %>;"></span>
                   <%= color %>
