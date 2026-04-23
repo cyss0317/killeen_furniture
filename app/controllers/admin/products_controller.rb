@@ -42,7 +42,11 @@ module Admin
     end
 
     def create
-      @product = Product.new(product_params)
+      attrs = product_params
+      new_urls = parse_image_urls(params.dig(:product, :new_vendor_image_urls).to_s)
+      attrs = attrs.merge(vendor_image_urls: new_urls.uniq) if new_urls.any?
+
+      @product = Product.new(attrs)
       if @product.save
         redirect_to admin_product_path(@product), notice: "Product created successfully."
       else
@@ -56,7 +60,20 @@ module Admin
     end
 
     def update
-      if @product.update(product_params)
+      attrs = product_params
+
+      # Merge manually entered image URLs (one per line) into the existing array.
+      # When vendor_image_urls[] wasn't submitted (e.g. from the show-page quick form),
+      # fall back to the product's current URLs so nothing gets wiped.
+      new_urls = parse_image_urls(params.dig(:product, :new_vendor_image_urls).to_s)
+      if new_urls.any?
+        existing = params[:product].key?(:vendor_image_urls) \
+          ? Array(attrs[:vendor_image_urls]).reject(&:blank?) \
+          : @product.vendor_image_urls
+        attrs = attrs.merge(vendor_image_urls: (existing + new_urls).uniq)
+      end
+
+      if @product.update(attrs)
         redirect_to admin_product_path(@product), notice: "Product updated."
       else
         @categories = Category.ordered
@@ -210,6 +227,28 @@ module Admin
     end
 
     private
+
+    # Accepts one URL per line, a JSON array (["url1","url2"]), or comma-separated URLs.
+    def parse_image_urls(raw)
+      text = raw.to_s.strip
+      return [] if text.blank?
+
+      candidates = if text.start_with?("[")
+        begin
+          parsed = JSON.parse(text)
+          Array(parsed).map(&:to_s)
+        rescue JSON::ParserError
+          text.lines
+        end
+      else
+        # Split on newlines first; if single line, also split on commas
+        lines = text.lines.map(&:strip).reject(&:blank?)
+        lines.size == 1 ? lines.first.split(/[,\s]+/) : lines
+      end
+
+      candidates.map(&:strip).map { |u| u.gsub(/\A["'\[\],\s]+|["'\[\],\s]+\z/, "") }
+                .select { |u| u.match?(/\Ahttps?:\/\//) }.uniq
+    end
 
     def set_product
       @product = Product.friendly.find(params[:id])

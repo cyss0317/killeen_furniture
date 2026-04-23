@@ -19,7 +19,10 @@
             </div>
             <div>
               <%= f.label :sku, "SKU / Model # *", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.text_field :sku, required: true, placeholder: "AF12345", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase" %>
+              <%= f.text_field :sku, required: true, placeholder: "AF12345",
+                  id: "product_sku",
+                  class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase",
+                  oninput: "const l=document.getElementById('ashley-search-link'),v=this.value.trim();if(v){l.href='https://www.ashleyfurniture.com/search-results?q='+encodeURIComponent(v);l.classList.remove('invisible')}else{l.classList.add('invisible')}" %>
             </div>
           </div>
           <div>
@@ -75,28 +78,66 @@
 
       <!-- Images -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 class="font-semibold text-gray-900 mb-4">Product Images</h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">Product Images</h3>
+          <a id="ashley-search-link"
+             href="<%= product.sku.present? ? "https://www.ashleyfurniture.com/search-results?q=#{product.sku}" : "#" %>"
+             target="_blank" rel="noopener"
+             class="text-xs text-amber-700 hover:underline <%= product.sku.present? ? "" : "invisible" %>">
+            Search Ashley ↗
+          </a>
+        </div>
 
-        <%# Vendor image URLs — shown as a removable grid on edit %>
+        <%# Vendor image URLs — draggable, reorderable, removable %>
         <% if product.vendor_image_urls.present? %>
-          <div class="mb-4">
-            <p class="text-xs font-medium text-gray-600 mb-2">Vendor Images <span class="font-normal text-gray-400">(uncheck to remove)</span></p>
-            <%# Sentinel ensures key is present even when all unchecked, so model can clear the array %>
+          <div class="mb-4" data-controller="image-sort">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs font-medium text-gray-600">
+                Vendor Images
+                <span class="font-normal text-gray-400">— drag to reorder · uncheck to remove</span>
+              </p>
+              <span class="text-xs text-gray-400">First image = main display image</span>
+            </div>
+
+            <%# Sentinel so the array key is always present even when all are unchecked %>
             <input type="hidden" name="product[vendor_image_urls][]" value="">
-            <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-              <% product.vendor_image_urls.each do |url| %>
-                <label class="relative cursor-pointer">
-                  <input type="checkbox" name="product[vendor_image_urls][]" value="<%= url %>"
-                         class="sr-only peer" checked>
-                  <div class="aspect-square bg-gray-100 rounded-md overflow-hidden border-2 border-transparent peer-checked:border-amber-500 transition-all">
-                    <%= image_tag url, class: "w-full h-full object-cover" %>
+
+            <div class="grid grid-cols-4 sm:grid-cols-6 gap-2" data-image-sort-grid>
+              <% product.vendor_image_urls.each_with_index do |url, i| %>
+                <div class="relative group rounded-md overflow-hidden bg-gray-100 ring-2 ring-amber-500 transition-all cursor-grab active:cursor-grabbing select-none"
+                     draggable="true"
+                     data-image-sort-target="item">
+
+                  <%# Hidden input carries the URL in DOM order — reordering DOM reorders submission %>
+                  <input type="hidden" name="product[vendor_image_urls][]" value="<%= url %>">
+
+                  <div class="aspect-square">
+                    <%= image_tag url, class: "w-full h-full object-cover pointer-events-none", loading: "lazy" %>
                   </div>
-                  <div class="absolute top-1 right-1 w-4 h-4 bg-amber-500 rounded-full hidden peer-checked:flex items-center justify-center pointer-events-none">
-                    <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                  </div>
-                </label>
+
+                  <%# Primary badge — only shown on first item, refreshed by JS %>
+                  <span data-primary-badge
+                        class="absolute bottom-1 left-1 text-[10px] font-bold bg-amber-500 text-white px-1 rounded leading-4 pointer-events-none <%= i == 0 ? '' : 'hidden' %>">
+                    Main
+                  </span>
+
+                  <%# Drag handle hint %>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none rounded-md"></div>
+
+                  <%# Remove checkbox overlay %>
+                  <label class="absolute top-1 right-1 cursor-pointer" title="Uncheck to remove">
+                    <input type="checkbox" class="sr-only peer" checked
+                           data-action="change->image-sort#toggle">
+                    <div class="w-5 h-5 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center ring-1 ring-gray-300 peer-checked:bg-amber-500 peer-checked:ring-amber-500 transition-all">
+                      <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                      <svg class="w-3 h-3 text-gray-400 peer-checked:hidden" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                      </svg>
+                    </div>
+                  </label>
+                </div>
               <% end %>
             </div>
           </div>
@@ -113,8 +154,17 @@
           </div>
         <% end %>
 
+        <%# Manual URL entry %>
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Add Image URLs</label>
+          <textarea name="product[new_vendor_image_urls]" rows="4"
+                    placeholder='One per line, comma-separated, or JSON array:&#10;["https://example.com/a.jpg","https://example.com/b.jpg"]'
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y"></textarea>
+          <p class="text-xs text-gray-400 mt-1">Accepts one URL per line, comma-separated URLs, or a JSON array. Added to existing vendor images.</p>
+        </div>
+
         <%= f.file_field :images, multiple: true, accept: "image/*",
-            class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" %>
+            class: "block w-full text-sm text-gray-500 mt-4 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" %>
         <p class="text-xs text-gray-400 mt-2">Upload multiple images. First image will be used as the primary image.</p>
       </div>
     </div>

@@ -77,8 +77,9 @@ module Products
 
     def apply_updates(data)
       updates = {}
-      updates[:name]   = data[:name]   if data[:name].present? && @product.name != data[:name]
-      updates[:weight] = data[:weight] if data[:weight].present? && @product.weight.nil?
+      updates[:name]     = data[:name]     if data[:name].present? && @product.name != data[:name]
+      updates[:weight]   = data[:weight]   if data[:weight].present? && @product.weight.nil?
+      updates[:page_url] = data[:page_url] if data[:page_url].present? && @product.page_url.blank?
 
       # Map Brand: Prefer "Ashley Furniture" if we successfully scraped the page
       # The @series passed in might just be a collection name (e.g. "Gerridan")

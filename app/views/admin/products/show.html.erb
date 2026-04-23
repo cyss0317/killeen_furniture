@@ -4,8 +4,8 @@
   <div class="flex items-center gap-4">
     <%= link_to "← Products", admin_products_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
     <h1 class="text-2xl font-bold text-gray-900"><%= @product.name %></h1>
-    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium
-      <%= @product.published? ? 'bg-green-100 text-green-700' : @product.draft? ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600' %>">
+    <% status_class = @product.published? ? 'bg-green-100 text-green-700' : @product.draft? ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600' %>
+    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_class %>">
       <%= @product.status.humanize %>
     </span>
   </div>
@@ -56,6 +56,8 @@
       <% unless @product.vendor_image_urls.present? || @product.images.attached? %>
         <p class="text-sm text-gray-400">No images. <%= link_to "Edit product", edit_admin_product_path(@product), class: "text-amber-700 hover:underline" %> to add images.</p>
       <% end %>
+
+
     </div>
 
     <!-- Description -->
