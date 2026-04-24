@@ -7,8 +7,12 @@ Rails.application.routes.draw do
 
   # SEO
   get "/sitemap.xml",              to: "sitemap#index",                 format: :xml
-  get "/killeen-furniture-store",  to: "pages#killeen_furniture_store", as: :killeen_furniture_store
-  get "/ashley-furniture-killeen", to: "pages#ashley_furniture_killeen", as: :ashley_furniture_killeen
+  get "/killeen-furniture-store",             to: "pages#killeen_furniture_store",      as: :killeen_furniture_store
+  get "/ashley-furniture-killeen",            to: "pages#ashley_furniture_killeen",     as: :ashley_furniture_killeen
+  get "/furniture-store-harker-heights-tx",   to: "pages#harker_heights_furniture",     as: :harker_heights_furniture
+  get "/furniture-store-copperas-cove-tx",    to: "pages#copperas_cove_furniture",      as: :copperas_cove_furniture
+  get "/affordable-furniture-killeen-tx",     to: "pages#affordable_furniture",         as: :affordable_furniture
+  get "/contact",                             to: "pages#contact",                      as: :contact
 
   # Authentication
   devise_for :users, controllers: {

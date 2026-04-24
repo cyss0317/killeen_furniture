@@ -42,41 +42,100 @@
     <!-- Images -->
     <div>
       <% if @product.vendor_image_urls.present? %>
-        <div class="aspect-square bg-warm-200 rounded-2xl overflow-hidden mb-3">
-          <%= image_tag @product.vendor_image_urls.first,
-              class: "w-full h-full object-cover",
-              alt: @product.name,
-              id: "main-product-image",
-              loading: "eager",
-              onerror: "this.onerror=null;this.style.display='none';this.parentElement.classList.add('flex','items-center','justify-center');this.parentElement.innerHTML='<svg class=\'w-24 h-24 text-warm-300\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg>';" %>
-        </div>
-        <% if @product.vendor_image_urls.size > 1 %>
-          <div class="grid grid-cols-4 gap-2">
-            <% @product.vendor_image_urls.each_with_index do |url, idx| %>
-              <div class="aspect-square bg-warm-200 rounded-xl overflow-hidden cursor-pointer border-2 <%= idx == 0 ? 'border-warm-600' : 'border-transparent' %> hover:border-warm-500 transition-colors"
-                   onclick="document.getElementById('main-product-image').src = '<%= url %>'; this.parentElement.querySelectorAll('div').forEach(d => d.classList.replace('border-warm-600','border-transparent')); this.classList.replace('border-transparent','border-warm-600');">
-                <%= image_tag url, class: "w-full h-full object-cover", alt: @product.name, loading: "lazy" %>
-              </div>
-            <% end %>
+        <% images = @product.vendor_image_urls %>
+        <div data-controller="image-gallery">
+          <%# Main image with nav arrows %>
+          <div class="relative aspect-square bg-warm-200 rounded-2xl overflow-hidden mb-3 group">
+            <%= image_tag images.first,
+                class: "w-full h-full object-cover",
+                alt: @product.name,
+                loading: "eager",
+                data: { "image-gallery-target": "main" } %>
+
+            <%# Prev arrow %>
+            <button type="button"
+                    data-image-gallery-target="prev"
+                    data-action="click->image-gallery#prev"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer"
+                    aria-label="Previous image">
+              <svg class="w-4 h-4 text-warm-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+
+            <%# Next arrow %>
+            <button type="button"
+                    data-image-gallery-target="next"
+                    data-action="click->image-gallery#next"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer"
+                    aria-label="Next image">
+              <svg class="w-4 h-4 text-warm-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
           </div>
-        <% end %>
+
+          <%# Thumbnails %>
+          <% if images.size > 1 %>
+            <div class="grid grid-cols-4 gap-2">
+              <% images.each_with_index do |url, idx| %>
+                <div class="aspect-square bg-warm-200 rounded-xl overflow-hidden cursor-pointer border-2 hover:border-warm-500 transition-colors <%= idx == 0 ? 'border-warm-600' : 'border-transparent' %>"
+                     data-image-gallery-target="thumb"
+                     data-gallery-src="<%= url %>"
+                     data-gallery-index="<%= idx %>"
+                     data-action="click->image-gallery#select">
+                  <%= image_tag url, class: "w-full h-full object-cover", alt: @product.name, loading: "lazy" %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
       <% elsif @product.images.attached? %>
-        <div class="aspect-square bg-warm-200 rounded-2xl overflow-hidden mb-3">
-          <%= image_tag @product.primary_image.variant(resize_to_fill: [600, 600]),
-              class: "w-full h-full object-cover",
-              alt: @product.name,
-              id: "main-product-image" %>
-        </div>
-        <% if @product.images.count > 1 %>
-          <div class="grid grid-cols-4 gap-2">
-            <% @product.images.each do |image| %>
-              <div class="aspect-square bg-warm-200 rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-warm-500 transition-colors"
-                   onclick="document.getElementById('main-product-image').src = '<%= url_for(image.variant(resize_to_fill: [600, 600])) %>'">
-                <%= image_tag image.variant(resize_to_fill: [150, 150]), class: "w-full h-full object-cover", alt: @product.name %>
-              </div>
-            <% end %>
+        <% as_images = @product.images.to_a %>
+        <div data-controller="image-gallery">
+          <div class="relative aspect-square bg-warm-200 rounded-2xl overflow-hidden mb-3 group">
+            <%= image_tag @product.primary_image.variant(resize_to_fill: [600, 600]),
+                class: "w-full h-full object-cover",
+                alt: @product.name,
+                data: { "image-gallery-target": "main" } %>
+
+            <button type="button"
+                    data-image-gallery-target="prev"
+                    data-action="click->image-gallery#prev"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer"
+                    aria-label="Previous image">
+              <svg class="w-4 h-4 text-warm-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+
+            <button type="button"
+                    data-image-gallery-target="next"
+                    data-action="click->image-gallery#next"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer"
+                    aria-label="Next image">
+              <svg class="w-4 h-4 text-warm-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
           </div>
-        <% end %>
+
+          <% if as_images.size > 1 %>
+            <div class="grid grid-cols-4 gap-2">
+              <% as_images.each_with_index do |image, idx| %>
+                <div class="aspect-square bg-warm-200 rounded-xl overflow-hidden cursor-pointer border-2 hover:border-warm-500 transition-colors <%= idx == 0 ? 'border-warm-600' : 'border-transparent' %>"
+                     data-image-gallery-target="thumb"
+                     data-gallery-src="<%= url_for(image.variant(resize_to_fill: [600, 600])) %>"
+                     data-gallery-index="<%= idx %>"
+                     data-action="click->image-gallery#select">
+                  <%= image_tag image.variant(resize_to_fill: [150, 150]), class: "w-full h-full object-cover", alt: @product.name %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
       <% else %>
         <div class="aspect-square bg-warm-200 rounded-2xl flex items-center justify-center">
           <svg class="w-24 h-24 text-warm-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,23 +222,23 @@
           </div>
         <% end %>
       </div>
-    </div>
-  </div>
 
-  <!-- Full Description -->
-  <% has_rich_description = @product.description&.body&.present? %>
-  <% if has_rich_description || @product.short_description.present? %>
-    <div class="mt-12 border-t border-warm-200 pt-8" data-controller="reveal">
-      <h2 class="text-xl font-bold text-warm-950 mb-4">Product Description</h2>
-      <% if has_rich_description %>
-        <div class="prose max-w-none text-warm-700">
-          <%= @product.description %>
+      <!-- Description -->
+      <% has_rich_description = @product.description&.body&.present? %>
+      <% if has_rich_description || @product.short_description.present? %>
+        <div class="border-t border-warm-200 pt-6 mt-6">
+          <h2 class="text-sm font-semibold text-warm-900 mb-3">Description</h2>
+          <% if has_rich_description %>
+            <div class="prose prose-sm max-w-none text-warm-600">
+              <%= @product.description %>
+            </div>
+          <% else %>
+            <p class="text-warm-600 leading-relaxed text-sm"><%= @product.short_description %></p>
+          <% end %>
         </div>
-      <% elsif @product.short_description.present? %>
-        <p class="text-warm-600 leading-relaxed text-base"><%= @product.short_description %></p>
       <% end %>
     </div>
-  <% end %>
+  </div>
 
   <!-- Related Products -->
   <% if @related.any? %>

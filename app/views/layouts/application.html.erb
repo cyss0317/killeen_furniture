@@ -4,6 +4,7 @@
     <title><%= meta_title %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-prefetch" content="false">
+    <meta name="turbo-cache-control" content="no-preview">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="stripe-key" content="<%= ENV.fetch('STRIPE_PUBLISHABLE_KEY', '') %>">
     <%= csrf_meta_tags %>
@@ -29,6 +30,56 @@
     <meta name="twitter:title" content="<%= meta_title %>">
     <meta name="twitter:description" content="<%= meta_description %>">
     <meta name="twitter:image" content="<%= meta_image %>">
+
+    <%# Sitewide LocalBusiness structured data — tells Google who we are on every page %>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FurnitureStore",
+      "name": "Warehouse Furniture",
+      "url": "<%= root_url %>",
+      "logo": "<%= request.base_url %>/icon.png",
+      "telephone": "+12546289088",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1104 E Veterans Memorial Blvd",
+        "addressLocality": "Killeen",
+        "addressRegion": "TX",
+        "postalCode": "76541",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 31.1171,
+        "longitude": -97.7278
+      },
+      "areaServed": [
+        { "@type": "City", "name": "Killeen",        "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Harker Heights", "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Copperas Cove",  "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Fort Cavazos",   "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Nolanville",     "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Belton",         "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Florence",       "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Lampasas",       "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Gatesville",     "containedInPlace": { "@type": "State", "name": "Texas" } },
+        { "@type": "City", "name": "Temple",         "containedInPlace": { "@type": "State", "name": "Texas" } }
+      ],
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+          "opens": "11:00",
+          "closes": "18:00"
+        }
+      ],
+      "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
+      "sameAs": [
+        "https://www.yelp.com/biz/warehouse-furniture-killeen",
+        "https://www.bbb.org/us/tx/killeen/profile/furniture-stores/warehouse-furniture-0825-90040068"
+      ]
+    }
+    </script>
 
     <%# Structured data (JSON-LD) — injected per page via content_for :structured_data %>
     <%= yield :structured_data %>

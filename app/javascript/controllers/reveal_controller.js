@@ -8,6 +8,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   connect() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    if (document.documentElement.hasAttribute("data-turbo-preview")) return
 
     this.delay = parseInt(this.element.dataset.revealDelay || "0")
 

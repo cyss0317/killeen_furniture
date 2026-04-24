@@ -1,0 +1,206 @@
+<% content_for :title, "Furniture Store Near Copperas Cove TX – Warehouse Furniture (14 mi)" %>
+<% content_for :description, "Furniture store 14 miles from Copperas Cove, TX. Warehouse Furniture in Killeen carries Ashley sofas, bedroom sets, dining tables & more with local delivery to Copperas Cove." %>
+<% content_for :structured_data do %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FurnitureStore",
+  "name": "Warehouse Furniture – Near Copperas Cove, TX",
+  "url": "<%= copperas_cove_furniture_url %>",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "1104 E Veterans Memorial Blvd",
+    "addressLocality": "Killeen",
+    "addressRegion": "TX",
+    "postalCode": "76541",
+    "addressCountry": "US"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 31.1171,
+    "longitude": -97.7278
+  },
+  "telephone": "+12546289088",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      "opens": "11:00",
+      "closes": "18:00"
+    }
+  ],
+  "areaServed": [
+    { "@type": "City", "name": "Copperas Cove", "containedInPlace": { "@type": "State", "name": "Texas" } },
+    { "@type": "City", "name": "Killeen" },
+    { "@type": "City", "name": "Harker Heights" }
+  ],
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is there a furniture store near Copperas Cove, TX?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — Warehouse Furniture is located in Killeen at 1104 E Veterans Memorial Blvd, just 14 miles from Copperas Cove. We carry Ashley Furniture sofas, bedroom sets, dining tables, recliners, and more. Open Mon–Sat 11 AM–6 PM."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Warehouse Furniture deliver to Copperas Cove?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we offer local delivery to Copperas Cove. Enter your ZIP code at checkout to confirm delivery availability and pricing for your area."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How far is Warehouse Furniture from Copperas Cove?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Warehouse Furniture is approximately 14 miles from Copperas Cove at 1104 E Veterans Memorial Blvd, Killeen, TX 76541 — about a 20-minute drive."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What furniture stores serve the Copperas Cove area?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Warehouse Furniture in Killeen is the closest furniture store to Copperas Cove, carrying Ashley Furniture and Generation Trade with local delivery available. Visit our showroom at 1104 E Veterans Memorial Blvd, Killeen, TX."
+      }
+    }
+  ]
+}
+</script>
+<% end %>
+
+<!-- ── Hero ───────────────────────────────────────────────────── -->
+<section class="bg-warm-100">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 text-center">
+    <p class="text-xs font-semibold tracking-[0.2em] uppercase text-warm-600 mb-4">
+      14 Miles from Copperas Cove · Local Delivery Available
+    </p>
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-warm-950 leading-tight mb-5">
+      Furniture Store<br>Near Copperas Cove, TX
+    </h1>
+    <p class="text-warm-700 text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
+      Warehouse Furniture is the closest furniture store to Copperas Cove — just 14 miles away in Killeen on Veterans Memorial Blvd. Shop Ashley sofas, bedroom sets, dining tables, and more, with local delivery available to Copperas Cove.
+    </p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <%= link_to "Shop All Furniture", products_path,
+          class: "bg-warm-800 text-warm-50 px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
+      <%= link_to "Get Directions →", "https://www.google.com/maps/dir/Copperas+Cove+TX/1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
+          target: "_blank", rel: "noopener noreferrer",
+          class: "text-warm-700 text-sm font-medium underline underline-offset-4 hover:text-warm-950 transition-colors" %>
+    </div>
+  </div>
+</section>
+
+<!-- ── Distance callout ───────────────────────────────────────── -->
+<section class="border-y border-warm-300 bg-warm-50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+      <div>
+        <p class="text-3xl font-bold text-warm-950">14 mi</p>
+        <p class="text-sm text-warm-600 mt-1">From Copperas Cove</p>
+      </div>
+      <div>
+        <p class="text-3xl font-bold text-warm-950">~20 min</p>
+        <p class="text-sm text-warm-600 mt-1">Drive from Copperas Cove</p>
+      </div>
+      <div>
+        <p class="text-3xl font-bold text-warm-950">Mon–Sat</p>
+        <p class="text-sm text-warm-600 mt-1">11 AM – 6 PM</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Shop by Room ──────────────────────────────────────────── -->
+<% if @categories.any? %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-8">
+      <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">Browse by Room</p>
+      <h2 class="text-2xl font-bold text-warm-950">Furniture for Every Room — Delivered to Copperas Cove</h2>
+      <p class="text-warm-600 text-sm mt-2 max-w-xl">From living room sofas to bedroom sets and dining tables — shop in our Killeen showroom or order online with delivery to Copperas Cove.</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <% @categories.each_with_index do |category, i| %>
+        <%= link_to category_path(category),
+            data: { controller: "reveal", "reveal-delay": i * 60 },
+            class: "group relative bg-warm-50 rounded-2xl p-5 hover:bg-warm-200 transition-colors border border-warm-400" do %>
+          <h3 class="font-semibold text-warm-800 group-hover:text-warm-950 text-sm pr-6"><%= category.name %></h3>
+          <% if category.subcategories.any? %>
+            <p class="text-xs text-warm-600 mt-1"><%= category.subcategories.count %> subcategories</p>
+          <% end %>
+          <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-300 group-hover:text-warm-600 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<!-- ── Featured Products ─────────────────────────────────────── -->
+<% if @featured_products.any? %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">In Stock Now</p>
+        <h2 class="text-2xl font-bold text-warm-950">Popular Furniture Near Copperas Cove</h2>
+      </div>
+      <%= link_to "View All →", products_path, class: "text-sm text-warm-600 hover:text-warm-950 transition-colors" %>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <% @featured_products.each_with_index do |product, i| %>
+        <%= render "products/product_card", product: product, reveal_delay: i * 80 %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<!-- ── FAQ ───────────────────────────────────────────────────── -->
+<section class="bg-warm-50 border-y border-warm-300">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-2xl font-bold text-warm-950 mb-8">Frequently Asked Questions</h2>
+    <dl class="space-y-6">
+      <% [
+        ["Is there a furniture store near Copperas Cove, TX?",
+         "Yes — Warehouse Furniture is 14 miles from Copperas Cove at 1104 E Veterans Memorial Blvd, Killeen. Open Mon–Sat 11 AM–6 PM with Ashley Furniture sofas, bedroom sets, dining tables, and more."],
+        ["Does Warehouse Furniture deliver to Copperas Cove?",
+         "Yes, we offer local delivery to Copperas Cove. Enter your ZIP code at checkout to see delivery options and pricing for your area."],
+        ["How far is the nearest furniture store from Copperas Cove?",
+         "Warehouse Furniture in Killeen is approximately 14 miles from Copperas Cove — about a 20-minute drive on TX-190 E."],
+        ["What brands are available near Copperas Cove?",
+         "We carry Ashley Furniture and Generation Trade. As an authorized Ashley dealer, we stock the full lineup including sofas, sectionals, bedroom sets, dining furniture, recliners, and mattresses."],
+      ].each do |q, a| %>
+        <div>
+          <dt class="font-semibold text-warm-900 text-sm mb-1"><%= q %></dt>
+          <dd class="text-sm text-warm-600 leading-relaxed"><%= a %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────── -->
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="bg-warm-950 text-white rounded-3xl p-10 text-center">
+    <h2 class="text-2xl font-bold mb-3">Visit Us — 14 Miles from Copperas Cove</h2>
+    <p class="text-warm-300 text-sm mb-2">1104 E Veterans Memorial Blvd, Killeen, TX 76541</p>
+    <p class="text-warm-400 text-sm mb-6">Mon–Sat: 11:00 AM – 6:00 PM &nbsp;·&nbsp; (254) 628-9088</p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <%= link_to "Get Directions", "https://www.google.com/maps/dir/Copperas+Cove+TX/1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
+          target: "_blank", rel: "noopener noreferrer",
+          class: "bg-warm-700 hover:bg-warm-600 text-white font-semibold px-7 py-3 rounded-full transition-colors text-sm" %>
+      <%= link_to "Shop Online", products_path,
+          class: "text-warm-300 hover:text-white text-sm font-medium underline underline-offset-4 transition-colors" %>
+    </div>
+  </div>
+</section>

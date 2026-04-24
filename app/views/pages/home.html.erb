@@ -39,19 +39,15 @@
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
       "opens": "11:00",
-      "closes": "19:00"
+      "closes": "18:00"
     }
   ],
   "priceRange": "$$",
   "hasMap": "https://www.google.com/maps/search/?api=1&query=1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
-  "brand": {
-    "@type": "Brand",
-    "name": "Ashley Furniture"
-  },
-  {
-    "@type": "Brand",
-    "name": "Generation Trade"
-  },
+  "brand": [
+    { "@type": "Brand", "name": "Ashley Furniture" },
+    { "@type": "Brand", "name": "Generation Trade" }
+  ],
   "knowsAbout": ["Ashley Furniture", "Generation Trade", "furniture", "home", "home furniture", "home decor", "sofa","sofas", "couch", "couches", "mattress", "mattresses", "sectional", "sectionals", "bedroom furniture", "dining table", "dining tables", "dining sets", "living room furniture"]
 }
 </script>
@@ -66,16 +62,22 @@
       Killeen, TX · Local Delivery Available
     </p>
     <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold text-warm-950 leading-[1.05] mb-6">
-      Nature in<br>your home.
+      Quality furniture,<br>delivered to your door.
     </h1>
     <p class="text-warm-700 text-base sm:text-lg max-w-md mx-auto mb-8 leading-relaxed">
-      Explore a premium collection of Ashley Furniture — perfect for adding warmth and style to every room.
+      Authorized Ashley Furniture Dealer & Other Trusted Furniture Brands
     </p>
     <div class="flex items-center justify-center gap-4 flex-wrap">
       <%= link_to "See Collection", products_path,
           class: "bg-warm-800 text-warm-50 px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
-      <%= link_to products_path, class: "text-warm-700 text-sm font-medium underline underline-offset-4 hover:text-warm-950 transition-colors" do %>
-        Browse All
+      <%= link_to "https://www.google.com/maps/dir/My+Location/1104+E+Veterans+Memorial+Blvd+Killeen+TX+76541",
+          target: "_blank", rel: "noopener noreferrer",
+          class: "flex items-center gap-1.5 text-warm-700 text-sm font-medium underline underline-offset-4 hover:text-warm-950 transition-colors" do %>
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Get Directions
       <% end %>
     </div>
   </div>
@@ -119,7 +121,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
       <% [
         ["Authentic Quality",    "Genuine Ashley Furniture",         "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"],
-        ["Local Delivery",       "Serving the Killeen area",         "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"],
+        ["Local Delivery",       "Deliver within 20 miles",         "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"],
         ["Competitive Pricing",  "Everyday low prices",              "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"],
         ["Personalized Service", "We help you find the right fit",   "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"],
       ].each do |title, subtitle, path| %>

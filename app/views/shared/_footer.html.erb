@@ -1,6 +1,6 @@
 <footer class="bg-warm-950 text-warm-300 mt-auto">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
 
       <%# Brand + Contact %>
       <div>
@@ -32,7 +32,7 @@
         <ul class="space-y-2 text-sm text-warm-400">
           <li class="flex justify-between gap-6">
             <span>Mon – Sat</span>
-            <span class="text-warm-300">11:00 AM – 7:00 PM</span>
+            <span class="text-warm-300">11:00 AM – 6:00 PM</span>
           </li>
           <li class="flex justify-between gap-6">
             <span>Sunday</span>
@@ -41,7 +41,21 @@
         </ul>
       </div>
 
-      <%# Account %>
+      <%# Quick Links — local SEO pages %>
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-4">Explore</h4>
+        <ul class="space-y-2 text-sm">
+          <%= link_to "Killeen Furniture Store", killeen_furniture_store_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+          <%= link_to "Ashley Furniture Killeen", ashley_furniture_killeen_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+          <%= link_to "Affordable Furniture", affordable_furniture_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+          <%= link_to "Near Harker Heights", harker_heights_furniture_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+          <%= link_to "Near Copperas Cove", copperas_cove_furniture_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+          <%= link_to "All Furniture", products_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+          <%= link_to "Contact Us", contact_path, class: "block text-warm-400 hover:text-white transition-colors" %>
+        </ul>
+      </div>
+
+<%# Account %>
       <div>
         <h4 class="text-white font-semibold text-sm mb-4">Account</h4>
         <ul class="space-y-2 text-sm">
