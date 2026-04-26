@@ -1,5 +1,7 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: -> { "#{APP_NAME} <#{ENV.fetch('ADMIN_EMAIL', 'noreply@warehousefurniture.com')}>" }
+  # ADMIN_EMAIL must be on the domain verified in Resend (e.g. noreply@warehousefurnituretx.com).
+  default from:     -> { "#{APP_NAME} <#{ENV.fetch('MAIL_FROM', 'noreply@warehousefurnituretx.com')}>" },
+          reply_to: -> { ENV.fetch('MAIL_REPLY_TO', ENV.fetch('MAIL_FROM', 'info@warehousefurnituretx.com')) }
   layout "mailer"
 
   rescue_from StandardError do |e|

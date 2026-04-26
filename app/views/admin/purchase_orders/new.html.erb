@@ -118,7 +118,7 @@
               data-action="change->purchase-order#productChanged"
               data-purchase-order-target="productSelect"
               class="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-        <option value="">— Select product —</option>
+        <option value="">Select product</option>
         <% @products.each do |p| %>
           <option value="<%= p.id %>" data-sku="<%= p.sku %>"><%= p.name %></option>
         <% end %>

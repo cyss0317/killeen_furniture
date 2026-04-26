@@ -48,14 +48,14 @@
 
           <td class="px-4 py-3">
             <%= select_tag "user[admin_kind]",
-                  options_for_select([["—", ""], ["Ops", "ops"], ["Delivery", "delivery"]], employee.admin_kind.to_s),
+                  options_for_select([["None", ""], ["Ops", "ops"], ["Delivery", "delivery"]], employee.admin_kind.to_s),
                   form: form_id,
                   class: "text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
           </td>
 
           <td class="px-4 py-3">
             <%= select_tag "user[pay_type]",
-                  options_for_select([["—", ""], ["Hourly", "hourly"], ["Monthly", "monthly"]], employee.pay_type.to_s),
+                  options_for_select([["None", ""], ["Hourly", "hourly"], ["Monthly", "monthly"]], employee.pay_type.to_s),
                   form: form_id,
                   class: "text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
           </td>

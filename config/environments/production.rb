@@ -54,15 +54,18 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
 
-  # Google SMTP. Set GMAIL_USERNAME and GMAIL_APP_PASSWORD in Render environment variables.
-  # Use a Gmail App Password (not your regular password): myaccount.google.com/apppasswords
+  # Resend SMTP — much better deliverability than Gmail SMTP.
+  # Setup: sign up at resend.com → Domains → add warehousefurnituretx.com → copy the 2 DNS
+  # records into your domain registrar. Then: Settings → API Keys → create key → set
+  # RESEND_API_KEY in your Render environment variables.
+  # Free tier: 3,000 emails/month / 100/day — more than enough for this app.
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings   = {
-    address:              "smtp.gmail.com",
+    address:              "smtp.resend.com",
     port:                 587,
-    domain:               ENV.fetch("SMTP_DOMAIN", "example.com"),
-    user_name:            ENV["SMTP_USER"],
-    password:             ENV["SMTP_PASS"],
+    domain:               ENV.fetch("APP_HOST", "warehousefurnituretx.com"),
+    user_name:            "resend",
+    password:             ENV["RESEND_API_KEY"],
     authentication:       :plain,
     enable_starttls_auto: true
   }

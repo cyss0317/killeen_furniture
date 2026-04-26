@@ -109,7 +109,7 @@
         <div data-admin-order-target="userSection" class="mb-4 <%= 'hidden' if @form_defaults&.dig(:customer_type) == 'guest' %>">
           <label class="block text-sm font-medium text-gray-700 mb-1">Select User</label>
           <%= f.select :user_id,
-              options_for_select([["— Select a customer —", ""]] + @users.map { |u| ["#{u.full_name} (#{u.email})", u.id] }, @form_defaults&.dig(:user_id)),
+              options_for_select([["Select a customer", ""]] + @users.map { |u| ["#{u.full_name} (#{u.email})", u.id] }, @form_defaults&.dig(:user_id)),
               {},
               class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
               data: { "admin-order-target": "userSelect", action: "change->admin-order#userChanged" } %>
@@ -126,7 +126,7 @@
             <%= f.email_field :guest_email, value: @form_defaults&.dig(:guest_email), class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "john@example.com" %>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone <span class="text-red-500">*</span></label>
             <%= f.telephone_field :guest_phone, value: @form_defaults&.dig(:guest_phone), class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "(254) 555-0100" %>
           </div>
         </div>
@@ -176,7 +176,6 @@
               <%= af.text_field :zip_code,
                   value: @form_defaults&.dig(:shipping_zip_code),
                   class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
-                  placeholder: "76541",
                   data: { "admin-order-target": "addressZip" } %>
             <% end %>
           </div>
@@ -434,7 +433,7 @@
       <select data-idx="product_id"
               data-action="change->admin-order#productChanged"
               class="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-        <option value="">— Select product —</option>
+        <option value="">Select product</option>
         <% @products.each do |product| %>
           <option value="<%= product.id %>"><%= product.name %> (<%= product.sku %>)</option>
         <% end %>

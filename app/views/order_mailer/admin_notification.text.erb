@@ -1,0 +1,19 @@
+NEW ORDER RECEIVED
+==================
+
+Order Number: <%= @order.order_number %>
+Total:        <%= number_to_currency(@order.grand_total) %>
+Customer:     <%= @order.customer_name %> (<%= @order.customer_email %>)
+Phone:        <%= @order.customer_phone.presence || "N/A" %>
+Zone:         <%= @order.delivery_zone&.name || "Unknown" %>
+Address:      <%= @order.shipping_address_line %>
+
+ITEMS
+-----
+<% @order_items.each do |item| %>
+  <%= item.product_name %> (SKU: <%= item.product_sku %>) x<%= item.quantity %> — <%= number_to_currency(item.line_total) %>
+<% end %>
+
+View order: <%= admin_order_url(@order) %>
+
+— <%= APP_NAME %>

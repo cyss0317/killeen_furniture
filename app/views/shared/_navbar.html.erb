@@ -85,10 +85,7 @@
               class: "flex items-center px-3 py-2.5 text-sm text-warm-600 hover:bg-warm-200 rounded-lg transition-colors" %>
         <% else %>
           <%= link_to "Sign In", new_user_session_path,
-              class: "flex items-center px-3 py-2.5 text-sm font-medium text-warm-800 hover:bg-warm-200 rounded-lg transition-colors",
-              data: { action: "click->drawer#close" } %>
-          <%= link_to "Create Account", new_user_registration_path,
-              class: "mt-2 block text-center text-sm font-semibold bg-warm-800 text-warm-50 px-4 py-3 rounded-full hover:bg-warm-700 transition-colors",
+              class: "block text-center text-sm font-semibold bg-warm-800 text-warm-50 px-4 py-3 rounded-full hover:bg-warm-700 transition-colors",
               data: { action: "click->drawer#close" } %>
         <% end %>
       </div>
@@ -111,8 +108,9 @@
         </button>
 
         <!-- Logo — center on mobile, left on desktop -->
-        <%= link_to root_path, class: "absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center" do %>
+        <%= link_to root_path, class: "absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center gap-2" do %>
           <span class="text-lg font-bold text-warm-900 tracking-tight whitespace-nowrap">Warehouse Furniture</span>
+          <%= image_tag "armchair-lamp.svg", class: "h-[40px] w-[40px]", alt: "" %>
         <% end %>
 
         <!-- Desktop nav links -->
@@ -177,9 +175,8 @@
                 </div>
               </div>
             <% else %>
-              <%= link_to "Sign In", new_user_session_path, class: "nav-bubble text-sm text-warm-700 hover:text-warm-950" %>
-              <%= link_to "Create Account", new_user_registration_path,
-                  class: "hidden lg:inline-block ml-3 text-sm font-semibold bg-warm-800 text-warm-50 px-5 py-2 rounded-full hover:bg-warm-700 transition-colors" %>
+              <%= link_to "Sign In", new_user_session_path,
+                  class: "text-sm font-semibold bg-warm-800 text-warm-50 px-5 py-2 rounded-full hover:bg-warm-700 transition-colors" %>
             <% end %>
           </div>
         </div>

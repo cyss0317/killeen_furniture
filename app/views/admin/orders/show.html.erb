@@ -424,7 +424,7 @@
           <%= form_with url: assign_delivery_admin_order_path(@order), method: :patch, class: "space-y-3" do |f| %>
             <%= f.select :assigned_to_id,
                 options_for_select(@delivery_admins.map { |u| [u.full_name, u.id] }, @order.assigned_to_id),
-                { include_blank: "— Select delivery admin —" },
+                { include_blank: "Select delivery admin" },
                 class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
             <%= f.submit "Assign", class: "w-full bg-amber-800 text-white text-sm py-2 px-4 rounded-md hover:bg-amber-900 cursor-pointer" %>
           <% end %>

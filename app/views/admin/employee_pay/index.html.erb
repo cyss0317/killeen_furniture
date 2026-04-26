@@ -76,7 +76,7 @@
         <label class="block text-xs font-medium text-gray-500 mb-1">Employee</label>
         <% employee_options = @employees.map { |u| [u.full_name + (u.pay_type ? " (#{u.pay_type})" : ""), u.id] } %>
         <%= f.select :user_id,
-              options_for_select([["— Select employee —", ""]] + employee_options),
+              options_for_select([["Select employee", ""]] + employee_options),
               {},
               class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white",
             data: { "employee-pay-target": "employeeSelect", action: "change->employee-pay#refresh" } %>

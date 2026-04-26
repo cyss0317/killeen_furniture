@@ -11,5 +11,4 @@ Disallow: /qr/
 
 Allow: /
 
-# Replace with your production domain after deploying
-# Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://warehouse-furniture.com/sitemap.xml

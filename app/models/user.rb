@@ -2,7 +2,45 @@
 
 class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :confirmable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable,
+         :omniauthable, omniauth_providers: %i[google_oauth2]
+
+  # Build or update a user record from an OmniAuth callback.
+  # OAuth users skip email confirmation — the provider already verified it.
+  def self.from_omniauth(auth)
+    # auth.info may be sparse depending on token vs. userinfo path;
+    # auth.extra.raw_info is the full Google userinfo payload.
+    raw  = auth["extra"]["raw_info"] || {}
+    email      = auth["info"]["email"].presence      || raw["email"].presence
+    first_name = auth["info"]["first_name"].presence || raw["given_name"].presence  ||
+                 (auth["info"]["name"] || raw["name"]).to_s.split(" ").first.presence
+    last_name  = auth["info"]["last_name"].presence  || raw["family_name"].presence ||
+                 (auth["info"]["name"] || raw["name"]).to_s.split(" ")[1..].join(" ").presence
+
+    # 1. Returning OAuth user (provider + uid match)
+    # 2. Existing email/password user signing in with Google for the first time
+    # 3. Brand new user
+    user = find_by(provider: auth.provider, uid: auth.uid) ||
+    (email && find_by(email: email)) ||
+    new
+
+    user.provider   = auth.provider
+    user.uid        = auth.uid
+    user.email      = email      if user.email.blank? && email.present?
+    user.first_name = first_name if user.first_name.blank? && first_name.present?
+    user.last_name  = last_name  if user.last_name.blank? && last_name.present?
+    user.password = Devise.friendly_token[0, 20] if user.new_record?
+
+    # Google has already verified the email — skip confirmation regardless
+    user.skip_confirmation! if user.respond_to?(:skip_confirmation!)
+
+    if user.save
+      user
+    else
+      Rails.logger.error "[OmniAuth] User save failed: #{user.errors.full_messages.join(', ')}"
+      nil
+    end
+  end
 
   EMAIL_COOLDOWN = 2.minutes
 

@@ -43,6 +43,8 @@ gem "image_processing", "~> 1.2"
 
 # Authentication & Authorization
 gem "devise", "~> 4.9"
+gem "omniauth-google-oauth2", "~> 1.1"
+gem "omniauth-rails_csrf_protection", "~> 1.0"
 gem "pundit", "~> 2.3"
 gem "rack-attack", "~> 6.7"
 

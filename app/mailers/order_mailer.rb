@@ -5,7 +5,7 @@ class OrderMailer < ApplicationMailer
 
     mail(
       to:      order.customer_email,
-      subject: "Order Confirmed — #{order.order_number} | #{APP_NAME}"
+      subject: "Order Confirmed: #{order.order_number} | #{APP_NAME}"
     )
   end
 
@@ -15,7 +15,7 @@ class OrderMailer < ApplicationMailer
 
     mail(
       to:      GlobalSetting.admin_notification_email,
-      subject: "New Order: #{order.order_number} — #{number_to_currency(order.grand_total)}"
+      subject: "New Order #{order.order_number}: #{number_to_currency(order.grand_total)}"
     )
   end
 
@@ -38,7 +38,7 @@ class OrderMailer < ApplicationMailer
 
     mail(
       to:      order.customer_email,
-      subject: "Your order is out for delivery! — #{order.order_number}"
+      subject: "Your Order Is Out for Delivery: #{order.order_number}"
     )
   end
 
@@ -61,7 +61,7 @@ class OrderMailer < ApplicationMailer
 
     mail(
       to:      order.customer_email,
-      subject: "Your order has been delivered — #{order.order_number}"
+      subject: "Your Order Has Been Delivered: #{order.order_number}"
     )
   end
 end

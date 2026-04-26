@@ -34,7 +34,7 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Where is the nearest furniture store to me in Killeen, TX?",
+      "name": "Where is the nearest furniture store in Killeen, TX?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Warehouse Furniture is located at 1104 E Veterans Memorial Blvd, Killeen, TX 76541. We are open Mon–Sat 11 AM–6 PM and serve Killeen, Harker Heights, Copperas Cove, Fort Cavazos, and surrounding areas."
@@ -42,10 +42,10 @@
     },
     {
       "@type": "Question",
-      "name": "What furniture stores are near Harker Heights and Copperas Cove, TX?",
+      "name": "What furniture does Warehouse Furniture carry in Killeen?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Warehouse Furniture in Killeen is the closest furniture store to both Harker Heights (5 miles) and Copperas Cove (14 miles). We offer local delivery to both cities and the surrounding area."
+        "text": "Our Killeen furniture store carries sofas, sectionals, bedroom sets, dining tables and chairs, recliners, mattresses, and accent furniture from Ashley Furniture and Generation Trade. We keep a large in-store selection ready for immediate purchase or local delivery."
       }
     },
     {
@@ -53,15 +53,23 @@
       "name": "Does Warehouse Furniture carry Ashley Furniture?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, we are an authorized Ashley Furniture dealer in Killeen, TX. We carry the full Ashley lineup — sofas, sectionals, bedroom sets, dining tables, recliners, and mattresses — with manufacturer warranty included."
+        "text": "Yes, we are an authorized Ashley Furniture dealer in Killeen, TX. We carry the full Ashley lineup: sofas, sectionals, bedroom sets, dining tables, recliners, and mattresses, with manufacturer warranty included."
       }
     },
     {
       "@type": "Question",
-      "name": "Does Warehouse Furniture offer local delivery?",
+      "name": "Does your Killeen furniture store offer local delivery?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, we deliver furniture to Killeen, Harker Heights, Copperas Cove, Fort Cavazos, Nolanville, and surrounding ZIP codes. Enter your ZIP at checkout to see delivery availability and pricing."
+        "text": "Yes. We deliver to Killeen, Harker Heights, Copperas Cove, Fort Cavazos, Nolanville, and surrounding ZIP codes. Enter your ZIP at checkout to see delivery availability and pricing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Warehouse Furniture an authorized Ashley Furniture dealer in Killeen?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we are an authorized Ashley Furniture dealer in Killeen, TX. You get genuine Ashley quality with the full manufacturer warranty, plus local delivery and in-person service."
       }
     },
     {
@@ -74,10 +82,10 @@
     },
     {
       "@type": "Question",
-      "name": "Where can I find cheap or affordable furniture near Killeen, TX?",
+      "name": "Is there affordable furniture available near Killeen?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Warehouse Furniture offers competitive everyday prices on quality Ashley Furniture in Killeen, TX. As a local authorized dealer, we offer genuine furniture at prices that beat big-box stores, with local delivery included."
+        "text": "Yes. Warehouse Furniture offers competitive everyday pricing on Ashley Furniture sofas, bedroom sets, dining sets, and more. As a direct local dealer, we cut out the big-box markup so you get quality furniture at prices that fit your budget."
       }
     }
   ]
@@ -92,10 +100,10 @@
       Killeen, TX · Local Delivery Available
     </p>
     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-warm-950 leading-tight mb-5">
-      Killeen's Local<br>Furniture Store
+      Furniture Store<br>in Killeen, TX
     </h1>
     <p class="text-warm-700 text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-      Warehouse Furniture is Killeen's go-to destination for quality furniture — from living room sofas to bedroom sets and dining room tables. Serving Killeen, Harker Heights, Copperas Cove, and the Fort Cavazos community.
+      Warehouse Furniture is Killeen's locally owned furniture store at 1104 E Veterans Memorial Blvd. Shop sofas, bedroom sets, dining tables, recliners, and mattresses from Ashley Furniture and more — with same-area delivery to Killeen, Harker Heights, Copperas Cove, and Fort Cavazos.
     </p>
     <div class="flex items-center justify-center gap-4 flex-wrap">
       <%= link_to "Shop All Furniture", products_path,
@@ -112,7 +120,7 @@
     <div class="mb-8">
       <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">Browse by Room</p>
       <h2 class="text-2xl font-bold text-warm-950">Bedroom, Living Room & Dining Furniture in Killeen</h2>
-      <p class="text-warm-600 text-sm mt-2 max-w-xl">Find the perfect furniture for every room in your Killeen home. From living room sets to bedroom furniture and dining tables — we have it all in store and ready for local delivery.</p>
+      <p class="text-warm-600 text-sm mt-2 max-w-xl">Find the perfect furniture for every room in your Killeen home. From living room sets to bedroom furniture and dining tables, we have it all in store and ready for local delivery.</p>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
       <% @categories.each_with_index do |category, i| %>
@@ -158,8 +166,8 @@
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
       <% [
-        ["Local Delivery", "We deliver to Killeen, Harker Heights, Copperas Cove, and surrounding areas — no national freight delays.", "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"],
-        ["Authorized Ashley Dealer", "We carry the full Ashley Furniture lineup — the same quality you'd find anywhere, with local service and expertise.", "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"],
+        ["Local Delivery", "We deliver to Killeen, Harker Heights, Copperas Cove, and surrounding areas with no national freight delays.", "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"],
+        ["Authorized Ashley Dealer", "We carry the full Ashley Furniture lineup, the same quality you'd find anywhere, with local service and expertise.", "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"],
         ["Personalized Service", "Come into our Killeen showroom on Veterans Memorial Blvd and let our team help you find the perfect fit.", "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"],
       ].each do |title, body, path| %>
         <div class="flex flex-col items-start gap-3">
@@ -175,6 +183,50 @@
         </div>
       <% end %>
     </div>
+  </div>
+</section>
+
+<!-- ── About the Store ───────────────────────────────────────── -->
+<section class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+  <h2 class="text-2xl font-bold text-warm-950 mb-4">Your Local Furniture Store in Killeen, TX</h2>
+  <div class="space-y-4 text-sm text-warm-700 leading-relaxed">
+    <p>
+      Warehouse Furniture has been serving the Killeen community as a locally operated furniture store on Veterans Memorial Blvd. As an authorized Ashley Furniture dealer, we stock a wide selection of living room furniture, bedroom sets, dining room tables, recliners, and mattresses — all available in our Killeen showroom or online with local delivery.
+    </p>
+    <p>
+      Whether you're furnishing a new home near Fort Cavazos, upgrading your living room in Harker Heights, or looking for affordable bedroom furniture in Copperas Cove, our furniture store in Killeen is your closest option with same-area delivery and in-person service. Come see the furniture in person before you buy — no national call centers, just local expertise.
+    </p>
+    <p>
+      We keep a rotating selection of sofas, sectionals, beds, dressers, dining sets, and more in stock and ready for fast delivery. Stop by our showroom at 1104 E Veterans Memorial Blvd, Killeen, TX 76541, open Monday through Saturday, 11 AM to 6 PM.
+    </p>
+  </div>
+</section>
+
+<!-- ── FAQ ───────────────────────────────────────────────────── -->
+<section class="bg-warm-50 border-y border-warm-300">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-2xl font-bold text-warm-950 mb-8">Furniture Store in Killeen: Common Questions</h2>
+    <dl class="space-y-6">
+      <% [
+        ["Where is the nearest furniture store in Killeen, TX?",
+         "Warehouse Furniture is located at 1104 E Veterans Memorial Blvd, Killeen, TX 76541. We are open Mon–Sat 11 AM–6 PM and serve Killeen, Harker Heights, Copperas Cove, Fort Cavazos, and surrounding areas."],
+        ["What furniture does Warehouse Furniture carry in Killeen?",
+         "Our Killeen furniture store carries sofas, sectionals, bedroom sets, dining tables and chairs, recliners, mattresses, and accent furniture from Ashley Furniture and Generation Trade. We keep a large in-store selection ready for immediate purchase or local delivery."],
+        ["Does your Killeen furniture store offer local delivery?",
+         "Yes. We deliver to Killeen, Harker Heights, Copperas Cove, Fort Cavazos, Nolanville, and surrounding ZIP codes. Enter your ZIP at checkout to see delivery availability and pricing."],
+        ["Is Warehouse Furniture an authorized Ashley Furniture dealer in Killeen?",
+         "Yes, we are an authorized Ashley Furniture dealer in Killeen, TX. You get genuine Ashley quality with the full manufacturer warranty, plus local delivery and in-person service."],
+        ["What are the store hours for the Killeen furniture store?",
+         "We are open Monday through Saturday, 11:00 AM to 6:00 PM. Closed Sundays. You can also shop online 24/7 at warehousefurnituretx.com."],
+        ["Is there affordable furniture available near Killeen?",
+         "Yes. Warehouse Furniture offers competitive everyday pricing on Ashley Furniture sofas, bedroom sets, dining sets, and more. As a direct local dealer, we cut out the big-box markup so you get quality furniture at prices that fit your budget."],
+      ].each do |q, a| %>
+        <div>
+          <dt class="font-semibold text-warm-900 text-sm mb-1"><%= q %></dt>
+          <dd class="text-sm text-warm-600 leading-relaxed"><%= a %></dd>
+        </div>
+      <% end %>
+    </dl>
   </div>
 </section>
 

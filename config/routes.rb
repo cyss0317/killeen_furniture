@@ -17,9 +17,10 @@ Rails.application.routes.draw do
 
   # Authentication
   devise_for :users, controllers: {
-    registrations:  "users/registrations",
-    sessions:       "users/sessions",
-    confirmations:  "users/confirmations"
+    registrations:       "users/registrations",
+    sessions:            "users/sessions",
+    confirmations:       "users/confirmations",
+    omniauth_callbacks:  "users/omniauth_callbacks"
   }
 
   # Product catalog
@@ -110,6 +111,7 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :customers,    only: [:index]
     resource  :settings,     only: [:show, :update]
     resources :employee_pay, only: [:index, :create, :destroy]
 
