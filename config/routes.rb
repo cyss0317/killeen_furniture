@@ -14,6 +14,8 @@ Rails.application.routes.draw do
   get "/affordable-furniture-killeen-tx",     to: "pages#affordable_furniture",         as: :affordable_furniture
   get "/contact",                             to: "pages#contact",                      as: :contact
   get "/financing",                           to: "pages#financing",                    as: :financing
+  get "/privacy",                             to: "pages#privacy",                      as: :privacy
+  get "/terms",                               to: "pages#terms",                        as: :terms
 
   # Authentication
   devise_for :users, controllers: {

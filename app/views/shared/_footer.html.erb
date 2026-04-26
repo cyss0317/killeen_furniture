@@ -75,7 +75,10 @@
 
     <div class="border-t border-warm-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-warm-600">
       <span>&copy; <%= Time.current.year %> Warehouse Furniture. All rights reserved.</span>
-      <span>Quality furniture, delivered to your door.</span>
+      <div class="flex items-center gap-4">
+        <%= link_to "Privacy Policy", privacy_path, class: "hover:text-white transition-colors" %>
+        <%= link_to "Terms of Service", terms_path, class: "hover:text-white transition-colors" %>
+      </div>
     </div>
   </div>
 </footer>
