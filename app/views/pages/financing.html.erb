@@ -1,0 +1,169 @@
+<% content_for :title, "Furniture Financing – Lease-to-Own with Acima | Warehouse Furniture Killeen TX" %>
+<% content_for :description, "Shop now, pay over time. Warehouse Furniture offers lease-to-own financing through Acima Leasing — no credit check required. Apply in minutes at our Killeen, TX store." %>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+  <%# ── Hero ── %>
+  <div class="text-center mb-14">
+    <p class="text-xs font-semibold tracking-[0.2em] uppercase text-warm-500 mb-3">Flexible Payments</p>
+    <h1 class="text-4xl font-bold text-warm-950 mb-4">Furniture Financing Available</h1>
+    <p class="text-warm-600 text-base max-w-2xl mx-auto">
+      We've partnered with <strong class="text-warm-800">Acima Leasing</strong> so you can take your furniture home today
+      and pay over time — no credit check required.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start mb-14">
+
+    <%# ── Left: What is Acima + How it Works ── %>
+    <div class="space-y-8">
+
+      <div class="bg-white rounded-2xl border border-warm-300 p-8">
+        <h2 class="text-lg font-bold text-warm-950 mb-4">What is Acima Leasing?</h2>
+        <p class="text-sm text-warm-700 leading-relaxed mb-4">
+          Acima is a <strong class="text-warm-900">lease-to-own</strong> program — not a loan. Acima purchases the
+          furniture on your behalf and leases it to you with flexible payment options. Once all payments are
+          complete, you own it. You can also use the <strong class="text-warm-900">90-day early purchase option</strong>
+          to pay off the lease amount plus a $10 fee and own your furniture right away.
+        </p>
+        <p class="text-sm text-warm-700 leading-relaxed">
+          Acima uses <strong class="text-warm-900">no traditional credit check</strong> — only a soft pull that
+          won't affect your credit score. Approval is based on income and bank account history, making it a
+          great option for customers with less-than-perfect or limited credit.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-warm-300 p-8">
+        <h2 class="text-lg font-bold text-warm-950 mb-5">How It Works</h2>
+        <ol class="space-y-5">
+          <li class="flex gap-4">
+            <span class="w-7 h-7 rounded-full bg-warm-800 text-warm-50 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+            <div>
+              <p class="text-sm font-semibold text-warm-900">Apply in minutes</p>
+              <p class="text-sm text-warm-600 mt-0.5">Scan the QR code or click the button to start your application. You'll enter your income and bank account information. Most decisions are instant.</p>
+            </div>
+          </li>
+          <li class="flex gap-4">
+            <span class="w-7 h-7 rounded-full bg-warm-800 text-warm-50 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <div>
+              <p class="text-sm font-semibold text-warm-900">Get approved for a lease amount</p>
+              <p class="text-sm text-warm-600 mt-0.5">Acima approves you for a lease between $300–$5,000. Bring your approval to our store and pick your furniture.</p>
+            </div>
+          </li>
+          <li class="flex gap-4">
+            <span class="w-7 h-7 rounded-full bg-warm-800 text-warm-50 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <div>
+              <p class="text-sm font-semibold text-warm-900">Take it home today</p>
+              <p class="text-sm text-warm-600 mt-0.5">Choose a payment schedule that matches your paycheck — weekly, bi-weekly, twice-monthly, or monthly. Payments are automatic from your checking account.</p>
+            </div>
+          </li>
+          <li class="flex gap-4">
+            <span class="w-7 h-7 rounded-full bg-warm-800 text-warm-50 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+            <div>
+              <p class="text-sm font-semibold text-warm-900">Own it — your way</p>
+              <p class="text-sm text-warm-600 mt-0.5">Pay off the lease within 90 days (lease amount + $10 fee) and save the most. Or complete a 12, 18, or 24-month lease term and own it at the end. You can also cancel the lease at any time with no penalty.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+    </div>
+
+    <%# ── Right: QR + CTA ── %>
+    <div class="space-y-6">
+
+      <%# QR card %>
+      <div class="bg-white rounded-2xl border border-warm-300 p-8 text-center">
+        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-500 mb-1">Scan to Apply</p>
+        <h2 class="text-base font-bold text-warm-950 mb-6">Point your phone camera at the code below</h2>
+
+        <% if @qr_svg.present? %>
+          <div class="w-52 h-52 mx-auto mb-6 p-3 border border-warm-200 rounded-xl bg-warm-50">
+            <%== @qr_svg %>
+          </div>
+        <% end %>
+
+        <div class="flex items-center gap-3 my-5">
+          <div class="flex-1 h-px bg-warm-200"></div>
+          <span class="text-xs text-warm-400 font-medium">or</span>
+          <div class="flex-1 h-px bg-warm-200"></div>
+        </div>
+
+        <% if @acima_url.present? %>
+          <%= link_to @acima_url,
+              target: "_blank", rel: "noopener noreferrer",
+              class: "block w-full bg-warm-800 hover:bg-warm-700 text-warm-50 font-semibold py-3 px-6 rounded-full transition-colors text-sm" do %>
+            Apply Now at Acima &rarr;
+          <% end %>
+        <% end %>
+
+        <p class="text-xs text-warm-400 mt-4 leading-relaxed">
+          Opens the Acima Leasing application in a new tab.<br>
+          Applications typically take 2–3 minutes.
+        </p>
+      </div>
+
+      <%# Qualification requirements %>
+      <div class="bg-warm-50 rounded-2xl border border-warm-300 p-6">
+        <h3 class="text-sm font-bold text-warm-900 mb-3">Do I qualify?</h3>
+        <ul class="space-y-2 text-sm text-warm-700">
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Active checking account open for at least 90 days
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Regular income of at least $750/month
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Government-issued photo ID
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            SSN or Taxpayer ID Number
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Must be 18 years or older
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            No traditional credit check — soft pull only
+          </li>
+        </ul>
+        <p class="text-xs text-warm-500 mt-4 leading-relaxed">
+          Approval is not guaranteed and is subject to Acima's criteria. Lease-to-own agreements involve a total cost higher than the retail price if carried to full term. See Acima's website for complete terms, state-specific details, and early purchase option calculations.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <%# ── Bottom CTA ── %>
+  <div class="bg-warm-50 border border-warm-300 rounded-2xl p-8 text-center">
+    <h2 class="text-lg font-bold text-warm-950 mb-2">Ready to furnish your home?</h2>
+    <p class="text-sm text-warm-600 max-w-xl mx-auto mb-6">
+      Browse our full selection and apply for Acima financing when you're ready — or stop by our Killeen showroom and we'll walk you through it in person.
+    </p>
+    <div class="flex items-center justify-center gap-4 flex-wrap">
+      <%= link_to "Shop All Furniture", products_path,
+          class: "bg-warm-800 text-warm-50 px-7 py-3 rounded-full text-sm font-semibold hover:bg-warm-700 transition-colors" %>
+      <%= link_to "Contact Us", contact_path,
+          class: "text-warm-700 text-sm font-medium underline underline-offset-4 hover:text-warm-950 transition-colors" %>
+    </div>
+  </div>
+
+</div>

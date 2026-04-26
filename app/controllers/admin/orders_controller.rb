@@ -1,6 +1,6 @@
 module Admin
   class OrdersController < BaseController
-    before_action :set_order, only: [ :show, :update_status, :assign_delivery, :resend_confirmation, :print_receipt ]
+    before_action :set_order, only: [ :show, :update_status, :update_customer, :update_address, :assign_delivery, :resend_confirmation, :print_receipt ]
 
     SORTABLE_COLUMNS = %w[order_number created_at grand_total status].freeze
 
@@ -74,7 +74,7 @@ module Admin
     def new
       authorize Order, :create?
       @order          = Order.new
-      @users          = User.order(:first_name, :last_name)
+      @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
       @products       = Product.published.includes(:category).order(:name)
       @delivery_zones = DeliveryZone.active.order(:name)
       @categories     = Category.order(:name)
@@ -90,7 +90,7 @@ module Admin
         redirect_to admin_order_path(result.order), notice: "Order #{result.order.order_number} created successfully."
       else
         @order          = Order.new
-        @users          = User.order(:first_name, :last_name)
+        @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
         @products       = Product.published.includes(:category).order(:name)
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
@@ -98,6 +98,28 @@ module Admin
         @submitted_line_items = (params.dig(:order, :line_items) || {}).values
                                   .select { |i| i[:product_id].present? }
                                   .map { |i| { product_id: i[:product_id], quantity: i[:quantity].to_i } }
+
+        # Preserve submitted form values so the form re-renders pre-filled.
+        # Shipping address is submitted as "[shipping_address][...]" by the
+        # fieldless form builder (no model scope), hence the bracket key.
+        sa = params["[shipping_address]"].to_h
+        @form_defaults = {
+          source:                  params[:source],
+          customer_type:           params[:customer_type],
+          user_id:                 params[:user_id],
+          guest_name:              params[:guest_name],
+          guest_email:             params[:guest_email],
+          guest_phone:             params[:guest_phone],
+          notes:                   params[:notes],
+          shipping_amount:         params[:shipping_amount],
+          discount_amount:         params[:discount_amount],
+          shipping_full_name:      sa[:full_name],
+          shipping_street_address: sa[:street_address],
+          shipping_city:           sa[:city],
+          shipping_state:          sa[:state],
+          shipping_zip_code:       sa[:zip_code]
+        }
+
         flash.now[:alert] = result.error
         render :new, status: :unprocessable_entity
       end
@@ -130,6 +152,47 @@ module Admin
           OrderMailer.order_delivered_customer(@order).deliver_now
         end
         redirect_to admin_order_path(@order), notice: "Order status updated to #{@order.status.humanize.downcase}."
+      else
+        redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence
+      end
+    end
+
+    def update_address
+      addr = {
+        "full_name"      => params[:full_name].to_s.strip,
+        "street_address" => params[:street_address].to_s.strip,
+        "city"           => params[:city].to_s.strip,
+        "state"          => params[:state].to_s.strip,
+        "zip_code"       => params[:zip_code].to_s.strip
+      }
+
+      missing = addr.select { |_, v| v.blank? }.keys
+      if missing.any?
+        redirect_to admin_order_path(@order), alert: "#{missing.map(&:humanize).to_sentence} can't be blank."
+        return
+      end
+
+      if @order.update(shipping_address: addr)
+        redirect_to admin_order_path(@order), notice: "Delivery address updated."
+      else
+        redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence
+      end
+    end
+
+    def update_customer
+      attrs = {
+        guest_name:  params[:guest_name].presence,
+        guest_email: params[:guest_email].presence,
+        guest_phone: params[:guest_phone].presence
+      }
+
+      if @order.user.nil? && attrs[:guest_email].blank?
+        redirect_to admin_order_path(@order), alert: "Email is required for guest orders."
+        return
+      end
+
+      if @order.update(attrs)
+        redirect_to admin_order_path(@order), notice: "Customer info updated."
       else
         redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence
       end

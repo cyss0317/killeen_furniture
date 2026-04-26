@@ -51,7 +51,7 @@
 <script type="application/json" id="tax-rate-data"><%= GlobalSetting.tax_rate %></script>
 
 <%= form_with url: admin_orders_path, method: :post,
-    data: { controller: "admin-order" },
+    data: { controller: "admin-order", action: "submit->admin-order#validate" },
     class: "space-y-6" do |f| %>
 
   <%# Flash errors %>
@@ -74,7 +74,7 @@
               ["Admin — Manual Entry", "admin_manual"],
               ["Phone Order", "phone"],
               ["In Store", "in_store"]
-            ]),
+            ], @form_defaults&.dig(:source)),
             {},
             class: "w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
       </div>
@@ -90,13 +90,15 @@
               <input type="radio" name="customer_type" value="existing"
                      data-admin-order-target="customerType"
                      data-action="change->admin-order#customerTypeChanged"
-                     checked class="text-amber-700">
+                     <%= "checked" unless @form_defaults&.dig(:customer_type) == "guest" %>
+                     class="text-amber-700">
               <span class="text-sm text-gray-700">Existing User</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="radio" name="customer_type" value="guest"
                      data-admin-order-target="customerType"
                      data-action="change->admin-order#customerTypeChanged"
+                     <%= "checked" if @form_defaults&.dig(:customer_type) == "guest" %>
                      class="text-amber-700">
               <span class="text-sm text-gray-700">Guest / New Customer</span>
             </label>
@@ -104,28 +106,28 @@
         </div>
 
         <%# Existing user dropdown %>
-        <div data-admin-order-target="userSection" class="mb-4">
+        <div data-admin-order-target="userSection" class="mb-4 <%= 'hidden' if @form_defaults&.dig(:customer_type) == 'guest' %>">
           <label class="block text-sm font-medium text-gray-700 mb-1">Select User</label>
           <%= f.select :user_id,
-              options_for_select([["— Select a customer —", ""]] + @users.map { |u| ["#{u.full_name} (#{u.email})", u.id] }),
+              options_for_select([["— Select a customer —", ""]] + @users.map { |u| ["#{u.full_name} (#{u.email})", u.id] }, @form_defaults&.dig(:user_id)),
               {},
               class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
               data: { "admin-order-target": "userSelect", action: "change->admin-order#userChanged" } %>
         </div>
 
         <%# Guest fields %>
-        <div data-admin-order-target="guestSection" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div data-admin-order-target="guestSection" class="<%= 'hidden' unless @form_defaults&.dig(:customer_type) == 'guest' %> grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
-            <%= f.text_field :guest_name, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "John Smith" %>
+            <%= f.text_field :guest_name, value: @form_defaults&.dig(:guest_name), class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "John Smith" %>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-            <%= f.email_field :guest_email, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "john@example.com" %>
+            <%= f.email_field :guest_email, value: @form_defaults&.dig(:guest_email), class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "john@example.com" %>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <%= f.telephone_field :guest_phone, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "(254) 555-0100" %>
+            <%= f.telephone_field :guest_phone, value: @form_defaults&.dig(:guest_phone), class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500", placeholder: "(254) 555-0100" %>
           </div>
         </div>
       </div>
@@ -138,6 +140,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
             <%= f.fields_for :shipping_address do |af| %>
               <%= af.text_field :full_name,
+                  value: @form_defaults&.dig(:shipping_full_name),
                   class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
                   data: { "admin-order-target": "addressFullName" } %>
             <% end %>
@@ -146,6 +149,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Street Address <span class="text-red-500">*</span></label>
             <%= f.fields_for :shipping_address do |af| %>
               <%= af.text_field :street_address,
+                  value: @form_defaults&.dig(:shipping_street_address),
                   class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
                   data: { "admin-order-target": "addressStreet" } %>
             <% end %>
@@ -153,7 +157,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-red-500">*</span></label>
             <%= f.fields_for :shipping_address do |af| %>
-              <%= af.text_field :city, value: "Killeen",
+              <%= af.text_field :city, value: @form_defaults&.dig(:shipping_city) || "Killeen",
                   class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
                   data: { "admin-order-target": "addressCity" } %>
             <% end %>
@@ -161,7 +165,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">State <span class="text-red-500">*</span></label>
             <%= f.fields_for :shipping_address do |af| %>
-              <%= af.text_field :state, value: "TX",
+              <%= af.text_field :state, value: @form_defaults&.dig(:shipping_state) || "TX",
                   class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
                   data: { "admin-order-target": "addressState" } %>
             <% end %>
@@ -170,6 +174,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code <span class="text-red-500">*</span></label>
             <%= f.fields_for :shipping_address do |af| %>
               <%= af.text_field :zip_code,
+                  value: @form_defaults&.dig(:shipping_zip_code),
                   class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
                   placeholder: "76541",
                   data: { "admin-order-target": "addressZip" } %>
@@ -326,6 +331,7 @@
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <label class="block text-sm font-medium text-gray-700 mb-2">Order Notes <span class="text-gray-400">(optional)</span></label>
         <%= f.text_area :notes, rows: 3,
+            value: @form_defaults&.dig(:notes),
             class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
             placeholder: "Delivery instructions, special requests..." %>
       </div>
@@ -344,11 +350,11 @@
             <span data-admin-order-target="subtotal">$0.00</span>
           </div>
           <div class="flex justify-between items-center text-gray-600">
-            <span>Shipping</span>
+            <span>Delivery</span>
             <div class="flex items-center gap-1">
               <span class="text-gray-400 text-sm">$</span>
               <%= f.number_field :shipping_amount,
-                    value: "0", min: 0, step: "0.01",
+                    value: @form_defaults&.dig(:shipping_amount) || "85", min: 0, step: "0.01",
                     data: { "admin-order-target": "shippingAmount", action: "input->admin-order#shippingChanged" },
                     class: "w-24 border border-gray-300 rounded-md px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-500" %>
             </div>
@@ -362,7 +368,7 @@
             <div class="flex items-center gap-1">
               <span class="text-gray-400 text-sm">-$</span>
               <%= f.number_field :discount_amount,
-                    value: 0, min: 0, step: "0.01",
+                    value: @form_defaults&.dig(:discount_amount) || 0, min: 0, step: "0.01",
                     data: { "admin-order-target": "discount", action: "input->admin-order#discountChanged" },
                     class: "w-24 border border-gray-300 rounded-md px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-500" %>
             </div>

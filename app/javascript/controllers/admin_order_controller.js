@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = [
-    "lineItems", "lineItemRow", "emptyState",
+    "lineItems", "lineItemRow", "lineItemsContainer", "emptyState",
     "subtotal", "tax", "grandTotal", "discount", "shippingAmount",
     "customerType", "userSection", "guestSection",
     "userSelect",
@@ -19,7 +19,7 @@ export default class extends Controller {
     this.taxRate = taxEl ? parseFloat(taxEl.textContent) : 0
 
     this.rowIndex = this.lineItemRowTargets.length
-    this.shippingCost = this.hasShippingAmountTarget ? (parseFloat(this.shippingAmountTarget.value) || 0) : 0
+    this.shippingCost = this.hasShippingAmountTarget ? (parseFloat(this.shippingAmountTarget.value) || 85) : 85
 
     // Restore products submitted before a validation failure
     const submittedEl = document.getElementById("submitted-items-data")
@@ -300,6 +300,121 @@ export default class extends Controller {
     if (this.hasSubtotalTarget)   this.subtotalTarget.textContent   = this.formatCurrency(subtotal)
     if (this.hasTaxTarget)        this.taxTarget.textContent        = this.formatCurrency(tax)
     if (this.hasGrandTotalTarget) this.grandTotalTarget.textContent = this.formatCurrency(grandTotal)
+  }
+
+  // ── Validation ───────────────────────────────────────────────────────────
+
+  validate(event) {
+    this._clearValidationErrors()
+    let hasErrors = false
+
+    // 1. Customer
+    const isGuest = [...this.customerTypeTargets].find(r => r.checked)?.value === "guest"
+    if (isGuest) {
+      const nameEl  = this.element.querySelector("input[name='guest_name']")
+      const emailEl = this.element.querySelector("input[name='guest_email']")
+
+      const phoneEl = this.element.querySelector("input[name='guest_phone']")
+
+      if (!nameEl?.value?.trim()) {
+        this._addFieldError(nameEl, "Full name is required")
+        hasErrors = true
+      }
+      if (!emailEl?.value?.trim()) {
+        this._addFieldError(emailEl, "Email address is required")
+        hasErrors = true
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
+        this._addFieldError(emailEl, "Enter a valid email address")
+        hasErrors = true
+      }
+      if (!phoneEl?.value?.trim()) {
+        this._addFieldError(phoneEl, "Phone number is required")
+        hasErrors = true
+      } else if (!/^[\d\s()\-+.]{7,}$/.test(phoneEl.value.trim())) {
+        this._addFieldError(phoneEl, "Enter a valid phone number")
+        hasErrors = true
+      }
+    } else {
+      if (!this.userSelectTarget?.value) {
+        this._addFieldError(this.userSelectTarget, "Please select a customer")
+        hasErrors = true
+      }
+    }
+
+    // 2. Shipping address
+    const addrChecks = [
+      [this.addressFullNameTarget, "Recipient name is required"],
+      [this.addressStreetTarget,   "Street address is required"],
+      [this.addressCityTarget,     "City is required"],
+      [this.addressStateTarget,    "State is required"],
+    ]
+    addrChecks.forEach(([el, msg]) => {
+      if (!el?.value?.trim()) {
+        this._addFieldError(el, msg)
+        hasErrors = true
+      }
+    })
+
+    const zipEl = this.addressZipTarget
+    const zip   = zipEl?.value?.trim()
+    if (!zip) {
+      this._addFieldError(zipEl, "ZIP code is required")
+      hasErrors = true
+    } else if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+      this._addFieldError(zipEl, "Enter a valid 5-digit ZIP code")
+      hasErrors = true
+    }
+
+    // 3. At least one valid line item
+    const hasValidItem = this.lineItemRowTargets.some(row => {
+      if (row.dataset.rowType === "custom") {
+        const name  = row.querySelector("input[data-idx='custom_name']")?.value?.trim()
+        const price = parseFloat(row.querySelector("input[data-custom-price]")?.value) || 0
+        const qty   = parseInt(row.querySelector("input[data-idx='quantity']")?.value)  || 0
+        return name && price > 0 && qty >= 1
+      } else {
+        const pid = row.querySelector("select[data-idx='product_id']")?.value
+        const qty = parseInt(row.querySelector("input[data-idx='quantity']")?.value) || 0
+        return pid && qty >= 1
+      }
+    })
+    if (!hasValidItem) {
+      const heading = this.hasLineItemsContainerTarget
+        ? this.lineItemsContainerTarget.querySelector("h2")
+        : null
+      if (heading) {
+        const errEl = document.createElement("p")
+        errEl.className = "field-error text-red-600 text-xs mt-1 px-6 pb-2"
+        errEl.textContent = "Add at least one product to the order"
+        heading.insertAdjacentElement("afterend", errEl)
+      }
+      hasErrors = true
+    }
+
+    if (hasErrors) {
+      event.preventDefault()
+      const firstError = this.element.querySelector(".field-error")
+      firstError?.closest(".bg-white")?.scrollIntoView({ behavior: "smooth", block: "center" })
+    }
+  }
+
+  _addFieldError(inputEl, message) {
+    if (!inputEl) return
+    inputEl.classList.add("border-red-400")
+    inputEl.classList.remove("border-gray-300")
+
+    const errEl = document.createElement("p")
+    errEl.className = "field-error text-red-600 text-xs mt-1"
+    errEl.textContent = message
+    inputEl.insertAdjacentElement("afterend", errEl)
+  }
+
+  _clearValidationErrors() {
+    this.element.querySelectorAll(".field-error").forEach(el => el.remove())
+    this.element.querySelectorAll(".border-red-400").forEach(el => {
+      el.classList.remove("border-red-400")
+      el.classList.add("border-gray-300")
+    })
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

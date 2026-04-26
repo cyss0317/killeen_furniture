@@ -253,47 +253,161 @@
       </dl>
     </div>
     
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 class="font-semibold text-gray-900 mb-4">Customer</h3>
-      <dl class="space-y-2 text-sm">
-        <div>
-          <dt class="text-gray-500">Name</dt>
-          <dd class="font-medium"><%= @order.customer_name %></dd>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6" id="customer-card-<%= @order.id %>">
+      <%# ── View mode ── %>
+      <div id="customer-view-<%= @order.id %>">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">Customer</h3>
+          <button type="button"
+                  onclick="document.getElementById('customer-view-<%= @order.id %>').classList.add('hidden'); document.getElementById('customer-edit-<%= @order.id %>').classList.remove('hidden')"
+                  class="text-xs text-amber-700 hover:text-amber-900 font-medium flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+            </svg>
+            Edit
+          </button>
         </div>
-        <div>
-          <dt class="text-gray-500">Email</dt>
-          <dd><%= mail_to @order.customer_email, @order.customer_email, class: "text-amber-700 hover:underline" %></dd>
-        </div>
-        <% if @order.customer_phone.present? %>
+        <dl class="space-y-2 text-sm">
+          <div>
+            <dt class="text-gray-500">Name</dt>
+            <dd class="font-medium"><%= @order.customer_name %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Email</dt>
+            <dd><%= mail_to @order.customer_email, @order.customer_email, class: "text-amber-700 hover:underline" %></dd>
+          </div>
           <div>
             <dt class="text-gray-500">Phone</dt>
-            <dd><%= @order.customer_phone %></dd>
+            <dd><%= @order.customer_phone.presence || "—" %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Account</dt>
+            <dd>
+              <% if @order.user %>
+                <span class="text-green-600 text-xs font-medium">Registered User</span>
+              <% else %>
+                <span class="text-gray-400 text-xs">Guest</span>
+              <% end %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <%# ── Edit mode ── %>
+      <div id="customer-edit-<%= @order.id %>" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">Edit Customer</h3>
+          <button type="button"
+                  onclick="document.getElementById('customer-view-<%= @order.id %>').classList.remove('hidden'); document.getElementById('customer-edit-<%= @order.id %>').classList.add('hidden')"
+                  class="text-xs text-gray-400 hover:text-gray-600 font-medium">
+            Cancel
+          </button>
+        </div>
+
+        <% if @order.user %>
+          <p class="text-xs text-gray-400 bg-gray-50 rounded px-2 py-1.5 mb-3">
+            Registered user account. Filling these fields overrides contact info for this order only.
+          </p>
+        <% end %>
+
+        <%= form_with url: update_customer_admin_order_path(@order), method: :patch, class: "space-y-3" do |f| %>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
+            <%= text_field_tag :guest_name, @order.customer_name,
+                class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                placeholder: "Full name" %>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Email <span class="text-red-500">*</span></label>
+            <%= email_field_tag :guest_email, @order.customer_email,
+                class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                placeholder: "email@example.com" %>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+            <%= telephone_field_tag :guest_phone, @order.customer_phone,
+                class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                placeholder: "(254) 555-0100" %>
+          </div>
+          <div class="flex gap-2 pt-1">
+            <%= f.submit "Save Changes",
+                class: "flex-1 bg-amber-800 text-white text-sm py-2 px-4 rounded-md hover:bg-amber-900 cursor-pointer" %>
           </div>
         <% end %>
-        <div>
-          <dt class="text-gray-500">Account</dt>
-          <dd>
-            <% if @order.user %>
-              <span class="text-green-600 text-xs font-medium">Registered User</span>
-            <% else %>
-              <span class="text-gray-400 text-xs">Guest</span>
-            <% end %>
-          </dd>
-        </div>
-      </dl>
+      </div>
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 class="font-semibold text-gray-900 mb-4">Delivery Address</h3>
-      <address class="text-sm text-gray-600 not-italic">
-        <strong><%= @order.shipping_address["full_name"] %></strong><br>
-        <%= @order.shipping_address["street_address"] %><br>
-        <%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %>
-        <%= @order.shipping_address["zip_code"] %>
-      </address>
-      <% if @order.delivery_zone %>
-        <p class="text-xs text-gray-400 mt-2">Zone: <%= @order.delivery_zone.name %></p>
-      <% end %>
+      <%# ── View mode ── %>
+      <div id="address-view-<%= @order.id %>">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">Delivery Address</h3>
+          <button type="button"
+                  onclick="document.getElementById('address-view-<%= @order.id %>').classList.add('hidden'); document.getElementById('address-edit-<%= @order.id %>').classList.remove('hidden')"
+                  class="text-xs text-amber-700 hover:text-amber-900 font-medium flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+            </svg>
+            Edit
+          </button>
+        </div>
+        <address class="text-sm text-gray-600 not-italic">
+          <strong><%= @order.shipping_address["full_name"] %></strong><br>
+          <%= @order.shipping_address["street_address"] %><br>
+          <%= @order.shipping_address["city"] %>, <%= @order.shipping_address["state"] %>
+          <%= @order.shipping_address["zip_code"] %>
+        </address>
+        <% if @order.delivery_zone %>
+          <p class="text-xs text-gray-400 mt-2">Zone: <%= @order.delivery_zone.name %></p>
+        <% end %>
+      </div>
+
+      <%# ── Edit mode ── %>
+      <div id="address-edit-<%= @order.id %>" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">Edit Address</h3>
+          <button type="button"
+                  onclick="document.getElementById('address-view-<%= @order.id %>').classList.remove('hidden'); document.getElementById('address-edit-<%= @order.id %>').classList.add('hidden')"
+                  class="text-xs text-gray-400 hover:text-gray-600 font-medium">
+            Cancel
+          </button>
+        </div>
+        <%= form_with url: update_address_admin_order_path(@order), method: :patch, class: "space-y-3" do |f| %>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Full Name <span class="text-red-500">*</span></label>
+            <%= text_field_tag :full_name, @order.shipping_address["full_name"],
+                class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                placeholder: "Recipient name" %>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Street Address <span class="text-red-500">*</span></label>
+            <%= text_field_tag :street_address, @order.shipping_address["street_address"],
+                class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                placeholder: "123 Main St" %>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">City <span class="text-red-500">*</span></label>
+              <%= text_field_tag :city, @order.shipping_address["city"],
+                  class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">State <span class="text-red-500">*</span></label>
+              <%= text_field_tag :state, @order.shipping_address["state"],
+                  class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                  placeholder: "TX" %>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ZIP Code <span class="text-red-500">*</span></label>
+            <%= text_field_tag :zip_code, @order.shipping_address["zip_code"],
+                class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                placeholder: "76541" %>
+          </div>
+          <%= f.submit "Save Address",
+              class: "w-full bg-amber-800 text-white text-sm py-2 px-4 rounded-md hover:bg-amber-900 cursor-pointer" %>
+        <% end %>
+      </div>
     </div>
 
     <%# Delivery Assignment (super_admin only, not shown for canceled/refunded orders) %>

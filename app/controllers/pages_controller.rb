@@ -32,4 +32,15 @@ class PagesController < ApplicationController
   end
 
   def contact; end
+
+  def financing
+    @acima_url = ENV.fetch("ACIMA_FINANCING_URL", nil)
+    if @acima_url.present?
+      @qr_svg = RQRCode::QRCode.new(@acima_url).as_svg(
+        viewbox:        true,
+        use_path:       true,
+        svg_attributes: { class: "w-full h-full" }
+      )
+    end
+  end
 end

@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   get "/furniture-store-copperas-cove-tx",    to: "pages#copperas_cove_furniture",      as: :copperas_cove_furniture
   get "/affordable-furniture-killeen-tx",     to: "pages#affordable_furniture",         as: :affordable_furniture
   get "/contact",                             to: "pages#contact",                      as: :contact
+  get "/financing",                           to: "pages#financing",                    as: :financing
 
   # Authentication
   devise_for :users, controllers: {
@@ -98,6 +99,8 @@ Rails.application.routes.draw do
     resources :orders do
       member do
         patch :update_status
+        patch :update_customer
+        patch :update_address
         patch :assign_delivery
         post  :resend_confirmation
         get   :print_receipt

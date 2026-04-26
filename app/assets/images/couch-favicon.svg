@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- White background -->
+  <rect width="32" height="32" rx="6" fill="#ffffff"/>
+
+  <!-- Left armrest -->
+  <rect x="2" y="13" width="5" height="10" rx="2.5" fill="#C45510"/>
+  <!-- Right armrest -->
+  <rect x="25" y="13" width="5" height="10" rx="2.5" fill="#C45510"/>
+
+  <!-- Sofa back -->
+  <rect x="5" y="10" width="22" height="9" rx="3" fill="#E07020"/>
+
+  <!-- Seat cushions (two) -->
+  <rect x="5" y="18" width="10" height="6" rx="2" fill="#D4611A"/>
+  <rect x="17" y="18" width="10" height="6" rx="2" fill="#D4611A"/>
+  <!-- Cushion split line -->
+  <line x1="16" y1="18" x2="16" y2="24" stroke="#B84E10" stroke-width="1"/>
+
+  <!-- Legs -->
+  <rect x="7" y="23" width="3" height="5" rx="1.5" fill="#7a4510"/>
+  <rect x="22" y="23" width="3" height="5" rx="1.5" fill="#7a4510"/>
+</svg>

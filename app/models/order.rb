@@ -50,15 +50,15 @@ class Order < ApplicationRecord
   }.freeze
 
   def customer_email
-    user&.email || guest_email
+    guest_email.presence || user&.email
   end
 
   def customer_name
-    user&.full_name || guest_name
+    guest_name.presence || user&.full_name
   end
 
   def customer_phone
-    user&.phone || guest_phone
+    guest_phone.presence || user&.phone
   end
 
   def editable_by_admin?

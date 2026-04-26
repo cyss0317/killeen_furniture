@@ -44,6 +44,7 @@ gem "image_processing", "~> 1.2"
 # Authentication & Authorization
 gem "devise", "~> 4.9"
 gem "pundit", "~> 2.3"
+gem "rack-attack", "~> 6.7"
 
 # Payments
 gem "stripe", "~> 13.0"
