@@ -11,7 +11,7 @@ module ApplicationHelper
   end
 
   def meta_image
-    content_for?(:og_image) ? content_for(:og_image) : "#{request.base_url}/icon.png"
+    content_for?(:og_image) ? content_for(:og_image) : "#{request.base_url}#{asset_path('armchair-lamp.svg')}"
   end
 
   def canonical_url
