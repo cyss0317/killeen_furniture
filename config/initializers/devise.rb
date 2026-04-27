@@ -272,7 +272,7 @@ Devise.setup do |config|
   config.omniauth :google_oauth2,
                   ENV.fetch("GOOGLE_CLIENT_ID", ""),
                   ENV.fetch("GOOGLE_CLIENT_SECRET", ""),
-                  scope: "openid email profile",
+                  scope: "email profile",
                   fetch_raw_info: true
 
   # ==> Warden configuration
