@@ -113,7 +113,11 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :customers,    only: [:index]
+    resources :customers,    only: [ :index, :edit, :update, :destroy ] do
+      collection do
+        delete :purge_unconfirmed
+      end
+    end
     resource  :settings,     only: [:show, :update]
     resources :employee_pay, only: [:index, :create, :destroy]
 

@@ -5,8 +5,8 @@
   <span class="text-sm text-gray-500"><%= @pagy.count %> total</span>
 </div>
 
-<!-- Search -->
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+<!-- Search & Filter -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 space-y-3">
   <%= form_with url: admin_customers_path, method: :get, data: { turbo: false } do |f| %>
     <div class="flex gap-3 items-end">
       <div class="flex-1">
@@ -14,10 +14,36 @@
         <%= f.search_field :q, value: params[:q], placeholder: "Name, email, or phone…",
             class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
       </div>
+      <%= f.hidden_field :confirmed, value: params[:confirmed] %>
       <%= f.submit "Search", class: "px-4 py-2 bg-amber-800 text-white text-sm font-medium rounded-md hover:bg-amber-900 transition-colors cursor-pointer" %>
-      <% if params[:q].present? %>
+      <% if params[:q].present? || params[:confirmed].present? %>
         <%= link_to "Clear", admin_customers_path,
             class: "px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors" %>
+      <% end %>
+    </div>
+
+    <!-- Confirmation filter pills -->
+    <div class="flex items-center justify-between gap-2 pt-1">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-gray-500">Account:</span>
+        <% [["All", nil], ["Confirmed", "confirmed"], ["Unconfirmed", "unconfirmed"]].each do |label, value| %>
+          <% active = params[:confirmed].to_s == value.to_s %>
+          <%= link_to label,
+              admin_customers_path(q: params[:q], confirmed: value),
+              class: "px-3 py-1 rounded-full text-xs font-medium border transition-colors " +
+                     (active ? "bg-amber-800 text-white border-amber-800" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50") %>
+        <% end %>
+      </div>
+
+      <% if @stale_unconfirmed_count > 0 %>
+        <%= button_to purge_unconfirmed_admin_customers_path, method: :delete,
+            form: { data: { turbo_confirm: "Delete #{@stale_unconfirmed_count} unconfirmed #{"account".pluralize(@stale_unconfirmed_count)} older than 1 week? This cannot be undone." } },
+            class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-md hover:bg-red-50 transition-colors" do %>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Delete <%= @stale_unconfirmed_count %> stale unconfirmed
+        <% end %>
       <% end %>
     </div>
   <% end %>
@@ -42,13 +68,21 @@
         <th class="px-6 py-3 text-right text-xs font-medium uppercase">
           <%= sort_link("Total Spent", :total_spent, current_sort: @sort, current_direction: @direction) %>
         </th>
+        <th class="px-6 py-3"></th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
       <% @customers.each do |customer| %>
         <tr class="hover:bg-gray-50">
           <td class="px-6 py-4">
-            <p class="font-medium text-gray-900"><%= customer.full_name %></p>
+            <div class="flex items-center gap-2">
+              <p class="font-medium text-gray-900"><%= customer.full_name %></p>
+              <% if customer.confirmed_at? %>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Confirmed</span>
+              <% else %>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700">Unconfirmed</span>
+              <% end %>
+            </div>
             <p class="text-xs text-gray-400"><%= customer.email %></p>
           </td>
           <td class="px-6 py-4 text-gray-600">
@@ -72,6 +106,25 @@
             <% else %>
               <span class="text-gray-300">—</span>
             <% end %>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center justify-end gap-2">
+              <%= link_to edit_admin_customer_path(customer),
+                  class: "inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors" do %>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Edit
+              <% end %>
+              <%= button_to admin_customer_path(customer), method: :delete,
+                  form: { class: "contents", data: { turbo_confirm: "Delete #{customer.full_name}? This cannot be undone." } },
+                  class: "inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-md hover:bg-red-50 transition-colors" do %>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Delete
+              <% end %>
+            </div>
           </td>
         </tr>
       <% end %>

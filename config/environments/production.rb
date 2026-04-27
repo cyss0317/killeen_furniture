@@ -52,7 +52,11 @@ Rails.application.configure do
   config.action_mailer.perform_deliveries   = true
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
+  # Strip any protocol prefix from APP_HOST so it doesn't double up with protocol: "https".
+  config.action_mailer.default_url_options = {
+    host:     ENV.fetch("APP_HOST", "example.com").sub(%r{\Ahttps?://}, ""),
+    protocol: "https"
+  }
 
   # Resend SMTP — much better deliverability than Gmail SMTP.
   # Setup: sign up at resend.com → Domains → add warehousefurnituretx.com → copy the 2 DNS
@@ -63,7 +67,7 @@ Rails.application.configure do
   config.action_mailer.smtp_settings   = {
     address:              "smtp.resend.com",
     port:                 587,
-    domain:               ENV.fetch("APP_HOST", "warehousefurnituretx.com"),
+    domain:               ENV.fetch("APP_HOST", "warehouse-furniture.com").sub(%r{\Ahttps?://}, ""),
     user_name:            "resend",
     password:             ENV["RESEND_API_KEY"],
     authentication:       :plain,
