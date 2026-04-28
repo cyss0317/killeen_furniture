@@ -49,7 +49,7 @@ gem "pundit", "~> 2.3"
 gem "rack-attack", "~> 6.7"
 
 # Payments
-gem "stripe", "~> 13.0"
+gem "stripe", "~> 18.4"
 
 # Pagination
 gem "pagy", "~> 43.2"
