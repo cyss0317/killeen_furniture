@@ -59,10 +59,17 @@ Rails.application.configure do
     protocol: "https"
   }
 
-  # Gmail SMTP — requires a Google App Password (not your regular password).
-  # Setup: Google Account → Security → 2-Step Verification → App Passwords → create one.
-  # Render env vars needed: SMTP_FROM (your gmail address), SMTP_PASSWORD (the app password).
+  # Resend SMTP — allows sending from noreply@warehouse-furniture.com.
+  # Gmail cannot send from a custom domain. Resend is free up to 3,000 emails/month.
+  # Setup:
+  #   1. Sign up at resend.com
+  #   2. Domains → Add Domain → warehouse-furniture.com → add the DNS records shown
+  #   3. Settings → API Keys → create a key
+  #   4. Add RESEND_API_KEY to Render environment variables
   config.action_mailer.delivery_method = :smtp
+  config.action_mailer.default_options = {
+  from: "Warehouse Furniture Killeen <noreply@warehouse-furniture.com>"
+  }
   config.action_mailer.smtp_settings   = {
     address:              "smtp.gmail.com",
     port:                 587,
