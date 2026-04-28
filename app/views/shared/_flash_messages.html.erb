@@ -9,13 +9,21 @@
   </div>
 <% end %>
 
-<% if local_assigns[:alert] || flash[:alert] %>
+<% alert_message = local_assigns[:alert] || flash[:alert] %>
+<% if alert_message %>
+  <% unconfirmed = alert_message.to_s.include?("confirm your email") %>
   <div class="rounded-md bg-red-50 border border-red-200 p-4 mb-2" role="alert">
     <div class="flex">
-      <svg class="h-5 w-5 text-red-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <svg class="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
       </svg>
-      <p class="text-sm text-red-800"><%= local_assigns[:alert] || flash[:alert] %></p>
+      <div>
+        <p class="text-sm text-red-800"><%= alert_message %></p>
+        <% if unconfirmed %>
+          <%= link_to "Resend confirmation email →", new_user_confirmation_path,
+              class: "inline-block mt-2 text-sm font-medium text-red-700 underline hover:text-red-900" %>
+        <% end %>
+      </div>
     </div>
   </div>
 <% end %>
