@@ -47,8 +47,9 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
-  # Don't crash the request on SMTP failure — errors are logged instead.
-  config.action_mailer.raise_delivery_errors = false
+  # Raise SMTP errors so they show up in Render logs (easier to debug).
+  # Set back to false once email is confirmed working.
+  config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_deliveries   = true
 
   # Set host to be used by links generated in mailer templates.
