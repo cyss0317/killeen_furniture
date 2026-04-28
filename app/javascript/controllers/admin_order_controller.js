@@ -5,7 +5,7 @@ export default class extends Controller {
     "lineItems", "lineItemRow", "lineItemsContainer", "emptyState",
     "subtotal", "tax", "grandTotal", "discount", "shippingAmount",
     "customerType", "userSection", "guestSection",
-    "userSelect",
+    "userSelect", "userSearch", "userDropdown",
     "addressFullName", "addressStreet", "addressCity", "addressState", "addressZip",
     "browserPanel", "browserToggle", "browserSearch", "browserCategory",
     "browserColor", "browserInStock", "browserRow", "browserEmpty"
@@ -32,6 +32,19 @@ export default class extends Controller {
       }
     }
 
+    // Pre-fill user search input when re-rendering after validation failure
+    if (this.hasUserSelectTarget && this.hasUserSearchTarget) {
+      const preselectedId = this.userSelectTarget.value
+      if (preselectedId) {
+        const usersEl = document.getElementById("users-data")
+        if (usersEl) {
+          const users = JSON.parse(usersEl.textContent)
+          const u = users[preselectedId]
+          if (u) this.userSearchTarget.value = `${u.name} (${u.email})`
+        }
+      }
+    }
+
     this.recalculate()
   }
 
@@ -44,8 +57,56 @@ export default class extends Controller {
     if (!isGuest) this.loadUserAddress()
   }
 
-  userChanged() {
+  searchUsers() {
+    const query = this.userSearchTarget.value.trim().toLowerCase()
+    const usersEl = document.getElementById("users-data")
+    if (!usersEl) return
+
+    const users  = JSON.parse(usersEl.textContent)
+    const entries = Object.entries(users)
+
+    const matches = query
+      ? entries.filter(([, u]) =>
+          u.name.toLowerCase().includes(query) ||
+          u.email.toLowerCase().includes(query)
+        )
+      : entries
+
+    const dropdown = this.userDropdownTarget
+    dropdown.innerHTML = ""
+
+    if (matches.length === 0) {
+      dropdown.innerHTML = `<li class="px-4 py-3 text-sm text-gray-400 italic">No customers found</li>`
+      dropdown.classList.remove("hidden")
+      return
+    }
+
+    matches.slice(0, 12).forEach(([id, u]) => {
+      const li = document.createElement("li")
+      li.className = "px-4 py-2.5 cursor-pointer hover:bg-amber-50 border-b border-gray-100 last:border-0"
+      li.innerHTML = `
+        <p class="text-sm font-medium text-gray-800">${this._esc(u.name)}</p>
+        <p class="text-xs text-gray-400">${this._esc(u.email)}</p>
+      `
+      li.addEventListener("mousedown", (e) => {
+        e.preventDefault()
+        this._selectUser(id, u)
+      })
+      dropdown.appendChild(li)
+    })
+
+    dropdown.classList.remove("hidden")
+  }
+
+  _selectUser(id, userData) {
+    this.userSelectTarget.value  = id
+    this.userSearchTarget.value  = `${userData.name} (${userData.email})`
+    this.userDropdownTarget.classList.add("hidden")
     this.loadUserAddress()
+  }
+
+  closeUserDropdown() {
+    this.userDropdownTarget.classList.add("hidden")
   }
 
   loadUserAddress() {
@@ -427,5 +488,11 @@ export default class extends Controller {
 
   formatCurrency(amount) {
     return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount)
+  }
+
+  _esc(str) {
+    return String(str)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
   }
 }

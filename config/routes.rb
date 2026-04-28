@@ -25,6 +25,9 @@ Rails.application.routes.draw do
     omniauth_callbacks:  "users/omniauth_callbacks"
   }
 
+  # Address autocomplete (Nominatim proxy — accessible to all visitors)
+  get "address_suggestions", to: "address_suggestions#index", as: :address_suggestions
+
   # Product catalog
   resources :categories, only: [:show], param: :slug
   resources :products,   only: [:index, :show], param: :slug
@@ -78,7 +81,8 @@ Rails.application.routes.draw do
   namespace :admin do
     root "dashboard#index", as: :dashboard
 
-    get "analytics", to: "analytics#index", as: :analytics
+    get "analytics",          to: "analytics#index",          as: :analytics
+    get "address_suggestions", to: "address_suggestions#index", as: :address_suggestions
 
     resources :products do
       member do
