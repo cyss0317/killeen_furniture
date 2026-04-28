@@ -20,7 +20,7 @@ class AddressSuggestionsController < ApplicationController
     http.read_timeout = 5
 
     request = Net::HTTP::Get.new(uri)
-    request["User-Agent"] = "WarehouseFurniture/1.0 (#{ENV.fetch('MAIL_FROM', 'info@warehousefurnituretx.com')})"
+    request["User-Agent"] = "WarehouseFurniture/1.0 (#{ENV.fetch('SMTP_FROM', 'info@warehouse-furniture.com')})"
     request["Accept-Language"] = "en-US,en"
 
     response = http.request(request)

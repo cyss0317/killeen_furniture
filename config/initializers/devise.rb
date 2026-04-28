@@ -24,9 +24,7 @@ Devise.setup do |config|
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class
   # with default "from" parameter.
-  # Must match the domain verified in Resend — use MAIL_FROM, not ADMIN_EMAIL.
-  # ADMIN_EMAIL is a recipient address; MAIL_FROM is the verified sender domain.
-  config.mailer_sender = ENV.fetch("MAIL_FROM", "noreply@warehouse-furniture.com")
+  config.mailer_sender = ENV.fetch("SMTP_FROM", "noreply@warehouse-furniture.com")
 
   # Configure the class responsible to send e-mails.
   # config.mailer = 'Devise::Mailer'

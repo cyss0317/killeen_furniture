@@ -59,18 +59,16 @@ Rails.application.configure do
     protocol: "https"
   }
 
-  # Resend SMTP — much better deliverability than Gmail SMTP.
-  # Setup: sign up at resend.com → Domains → add warehousefurnituretx.com → copy the 2 DNS
-  # records into your domain registrar. Then: Settings → API Keys → create key → set
-  # RESEND_API_KEY in your Render environment variables.
-  # Free tier: 3,000 emails/month / 100/day — more than enough for this app.
+  # Gmail SMTP — requires a Google App Password (not your regular password).
+  # Setup: Google Account → Security → 2-Step Verification → App Passwords → create one.
+  # Render env vars needed: SMTP_FROM (your gmail address), SMTP_PASSWORD (the app password).
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings   = {
-    address:              "smtp.resend.com",
+    address:              "smtp.gmail.com",
     port:                 587,
-    domain:               ENV.fetch("APP_HOST", "warehouse-furniture.com").sub(%r{\Ahttps?://}, ""),
-    user_name:            "resend",
-    password:             ENV["RESEND_API_KEY"],
+    domain:               "gmail.com",
+    user_name:            ENV["SMTP_FROM"],
+    password:             ENV["SMTP_PASS"],
     authentication:       :plain,
     enable_starttls_auto: true
   }
