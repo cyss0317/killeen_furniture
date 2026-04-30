@@ -21,32 +21,32 @@
             class: "px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors" %>
       <% end %>
     </div>
+  <% end %>
 
-    <!-- Confirmation filter pills -->
-    <div class="flex items-center justify-between gap-2 pt-1">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-medium text-gray-500">Account:</span>
-        <% [["All", nil], ["Confirmed", "confirmed"], ["Unconfirmed", "unconfirmed"]].each do |label, value| %>
-          <% active = params[:confirmed].to_s == value.to_s %>
-          <%= link_to label,
-              admin_customers_path(q: params[:q], confirmed: value),
-              class: "px-3 py-1 rounded-full text-xs font-medium border transition-colors " +
-                     (active ? "bg-amber-800 text-white border-amber-800" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50") %>
-        <% end %>
-      </div>
-
-      <% if @stale_unconfirmed_count > 0 %>
-        <%= button_to purge_unconfirmed_admin_customers_path, method: :delete,
-            form: { data: { turbo_confirm: "Delete #{@stale_unconfirmed_count} unconfirmed #{"account".pluralize(@stale_unconfirmed_count)} older than 1 week? This cannot be undone." } },
-            class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-md hover:bg-red-50 transition-colors" do %>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-          </svg>
-          Delete <%= @stale_unconfirmed_count %> stale unconfirmed
-        <% end %>
+  <!-- Confirmation filter pills — separate row, outside the search form -->
+  <div class="flex items-center justify-between gap-2 pt-1">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-medium text-gray-500">Account:</span>
+      <% [["All", nil], ["Confirmed", "confirmed"], ["Unconfirmed", "unconfirmed"]].each do |label, value| %>
+        <% active = params[:confirmed].to_s == value.to_s %>
+        <%= link_to label,
+            admin_customers_path(q: params[:q], confirmed: value),
+            class: "px-3 py-1 rounded-full text-xs font-medium border transition-colors " +
+                   (active ? "bg-amber-800 text-white border-amber-800" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50") %>
       <% end %>
     </div>
-  <% end %>
+
+    <% if @stale_unconfirmed_count > 0 %>
+      <%= button_to purge_unconfirmed_admin_customers_path, method: :delete,
+          form: { data: { turbo_confirm: "Delete #{@stale_unconfirmed_count} unconfirmed #{"account".pluralize(@stale_unconfirmed_count)} older than 1 week? This cannot be undone." } },
+          class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-md hover:bg-red-50 transition-colors" do %>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        Delete <%= @stale_unconfirmed_count %> stale unconfirmed
+      <% end %>
+    <% end %>
+  </div>
 </div>
 
 <!-- Table -->

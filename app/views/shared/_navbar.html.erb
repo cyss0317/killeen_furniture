@@ -2,12 +2,12 @@
   <!-- Backdrop -->
   <div data-drawer-target="backdrop"
        data-action="click->drawer#close"
-       class="fixed inset-0 z-40 bg-warm-950/50 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"
+       class="fixed inset-0 z-40 bg-warm-950/50 opacity-0 pointer-events-none transition-opacity duration-300 xl:hidden"
        aria-hidden="true"></div>
 
   <!-- Mobile drawer -->
   <nav data-drawer-target="panel"
-       class="fixed top-0 left-0 z-50 h-full w-72 bg-warm-50 flex flex-col shadow-2xl -translate-x-full transition-transform duration-300 ease-in-out md:hidden"
+       class="fixed top-0 left-0 z-50 h-full w-72 bg-warm-50 flex flex-col shadow-2xl -translate-x-full transition-transform duration-300 ease-in-out xl:hidden"
        aria-modal="true" role="dialog" aria-label="Navigation menu">
 
     <div class="h-16 flex items-center justify-between px-5 border-b border-warm-400 flex-shrink-0">
@@ -100,7 +100,7 @@
 
         <!-- Mobile: hamburger left -->
         <button data-action="click->drawer#open"
-                class="md:hidden p-2 text-warm-700 hover:bg-warm-200 rounded-lg transition-colors"
+                class="xl:hidden p-2 text-warm-700 hover:bg-warm-200 rounded-lg transition-colors"
                 aria-label="Open menu">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -108,13 +108,13 @@
         </button>
 
         <!-- Logo — center on mobile, left on desktop -->
-        <%= link_to root_path, class: "absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center gap-2" do %>
+        <%= link_to root_path, class: "absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0 flex items-center gap-2" do %>
           <span class="text-lg font-bold text-warm-900 tracking-tight whitespace-nowrap">Warehouse Furniture</span>
           <%= image_tag "armchair-lamp.svg", class: "h-[40px] w-[40px]", alt: "" %>
         <% end %>
 
         <!-- Desktop nav links -->
-        <nav class="hidden md:flex items-center gap-7 ml-10">
+        <nav class="hidden xl:flex items-center gap-7 ml-10">
           <%= link_to "Shop All", products_path, class: "nav-bubble text-sm text-warm-700 hover:text-warm-950" %>
           <% navbar_categories.each do |category| %>
             <%= link_to category.name, category_path(category), class: "nav-bubble text-sm text-warm-700 hover:text-warm-950" %>
@@ -137,7 +137,7 @@
         <!-- Right icons -->
         <div class="flex items-center gap-4">
           <!-- Search (desktop only) -->
-          <div class="hidden md:block">
+          <div class="hidden xl:block">
             <%= link_to products_path, class: "nav-bubble text-warm-600 hover:text-warm-950" do %>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -154,7 +154,7 @@
           <% end %>
 
           <!-- Auth (desktop) -->
-          <div class="hidden md:block">
+          <div class="hidden xl:block">
             <% if user_signed_in? %>
               <div class="relative" data-controller="dropdown">
                 <button data-action="click->dropdown#toggle" class="nav-bubble flex items-center gap-1 text-sm text-warm-700 hover:text-warm-950">

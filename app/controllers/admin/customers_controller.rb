@@ -46,7 +46,9 @@ module Admin
     end
 
     def purge_unconfirmed
-      count = User.customer.where(confirmed_at: nil).where("created_at < ?", 1.week.ago).delete_all
+      stale = User.customer.where(confirmed_at: nil).where("created_at < ?", 1.week.ago)
+      count = stale.count
+      stale.destroy_all
       redirect_to admin_customers_path, notice: "#{count} unconfirmed #{"account".pluralize(count)} deleted."
     end
 
