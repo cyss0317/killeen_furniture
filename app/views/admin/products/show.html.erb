@@ -10,6 +10,10 @@
     </span>
   </div>
   <div class="flex gap-2">
+    <% if @product.brand.to_s.match?(/ashley/i) %>
+      <%= button_to "↻ Fetch Ashley Data", refetch_ashley_admin_product_path(@product), method: :post,
+          class: "px-4 py-2 text-sm font-medium border border-amber-300 text-amber-800 rounded-md hover:bg-amber-50 transition-colors cursor-pointer" %>
+    <% end %>
     <%= link_to "Edit", edit_admin_product_path(@product), class: "px-4 py-2 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors" %>
     <% if @product.draft? || @product.archived? %>
       <%= button_to "Publish", publish_admin_product_path(@product), method: :patch,
@@ -156,18 +160,40 @@
             <dd><%= @product.color %></dd>
           </div>
         <% end %>
-        <% if (dims = @product.formatted_dimensions) %>
-          <div>
-            <dt class="text-gray-500">Dimensions</dt>
-            <dd><%= dims %></dd>
-          </div>
-        <% end %>
-        <% if @product.weight.present? %>
-          <div>
-            <dt class="text-gray-500">Weight</dt>
-            <dd><%= @product.weight %> lbs <%= "(Large item)" if @product.large_item? %></dd>
-          </div>
-        <% end %>
+        <div>
+          <dt class="text-gray-500">Dimensions</dt>
+          <dd>
+            <% if (dims = @product.formatted_dimensions) %>
+              <%= dims %>
+            <% else %>
+              <span class="text-gray-300">—</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-gray-500">Weight</dt>
+          <dd>
+            <% if @product.weight.present? %>
+              <%= @product.weight %> lbs
+              <% if @product.large_item? %>
+                <span class="ml-1 text-xs text-amber-600 font-medium">(Large item)</span>
+              <% end %>
+            <% else %>
+              <span class="text-gray-300">—</span>
+            <% end %>
+          </dd>
+        </div>
+        <% desc_text = @product.description&.body&.to_plain_text&.strip.presence %>
+        <div>
+          <dt class="text-gray-500">Description</dt>
+          <dd>
+            <% if desc_text %>
+              <p class="text-gray-700 text-xs leading-relaxed"><%= truncate(desc_text, length: 200) %></p>
+            <% else %>
+              <span class="text-gray-300">—</span>
+            <% end %>
+          </dd>
+        </div>
         <div>
           <dt class="text-gray-500">Featured</dt>
           <dd>
@@ -192,6 +218,85 @@
         <% end %>
       </dl>
     </div>
+
+    <% if (payload = @product.ashley_payload.presence) %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Ashley Details</h3>
+        <dl class="space-y-3 text-sm">
+          <% [
+            ["Style",    payload["style"]],
+            ["Showroom", payload["showroom"]],
+            ["Division", payload["division"]],
+            ["Status",   payload["status"]],
+            ["Ship By",  payload["ship_by"]],
+          ].each do |label, value| %>
+            <% next if value.blank? %>
+            <div>
+              <dt class="text-gray-500"><%= label %></dt>
+              <dd class="font-medium"><%= value %></dd>
+            </div>
+          <% end %>
+
+          <% if (extra = payload["extra_dimensions"]).present? %>
+            <div class="pt-3 border-t border-gray-100">
+              <dt class="text-gray-500 mb-2">Extra Dimensions</dt>
+              <dd class="space-y-1">
+                <% extra.each do |label, value| %>
+                  <div class="flex gap-2 text-xs">
+                    <span class="text-gray-400 font-medium w-40 shrink-0"><%= label %></span>
+                    <span class="text-gray-700"><%= value %></span>
+                  </div>
+                <% end %>
+              </dd>
+            </div>
+          <% end %>
+
+          <% if (videos = payload["videos"]).present? %>
+            <div class="pt-3 border-t border-gray-100">
+              <dt class="text-gray-500 mb-2">Videos (<%= videos.size %>)</dt>
+              <dd class="space-y-1.5">
+                <% videos.each do |v| %>
+                  <%= link_to v["title"].to_s.truncate(50), v["url"],
+                        target: "_blank", rel: "noopener",
+                        class: "flex items-center gap-1.5 text-xs text-amber-700 hover:underline" do %>
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                    <%= v["title"].to_s.truncate(50) %>
+                  <% end %>
+                <% end %>
+              </dd>
+            </div>
+          <% end %>
+
+          <% if (documents = payload["documents"]).present? %>
+            <div class="pt-3 border-t border-gray-100">
+              <dt class="text-gray-500 mb-2">Documents</dt>
+              <dd class="space-y-1.5">
+                <% documents.each do |doc| %>
+                  <%= link_to doc["url"], target: "_blank", rel: "noopener",
+                        class: "flex items-center gap-1.5 text-xs text-amber-700 hover:underline" do %>
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <%= doc["type"] %> — <%= doc["filename"] %>
+                  <% end %>
+                <% end %>
+              </dd>
+            </div>
+          <% end %>
+
+          <% if @product.page_url.present? %>
+            <div class="pt-3 border-t border-gray-100">
+              <dt class="text-gray-500 mb-1">Dealer Page</dt>
+              <dd><%= link_to "View on Ashley Direct ↗", @product.page_url,
+                    target: "_blank", rel: "noopener",
+                    class: "text-xs text-amber-700 hover:underline break-all" %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+    <% end %>
   </div>
 </div>
 

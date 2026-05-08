@@ -1,6 +1,6 @@
 module Admin
   class ProductsController < BaseController
-    before_action :set_product, only: [:show, :edit, :update, :destroy, :update_stock, :toggle_featured, :publish, :archive, :update_price, :move]
+    before_action :set_product, only: [:show, :edit, :update, :destroy, :update_stock, :toggle_featured, :publish, :archive, :update_price, :move, :refetch_ashley]
 
     SORTABLE_COLUMNS = %w[name selling_price stock_quantity created_at status].freeze
 
@@ -153,6 +153,11 @@ module Admin
       @product.update!(featured: !@product.featured?)
       state = @product.featured? ? "featured" : "unfeatured"
       redirect_back(fallback_location: admin_products_path, notice: "Product #{state}.")
+    end
+
+    def refetch_ashley
+      AshleyEnrichProductJob.perform_later(@product.id)
+      redirect_to admin_product_path(@product), notice: "Ashley data fetch queued — refresh in a moment."
     end
 
     def import_screenshot

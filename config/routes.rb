@@ -92,6 +92,7 @@ Rails.application.routes.draw do
         patch :archive
         patch :update_price
         patch :move
+        post  :refetch_ashley
       end
       collection do
         post :import_screenshot

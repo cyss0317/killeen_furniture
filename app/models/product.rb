@@ -77,11 +77,11 @@ class Product < ApplicationRecord
     return nil unless dimensions.present?
     d = dimensions
     parts = [
-      d["depth"].present?  ? "D:#{d["depth"]}"  : nil,
-      d["width"].present?  ? "W:#{d["width"]}"  : nil,
-      d["height"].present? ? "H:#{d["height"]}" : nil
+      d["width"].present?  ? "#{d['width']}\" W"  : nil,
+      d["depth"].present?  ? "#{d['depth']}\" D"  : nil,
+      d["height"].present? ? "#{d['height']}\" H" : nil
     ].compact
-    parts.any? ? "#{parts.join(" × ")} in" : nil
+    parts.any? ? parts.join(" × ") : nil
   end
 
   def update_selling_price(new_price)

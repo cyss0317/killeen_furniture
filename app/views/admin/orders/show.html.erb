@@ -84,6 +84,53 @@
                   <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
                 <% end %>
                 <p class="text-xs text-gray-400 font-mono">SKU: <%= item.product_sku %></p>
+
+                <% payload = item.product&.ashley_payload.presence %>
+                <% if payload %>
+                  <%# ── Inline attribute chips ── %>
+                  <% chip_pairs = [
+                      ["Style",    payload["style"]],
+                      ["Color",    item.product.color.presence || payload["color"]],
+                      ["Showroom", payload["showroom"]],
+                      ["Division", payload["division"]],
+                      ["Status",   payload["status"]],
+                    ].select { |_, v| v.present? } %>
+
+                  <% if chip_pairs.any? %>
+                    <div class="flex flex-wrap gap-1 mt-1.5">
+                      <% chip_pairs.each do |label, value| %>
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                          <span class="font-medium text-gray-400"><%= label %>:</span> <%= value %>
+                        </span>
+                      <% end %>
+                    </div>
+                  <% end %>
+
+                  <%# ── Ship-by date ── %>
+                  <% if payload["ship_by"].present? %>
+                    <p class="text-xs text-blue-600 mt-1">
+                      Ships by <%= payload["ship_by"] %>
+                    </p>
+                  <% end %>
+
+                  <%# ── Extra dimensions collapsible ── %>
+                  <% extra = payload["extra_dimensions"].presence %>
+                  <% if extra.present? %>
+                    <details class="mt-1.5">
+                      <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none">
+                        More dimensions
+                      </summary>
+                      <dl class="mt-1 space-y-0.5">
+                        <% extra.each do |label, value| %>
+                          <div class="flex gap-1 text-xs text-gray-500">
+                            <dt class="font-medium text-gray-400 whitespace-nowrap"><%= label %>:</dt>
+                            <dd><%= value %></dd>
+                          </div>
+                        <% end %>
+                      </dl>
+                    </details>
+                  <% end %>
+                <% end %>
               </td>
               <td class="px-6 py-4 text-center text-sm"><%= item.quantity %></td>
               <td class="px-6 py-4 text-right text-sm text-gray-500">

@@ -187,6 +187,7 @@ module PurchaseOrders
     end
 
     def enrich_product!(product:, series:, description:)
+      Rails.logger.info("[ImportScreenshot] enrich_product! sku=#{product.sku} supplier=#{@supplier}")
       case @supplier
       when "generation_trade"
         Products::FetchFromGenerationTrade.enrich!(product, series: series, description: description)

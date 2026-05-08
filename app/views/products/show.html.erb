@@ -201,7 +201,9 @@
 
       <!-- Product Details -->
       <div class="border-t border-warm-200 pt-6 space-y-3 mt-2">
+        <% payload = @product.ashley_payload.presence %>
         <% [
+          ["Style",      payload&.dig("style")],
           ["Material",   @product.material],
           ["Color",      @product.color],
           ["Dimensions", @product.try(:formatted_dimensions)],
@@ -220,6 +222,22 @@
             <%= link_to @product.category.name, category_path(@product.category),
                 class: "text-warm-700 hover:text-warm-950 underline underline-offset-2" %>
           </div>
+        <% end %>
+
+        <% if (extra = payload&.dig("extra_dimensions")).present? %>
+          <details class="pt-1">
+            <summary class="text-sm text-warm-500 cursor-pointer hover:text-warm-800 select-none font-medium">
+              More dimensions
+            </summary>
+            <div class="mt-3 space-y-2 pl-1">
+              <% extra.each do |label, value| %>
+                <div class="flex text-sm">
+                  <span class="w-28 text-warm-500"><%= label %></span>
+                  <span class="text-warm-700"><%= value %></span>
+                </div>
+              <% end %>
+            </div>
+          </details>
         <% end %>
       </div>
 
