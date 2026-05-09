@@ -2,6 +2,18 @@ module ApplicationHelper
   DEFAULT_DESCRIPTION = "Shop quality Ashley Furniture at Warehouse Furniture — sofas, beds, " \
                         "dining sets, and more with local delivery in the Killeen, TX area."
 
+  STORE_EMAIL = "info@warehouse-furniture.com"
+
+  # Renders a click-to-email link where the address is ROT13-encoded in the HTML.
+  # The real email never appears in the source — a bot scraping href/text finds nothing useful.
+  def obfuscated_email_link(email = STORE_EMAIL, display: nil, **html_options)
+    rot13 = email.tr("A-Za-z", "N-ZA-Mn-za-m")
+    display_text = display || "Email Us"
+
+    defaults = { href: "#", data: { controller: "email-reveal", action: "click->email-reveal#open", r: rot13 } }
+    content_tag(:a, display_text, defaults.deep_merge(html_options))
+  end
+
   def meta_title
     content_for?(:title) ? content_for(:title) : APP_NAME
   end

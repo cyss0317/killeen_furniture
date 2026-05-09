@@ -28,6 +28,9 @@ Rails.application.routes.draw do
   # Address autocomplete (Nominatim proxy — accessible to all visitors)
   get "address_suggestions", to: "address_suggestions#index", as: :address_suggestions
 
+  # Customer chatbot
+  post "chat/message", to: "chat#message", as: :chat_message
+
   # Product catalog
   resources :categories, only: [:show], param: :slug
   resources :products,   only: [:index, :show], param: :slug

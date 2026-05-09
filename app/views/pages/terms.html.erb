@@ -29,7 +29,7 @@
 
     <section>
       <h2 class="text-xl font-semibold text-warm-900 mb-3">5. Returns and Cancellations</h2>
-      <p>Please contact us at <a href="tel:+12546289088" class="text-warm-700 underline">(254) 628-9088</a> or visit our store to discuss returns or cancellations. All return requests are handled on a case-by-case basis.</p>
+      <p>Please contact us at <%= obfuscated_email_link(class: "text-warm-700 underline") %> or visit our store to discuss returns or cancellations. All return requests are handled on a case-by-case basis.</p>
     </section>
 
     <section>
@@ -59,8 +59,7 @@
         <p><strong>Warehouse Furniture</strong></p>
         <p>1104 E Veterans Memorial Blvd</p>
         <p>Killeen, TX 76541</p>
-        <p>Phone: <a href="tel:+12546289088" class="text-warm-700 underline">(254) 628-9088</a></p>
-        <p>Email: <a href="mailto:sales@warehousefurnituretx.com" class="text-warm-700 underline">sales@warehousefurnituretx.com</a></p>
+        <p>Email: <%= obfuscated_email_link(class: "text-warm-700 underline") %></p>
       </address>
     </section>
 

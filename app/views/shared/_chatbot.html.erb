@@ -1,0 +1,74 @@
+<div data-controller="chatbot"
+     data-chat-url="<%= chat_message_path %>"
+     class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+
+  <%# Chat window %>
+  <div data-chatbot-target="window"
+       class="hidden flex-col w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-warm-200 overflow-hidden"
+       style="max-height: 520px;">
+
+    <%# Header %>
+    <div class="bg-warm-800 px-4 py-3 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-warm-600 rounded-full flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white text-sm font-semibold leading-tight">Warehouse Furniture</p>
+          <p class="text-warm-300 text-xs">Ask us anything</p>
+        </div>
+      </div>
+      <button type="button"
+              data-action="click->chatbot#close"
+              class="text-warm-300 hover:text-white transition-colors p-1 rounded-lg hover:bg-warm-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <%# Messages %>
+    <div data-chatbot-target="messages"
+         class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"
+         style="max-height: 360px;">
+      <%# Welcome message %>
+      <div class="flex justify-start">
+        <div class="max-w-[80%] bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded-2xl rounded-tl-sm leading-relaxed">
+          Hi! 👋 Welcome to Warehouse Furniture. How can I help you today?
+        </div>
+      </div>
+    </div>
+
+    <%# Input %>
+    <div class="px-3 py-3 border-t border-warm-100 flex gap-2 flex-shrink-0">
+      <input type="text"
+             data-chatbot-target="input"
+             data-action="keydown->chatbot#send"
+             placeholder="Type a message…"
+             class="flex-1 border border-warm-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 bg-warm-50">
+      <button type="button"
+              data-chatbot-target="button"
+              data-action="click->chatbot#send"
+              class="w-9 h-9 bg-warm-800 hover:bg-warm-700 text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <%# Floating toggle button %>
+  <button type="button"
+          data-action="click->chatbot#toggle"
+          class="w-14 h-14 bg-warm-800 hover:bg-warm-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 cursor-pointer relative">
+    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+    </svg>
+    <%# Unread badge — shown when chat is closed %>
+    <span data-chatbot-target="badge"
+          class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white"></span>
+  </button>
+
+</div>
