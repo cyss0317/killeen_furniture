@@ -89,7 +89,6 @@
         </th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivery Address</th>
-        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Cost</th>
         <th class="px-6 py-3 text-right text-xs font-medium uppercase">
           <%= sort_link("Total", :grand_total, current_sort: @sort, current_direction: @direction) %>
         </th>
@@ -118,14 +117,6 @@
           <td class="px-6 py-4 text-sm text-gray-600">
             <%= link_to order.shipping_address_line, google_maps_url(order.shipping_address),
                 target: "_blank", rel: "noopener", class: "hover:text-amber-700 hover:underline" %>
-          </td>
-          <td class="px-6 py-4 text-sm text-right text-gray-500">
-            <% order_cost = order.order_items.sum { |i| i.unit_cost.to_f * i.quantity } %>
-            <% if order_cost > 0 %>
-              <%= number_to_currency(order_cost) %>
-            <% else %>
-              <span class="text-gray-300">—</span>
-            <% end %>
           </td>
           <td class="px-6 py-4 text-sm font-semibold text-right"><%= number_to_currency(order.grand_total) %></td>
           <td class="px-6 py-4 text-center">

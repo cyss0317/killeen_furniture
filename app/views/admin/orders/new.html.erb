@@ -146,16 +146,6 @@
              data-controller="address-autocomplete"
              data-address-autocomplete-url-value="<%= admin_address_suggestions_path %>">
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
-            <%= f.fields_for :shipping_address do |af| %>
-              <%= af.text_field :full_name,
-                  value: @form_defaults&.dig(:shipping_full_name),
-                  class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
-                  data: { "admin-order-target": "addressFullName" } %>
-            <% end %>
-          </div>
-
-          <div class="sm:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Street Address <span class="text-red-500">*</span></label>
             <div class="relative">
               <%= f.fields_for :shipping_address do |af| %>

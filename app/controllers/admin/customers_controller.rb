@@ -5,14 +5,13 @@ module Admin
     before_action :set_customer, only: [ :edit, :update, :destroy ]
 
     def index
+      qualifying = Order.statuses.values_at("paid", "scheduled_for_delivery", "out_for_delivery", "delivered")
       scope = User.customer
                   .left_joins(:orders)
-                  .where("orders.id IS NULL OR orders.status IN (?)",
-                         Order.statuses.values_at("paid", "scheduled_for_delivery", "out_for_delivery", "delivered"))
                   .select(
                     "users.*",
-                    "COUNT(DISTINCT orders.id) AS orders_count",
-                    "COALESCE(SUM(orders.grand_total), 0) AS total_spent"
+                    "COUNT(DISTINCT CASE WHEN orders.status IN (#{qualifying.join(',')}) THEN orders.id END) AS orders_count",
+                    "COALESCE(SUM(CASE WHEN orders.status IN (#{qualifying.join(',')}) THEN orders.grand_total END), 0) AS total_spent"
                   )
                   .group("users.id")
 
