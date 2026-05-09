@@ -179,12 +179,16 @@ class Admin::PurchaseOrdersController < Admin::BaseController
       parts << "#{result.updated_products.size} #{"product".pluralize(result.updated_products.size)} updated"               if result.updated_products.any?
       parts << "#{result.skipped_rows.size} #{"row".pluralize(result.skipped_rows.size)} skipped"                           if result.skipped_rows.any?
 
-      all_pos = result.purchase_orders.presence || [ result.purchase_order ]
+      all_pos = (result.purchase_orders.presence || [ result.purchase_order ]).compact
 
-      if all_pos.size == 1
-        po      = all_pos.first
+      if all_pos.empty?
+        # All invoices were already imported (all duplicates)
+        notice = "All invoices already imported — #{result.skipped_rows.size} #{"duplicate".pluralize(result.skipped_rows.size)} skipped."
+        redirect_to admin_purchase_orders_path, notice: notice
+      elsif all_pos.size == 1
+        po        = all_pos.first
         file_note = files.size > 1 ? " (from #{files.size} screenshots)" : ""
-        notice = "PO #{po.reference_number} from #{result.supplier_name} imported#{file_note} — #{po.purchase_order_items.size} items. #{parts.join(', ')}."
+        notice    = "PO #{po.reference_number} from #{result.supplier_name} imported#{file_note} — #{po.purchase_order_items.size} items. #{parts.join(', ')}."
         redirect_to admin_purchase_order_path(po), notice: notice
       else
         po_numbers = all_pos.map(&:reference_number).join(", ")
@@ -192,6 +196,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
         redirect_to admin_purchase_orders_path, notice: notice
       end
     else
+      Rails.logger.error "[ImportScreenshot] Failed — #{result.error}"
       flash.now[:alert] = result.error
       render :import_screenshot, status: :unprocessable_entity
     end

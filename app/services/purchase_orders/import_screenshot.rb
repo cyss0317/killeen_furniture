@@ -165,6 +165,18 @@ module PurchaseOrders
       ref = @reference_number || invoice_number
       return Result.new(error: "Could not determine invoice number. Please enter it manually or ensure it is visible in the image.") if ref.blank?
 
+      # Skip duplicate invoices — don't fail the whole batch, just report it
+      if PurchaseOrder.exists?(reference_number: ref)
+        Rails.logger.info "[ImportScreenshot] Invoice #{ref} already exists — skipping"
+        return Result.new(
+          purchase_order:   nil,
+          created_products: [],
+          updated_products: [],
+          skipped_rows:     [ "Invoice #{ref} already imported — skipped" ],
+          supplier_name:    supplier_category_name
+        )
+      end
+
       return Result.new(error: "No order items could be found in the image.") if raw_items.empty?
 
       created_products = []
@@ -312,9 +324,9 @@ module PurchaseOrders
       invoices.each do |invoice|
         result = process_extracted(invoice)
 
-        # Accumulate even if one invoice errors — report it in skipped
         if result.success?
-          all_pos     << result.purchase_order
+          # purchase_order is nil when the invoice was skipped (duplicate)
+          all_pos << result.purchase_order if result.purchase_order
           all_created.concat(result.created_products)
           all_updated.concat(result.updated_products)
           all_skipped.concat(result.skipped_rows)
@@ -324,7 +336,8 @@ module PurchaseOrders
         end
       end
 
-      return Result.new(error: all_skipped.join("; ")) if all_pos.empty?
+      # If every invoice was either created or skipped (duplicate), that is still a success
+      return Result.new(error: "All invoices failed: #{all_skipped.join('; ')}") if all_pos.empty? && all_skipped.none? { |s| s.include?("already imported") }
 
       Result.new(
         purchase_order:   all_pos.first,
@@ -347,46 +360,128 @@ module PurchaseOrders
       media_type == "application/pdf" ? PDF_EXTRACTION_PROMPT : EXTRACTION_PROMPT
     end
 
+    MAX_RETRIES = 3
+
     def extract_via_claude(image_data, media_type)
       api_key = ENV["ANTHROPIC_API_KEY"] || Rails.application.credentials.anthropic_api_key || "empty"
       return "Anthropic API key is not configured. Set ANTHROPIC_API_KEY in your environment." if api_key.blank?
 
+      # ── Cache by content hash ──────────────────────────────────────────────
+      # Same PDF re-submitted after a failure skips Claude entirely and reuses
+      # the previously extracted data. Cache expires after 4 hours.
+      if media_type == "application/pdf"
+        cache_key = "pdf_extraction_#{Digest::SHA256.hexdigest(image_data)}"
+        if (cached = Rails.cache.read(cache_key))
+          count = cached.is_a?(Array) ? cached.size : 1
+          Rails.logger.info "[ImportScreenshot] Cache hit — #{count} invoice(s) reused, Claude skipped"
+          return cached
+        end
+      end
+
       client = Anthropic::Client.new(api_key: api_key)
 
-      # PDFs use "document" type; images use "image" type
       file_content = if media_type == "application/pdf"
         { type: "document", source: { type: "base64", media_type: "application/pdf", data: image_data } }
       else
-        { type: "image",    source: { type: "base64", media_type: media_type, data: image_data } }
+        { type: "image", source: { type: "base64", media_type: media_type, data: image_data } }
       end
 
-      # PDFs may span many pages with many line items — raise max_tokens to
-      # avoid JSON truncation. Model stays Haiku for cost efficiency.
       model      = "claude-haiku-4-5-20251001"
-      max_tokens = media_type == "application/pdf" ? 8096 : 2048
+      # 16,384 = Haiku 4.5 max output. Sized for ~80-page PDFs (~50 invoices).
+      # Truncated responses are salvaged by salvage_partial_json + cached so
+      # re-submitting the same PDF resumes without another Claude call.
+      max_tokens = media_type == "application/pdf" ? 16_384 : 2048
 
-      message = client.messages.create(
-        model:      model,
-        max_tokens: max_tokens,
-        messages: [{
-          role:    "user",
-          content: [ file_content, { type: "text", text: extraction_prompt(media_type) } ]
-        }]
-      )
+      last_error = nil
+      raw_text   = nil
 
-      text = message.content[0].text.strip
-             .gsub(/\A```(?:json)?\n?/, "").gsub(/\n?```\z/, "").strip
+      MAX_RETRIES.times do |attempt|
+        begin
+          message = client.messages.create(
+            model:      model,
+            max_tokens: max_tokens,
+            messages: [ {
+              role:    "user",
+              content: [ file_content, { type: "text", text: extraction_prompt(media_type) } ]
+            } ]
+          )
 
-      JSON.parse(text)
-    rescue JSON::ParserError
-      "Claude returned data in an unexpected format. Please try again."
-    rescue Anthropic::Errors::AuthenticationError
-      "Anthropic API key is invalid."
-    rescue Anthropic::Errors::APIStatusError => e
-      "Anthropic API error (#{e.status}): #{e.message}"
-    rescue => e
-      Rails.logger.error "[ImportScreenshot] Claude error: #{e.class} — #{e.message}"
-      "Could not connect to the AI service. Please try again."
+          raw_text = message.content[0].text.strip
+                             .gsub(/\A```(?:json)?\n?/, "").gsub(/\n?```\z/, "").strip
+
+          if message.stop_reason == "max_tokens"
+            Rails.logger.warn "[ImportScreenshot] Response truncated — salvaging partial JSON"
+            raw_text = salvage_partial_json(raw_text)
+          end
+
+          result = JSON.parse(raw_text)
+
+          # Cache successful PDF extractions so re-submissions are free
+          if media_type == "application/pdf"
+            Rails.cache.write(cache_key, result, expires_in: 4.hours)
+            count = result.is_a?(Array) ? result.size : 1
+            Rails.logger.info "[ImportScreenshot] Cached #{count} invoice(s) from PDF"
+          end
+
+          return result
+
+        rescue JSON::ParserError
+          Rails.logger.error "[ImportScreenshot] JSON parse error (attempt #{attempt + 1}): #{raw_text&.first(500)}"
+          salvaged = salvage_partial_json(raw_text.to_s)
+          begin
+            result = JSON.parse(salvaged)
+            Rails.cache.write(cache_key, result, expires_in: 4.hours) if media_type == "application/pdf"
+            return result
+          rescue JSON::ParserError
+            last_error = "Claude returned data in an unexpected format."
+            break
+          end
+
+        rescue Anthropic::Errors::AuthenticationError
+          return "Anthropic API key is invalid."
+
+        rescue Anthropic::Errors::RateLimitError => e
+          last_error = e.message
+          sleep(2 ** attempt)
+
+        rescue Anthropic::Errors::APIStatusError => e
+          last_error = "Anthropic API error (#{e.status}): #{e.message}"
+          e.status.to_i >= 500 ? sleep(2 ** attempt) : (return last_error)
+
+        rescue => e
+          last_error = e.message
+          Rails.logger.error "[ImportScreenshot] Claude error (attempt #{attempt + 1}): #{e.class} — #{e.message}"
+          sleep(2 ** attempt)
+        end
+      end
+
+      last_error || "Could not complete extraction after #{MAX_RETRIES} attempts. Please try again."
+    end
+
+    # Salvages complete invoice objects from a truncated JSON array.
+    def salvage_partial_json(text)
+      return text if text.blank?
+      begin; JSON.parse(text); return text; rescue JSON::ParserError; end
+
+      objects = []
+      depth = 0
+      start = nil
+      text.each_char.with_index do |char, i|
+        if char == "{"
+          start = i if depth.zero?
+          depth += 1
+        elsif char == "}"
+          depth -= 1
+          if depth.zero? && start
+            begin objects << JSON.parse(text[start..i]); rescue JSON::ParserError; end
+            start = nil
+          end
+        end
+      end
+
+      return text if objects.empty?
+      Rails.logger.warn "[ImportScreenshot] Salvaged #{objects.size} invoice(s) from truncated response"
+      objects.to_json
     end
   end
 end

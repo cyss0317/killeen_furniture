@@ -17,6 +17,7 @@
     <% end %>
 
     <%= form_with url: import_screenshot_admin_purchase_orders_path, method: :post,
+          data: { turbo: false },
           html: {
             enctype: "multipart/form-data",
             data: {
