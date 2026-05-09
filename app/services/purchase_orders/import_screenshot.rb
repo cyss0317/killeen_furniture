@@ -20,6 +20,8 @@ module PurchaseOrders
       {
         "supplier": "ashley",
         "invoice_number": "ASH-2026-001",
+        "invoice_date": "2026-05-01",
+        "order_date": "2026-04-28",
         "freight_cost": 125.00,
         "discount": 50.00,
         "items": [
@@ -38,6 +40,8 @@ module PurchaseOrders
       Rules:
       - supplier: string identifying the supplier (e.g., "ashley", "generation_trade", etc.) based on logos or text. Use "ashley" for Ashley Furniture, "generation_trade" for Generation Trade.
       - invoice_number: the order/invoice/PO number shown on the document (empty string "" if not visible)
+      - invoice_date: the date printed on the invoice/document in YYYY-MM-DD format (null if not visible)
+      - order_date: the date the order was placed in YYYY-MM-DD format (null if not visible; may differ from invoice_date)
       - freight_cost: the freight, shipping, or delivery charge as a decimal (0 if not shown)
       - discount: any discount, rebate, or credit applied to the order as a decimal (0 if not shown)
       - item_code: The SKU / item code (e.g. "B1190-31" for Ashley, "GT-1234" for Generation Trade)
@@ -62,6 +66,8 @@ module PurchaseOrders
         {
           "supplier": "ashley",
           "invoice_number": "ASH-2026-001",
+          "invoice_date": "2026-05-01",
+          "order_date": "2026-04-28",
           "freight_cost": 125.00,
           "discount": 50.00,
           "items": [
@@ -89,6 +95,8 @@ module PurchaseOrders
       - series: furniture collection/series name (empty string "" if not shown)
       - color: color or finish name (empty string "" if not shown)
       - qty: integer quantity from the Qty or Ordered column
+      - invoice_date: date printed on the invoice in YYYY-MM-DD format (null if not visible)
+      - order_date: date the order was placed in YYYY-MM-DD format (null if not visible)
       - freight_cost: freight, shipping, or delivery charge as a decimal (0 if not shown)
       - discount: any discount, rebate, or credit applied to the order as a decimal (0 if not shown)
       - price: unit wholesale price as a decimal (NOT extended/total)
@@ -147,6 +155,8 @@ module PurchaseOrders
       @supplier      = "ashley" if @supplier.blank?
 
       invoice_number = extracted["invoice_number"].to_s.strip.presence
+      invoice_date   = parse_date(extracted["invoice_date"])
+      order_date     = parse_date(extracted["order_date"])
       freight_cost   = extracted["freight_cost"].to_d
       discount       = extracted["discount"].to_d
       raw_items      = Array(extracted["items"])
@@ -231,7 +241,8 @@ module PurchaseOrders
         po = PurchaseOrder.create!(
           reference_number: ref,
           status:           :submitted,
-          ordered_at:       @ordered_at,
+          ordered_at:       order_date || @ordered_at,
+          invoice_date:     invoice_date,
           notes:            @notes,
           created_by:       @created_by,
           brand:            supplier_category_name,
@@ -265,6 +276,13 @@ module PurchaseOrders
       Result.new(error: e.message)
     rescue => e
       Result.new(error: e.message)
+    end
+
+    def parse_date(value)
+      return nil if value.blank?
+      Date.parse(value.to_s)
+    rescue ArgumentError, TypeError
+      nil
     end
 
     def supplier_category_name

@@ -251,7 +251,11 @@
           </dd>
         </div>
         <div>
-          <dt class="text-gray-500">Date Ordered</dt>
+          <dt class="text-gray-500">Invoice Date</dt>
+          <dd class="mt-0.5"><%= @po.invoice_date&.strftime("%B %d, %Y") || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-gray-500">Order Date</dt>
           <dd class="mt-0.5"><%= @po.ordered_at&.strftime("%B %d, %Y") || "—" %></dd>
         </div>
         <div>
