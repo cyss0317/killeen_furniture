@@ -57,7 +57,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <!-- Order Items -->
   <div class="lg:col-span-2 space-y-6">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
       <div class="px-6 py-4 border-b border-gray-200">
         <h2 class="font-semibold text-gray-900">Order Items</h2>
       </div>
@@ -75,15 +75,38 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <% @order_items.each do |item| %>
+            <% othumb = item.product&.vendor_image_urls&.first %>
             <tr>
               <td class="px-6 py-4">
-                <% if item.product %>
-                  <%= link_to item.product_name, admin_product_path(item.product),
-                        class: "text-sm font-medium text-amber-800 hover:underline" %>
-                <% else %>
-                  <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
-                <% end %>
-                <p class="text-xs text-gray-400 font-mono">SKU: <%= item.product_sku %></p>
+                <div class="flex items-center gap-3">
+                  <% if othumb %>
+                    <div class="relative group shrink-0">
+                      <img src="<%= othumb %>" alt="<%= item.product_name %>"
+                           class="w-10 h-10 rounded-md object-cover bg-gray-100 cursor-pointer ring-1 ring-gray-200">
+                      <div class="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50
+                                  opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                        <div class="w-64 h-64 rounded-lg bg-white shadow-xl ring-2 ring-gray-200 p-1 flex items-center justify-center">
+                          <img src="<%= othumb %>" alt="<%= item.product_name %>"
+                               class="max-w-full max-h-full object-contain rounded-md">
+                        </div>
+                        <div class="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-45 shadow ring-1 ring-gray-200"></div>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="w-10 h-10 rounded-md bg-gray-100 ring-1 ring-gray-200 flex items-center justify-center shrink-0">
+                      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                  <% end %>
+                  <div>
+                    <% if item.product %>
+                      <%= link_to item.product_name, admin_product_path(item.product),
+                            class: "text-sm font-medium text-amber-800 hover:underline" %>
+                    <% else %>
+                      <p class="text-sm font-medium text-gray-900"><%= item.product_name %></p>
+                    <% end %>
+                    <p class="text-xs text-gray-400 font-mono">SKU: <%= item.product_sku %></p>
 
                 <% payload = item.product&.ashley_payload.presence %>
                 <% if payload %>
@@ -131,6 +154,8 @@
                     </details>
                   <% end %>
                 <% end %>
+                  </div><%# close text wrapper %>
+                </div><%# close flex row %>
               </td>
               <td class="px-6 py-4 text-center text-sm"><%= item.quantity %></td>
               <td class="px-6 py-4 text-right text-sm text-gray-500">

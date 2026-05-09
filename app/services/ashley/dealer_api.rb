@@ -4,15 +4,7 @@ require "base64"
 
 module Ashley
   # Fetches product data from the Ashley dealer API gateway.
-  # Uses the JSON API discovered from the dealer portal Angular app —
-  # no Selenium / headless browser required.
-  #
-  # Auth config (set in ENV):
-  #   ASHLEY_DIRECT_COOKIES — JSON array of cookie objects exported from a
-  #                           logged-in browser session on home.ashleydirect.com
-  #
-  # Falls back to probing cdn.ashley.com image URLs when the API is unreachable.
-  class DirectScraper
+  class DealerApi
     Result = Struct.new(:image_urls, :data, :error, keyword_init: true)
 
     API_BASE = "https://apigw3.ashleyfurniture.com/ashley-direct-catalog-experience/Catalog/product-detail"
@@ -31,8 +23,8 @@ module Ashley
       new(sku).call
     end
 
-    # Debug helper — parse a raw JSON string without making a real HTTP call.
-    # Usage: Ashley::DirectScraper.parse_json(raw_json_string, sku: "B376-92")
+    # Debug helper — test map_api_response against a raw JSON string.
+    # Usage: Ashley::DealerApi.parse_json(raw_json_string, sku: "B376-92")
     def self.parse_json(raw, sku: "DEBUG")
       instance = new(sku)
       instance.send(:map_api_response, JSON.parse(raw))
@@ -43,32 +35,21 @@ module Ashley
     end
 
     def call
-      log "▶ call started — credentials_configured=#{credentials_configured?}"
-
       if credentials_configured?
         json = fetch_from_api
         if json
           data = map_api_response(json)
           imgs = data.delete(:image_urls).map { |u| clean_cdn_url(u) }.uniq
-          log "  API result: #{data.inspect}"
-          log "  images: #{imgs.inspect}"
           return Result.new(image_urls: imgs, data: data) if imgs.any? || data[:name].present?
-          log "  ⚠ API returned no name and no images — falling through to CDN"
-        else
-          log "  ✗ API fetch returned nil"
         end
-      else
-        log "  ⚠ no credentials — skipping API, going straight to CDN probe"
       end
 
       cdn_images = probe_cdn_images
-      log "  CDN probe result: #{cdn_images.inspect}"
       return Result.new(image_urls: cdn_images, data: {}) if cdn_images.any?
 
-      log "  ✗ nothing found for #{@sku}"
       Result.new(image_urls: [], error: "No data found for #{@sku}")
     rescue => e
-      Rails.logger.error("[Ashley::DirectScraper] #{@sku}: #{e.class} — #{e.message}")
+      Rails.logger.error("[Ashley::DealerApi] #{@sku}: #{e.class} — #{e.message}")
       Result.new(image_urls: [], error: e.message)
     end
 
@@ -93,18 +74,18 @@ module Ashley
           checkWarehouseOverrides: true,
           noShowPricing:           false,
           securityAccesses: {
-            customerEdiAuthorization:       true,
-            customerServiceAuthorization:   false,
+            customerEdiAuthorization:         true,
+            customerServiceAuthorization:     false,
             marketingSpecialistAuthorization: false,
-            homeStoreAuthorization:         false,
-            aTPAuthorization:               true,
-            mSEdiAuthorization:             false,
-            hasPricingAuthorization:        true,
-            isITAdmin:                      false,
-            wishListAuthorization:          false,
-            isMasterUser:                   false,
-            relevanceSortPreview:           true,
-            hideAshtonYork:                 false
+            homeStoreAuthorization:           false,
+            aTPAuthorization:                 true,
+            mSEdiAuthorization:               false,
+            hasPricingAuthorization:          true,
+            isITAdmin:                        false,
+            wishListAuthorization:            false,
+            isMasterUser:                     false,
+            relevanceSortPreview:             true,
+            hideAshtonYork:                   false
           },
           channelId: "PRMRY"
         },
@@ -128,8 +109,6 @@ module Ashley
 
     def fetch_from_api
       uri = URI.parse(api_url)
-      log "  API: POST #{uri}"
-
       req = Net::HTTP::Post.new(uri)
       req["Accept"]          = "application/json"
       req["Content-Type"]    = "application/json"
@@ -143,12 +122,10 @@ module Ashley
         http.request(req)
       end
 
-      log "  API: response #{res.code} (#{res.body&.bytesize} bytes)"
-
       return nil unless res.code == "200"
       JSON.parse(res.body)
     rescue => e
-      log "  API: ✗ #{e.class} — #{e.message}"
+      Rails.logger.error("[Ashley::DealerApi] #{@sku}: #{e.class} — #{e.message}")
       nil
     end
 
@@ -157,8 +134,8 @@ module Ashley
     def map_api_response(json)
       data = { image_urls: [] }
 
-      data[:name]        = json["friendlyDescription"].to_s.strip.presence ||
-                           json["alternateDescription3"].to_s.strip.presence
+      data[:name]        = json["alternateDescription3"].to_s.strip.presence ||
+                           json["friendlyDescription"].to_s.strip.presence
       data[:sku]         = json["sku"]
       data[:status_text] = json["statusDescription"]
       data[:color]       = json["color"].to_s.strip.presence
@@ -166,15 +143,12 @@ module Ashley
       data[:showroom]    = json["seriesShowroom"].to_s.strip.presence
       data[:division]    = json["divisionName"].to_s.strip.presence
 
-      # Weight (lbs)
       data[:weight] = json["standardShippingWeight"].to_f if json["standardShippingWeight"].present?
 
-      # Overall dimensions (inches)
       data[:dimensions_width]  = json["standardWidth"].to_f  if json["standardWidth"].present?
       data[:dimensions_depth]  = json["standardDepth"].to_f  if json["standardDepth"].present?
       data[:dimensions_height] = json["standardHeight"].to_f if json["standardHeight"].present?
 
-      # Extra dimensions (drawer interiors, rail heights, etc.)
       if json["extraDimensions"].present?
         extra = json["extraDimensions"].each_with_object({}) do |d, h|
           label = d["dimensionDescription"].to_s.strip
@@ -194,48 +168,46 @@ module Ashley
         data[:extra_dimensions] = extra if extra.any?
       end
 
-      # Wholesale price (MESQUITE warehouse = warehouse 28)
       price_entry = Array(json["priceInfo"]).find { |p| p["warehouse"] == "28" } ||
                     Array(json["priceInfo"]).first
       data[:base_cost] = price_entry["itemPrice"].to_f if price_entry&.dig("itemPrice").present?
 
-      # Description — paragraph + bullet points
       body    = json["itemDescription"].to_s.strip.presence
       bullets = Array(json["productDetails"]).map(&:strip).reject(&:blank?)
       parts   = [ body, bullets.map { |b| "• #{b}" }.join("\n") ].reject(&:blank?)
       data[:description] = parts.join("\n\n").presence
 
-      # Images — prefer itemAFIImageSetLinks (same CDN), fall back to imageSet
       images = Array(json["itemAFIImageSetLinks"]).presence ||
                Array(json["imageSet"]).presence ||
                []
       data[:image_urls] = images.map { |u| u.to_s.gsub(/\?.*\z/, "") }.uniq
 
-      # Series info
       data[:series_name]     = json["seriesName"].to_s.strip.presence
       data[:series_features] = json["seriesFeatures"].to_s.strip.presence
       data[:intended_room]   = Array(json["itemIntendedRoom"]).first.to_s.strip.presence
 
-      # Videos — two formats depending on which API path returned them:
+      # Videos — two API formats:
       #   videoInfo: series-level [{sheetName, videoLink (full URL)}]
       #   videos:    item-level   [{type, id (YouTube ID), key}]
+      # Product/collection videos have titles starting with the series ID.
+      series_id  = json["seriesID"].to_s
       all_videos = []
 
       Array(json["videoInfo"]).each do |v|
         url = v["videoLink"].to_s
-        all_videos << { title: v["sheetName"].to_s, url: url } if url.match?(/youtu/)
+        next unless url.match?(/youtu/)
+        title = v["sheetName"].to_s
+        all_videos << { title: title, url: url, product_video: series_id.present? && title.start_with?(series_id) }
       end
 
       Array(json["videos"]).each do |v|
         next unless v["type"] == "YouTube" && v["id"].present?
-        url = "https://youtu.be/#{v['id']}"
-        all_videos << { title: v["key"].to_s.gsub(/([A-Z])/, ' \1').strip, url: url }
+        title = v["key"].to_s
+        all_videos << { title: title, url: "https://youtu.be/#{v['id']}", product_video: !title.match?(/assembly/i) }
       end
 
-      unique_videos = all_videos.uniq { |v| v[:url] }
-      data[:videos] = unique_videos if unique_videos.any?
+      data[:videos] = all_videos.uniq { |v| v[:url] } if all_videos.any?
 
-      # Documents — assembly instructions, parts drawings, mechanism guides
       documents = []
       Array(json["instructionList"]).each do |d|
         documents << { type: "Assembly Instructions", filename: d["filename"], url: d["url"] } if d["url"].present?
@@ -280,10 +252,6 @@ module Ashley
 
     def clean_cdn_url(url)
       "#{url.gsub(/\?.*\z/, "")}?height=1000"
-    end
-
-    def log(msg)
-      Rails.logger.info("[Ashley::DirectScraper] #{msg}")
     end
   end
 end

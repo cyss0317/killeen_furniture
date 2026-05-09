@@ -43,14 +43,28 @@
     <div>
       <% if @product.vendor_image_urls.present? %>
         <% images = @product.vendor_image_urls %>
+        <% product_video = @product.ashley_payload&.dig("videos")&.find { |v| v["product_video"] } %>
+        <% video_id = product_video&.dig("url").to_s.match(%r{youtu\.be/([^?]+)|v=([^&]+)})&.captures&.compact&.first %>
+        <% total_thumbs = images.size + (video_id ? 1 : 0) %>
         <div data-controller="image-gallery">
-          <%# Main image with nav arrows %>
+          <%# Main display — image or video iframe %>
           <div class="relative aspect-square bg-warm-200 rounded-2xl overflow-hidden mb-3 group">
             <%= image_tag images.first,
                 class: "w-full h-full object-cover",
                 alt: @product.name,
                 loading: "eager",
                 data: { "image-gallery-target": "main" } %>
+
+            <% if video_id %>
+              <iframe
+                src=""
+                title="<%= @product.name %> video"
+                class="hidden w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                data-image-gallery-target="videoFrame"></iframe>
+            <% end %>
 
             <%# Prev arrow %>
             <button type="button"
@@ -75,8 +89,8 @@
             </button>
           </div>
 
-          <%# Thumbnails %>
-          <% if images.size > 1 %>
+          <%# Thumbnails + video thumbnail %>
+          <% if total_thumbs > 1 %>
             <div class="grid grid-cols-4 gap-2">
               <% images.each_with_index do |url, idx| %>
                 <div class="aspect-square bg-warm-200 rounded-xl overflow-hidden cursor-pointer border-2 hover:border-warm-500 transition-colors <%= idx == 0 ? 'border-warm-600' : 'border-transparent' %>"
@@ -85,6 +99,26 @@
                      data-gallery-index="<%= idx %>"
                      data-action="click->image-gallery#select">
                   <%= image_tag url, class: "w-full h-full object-cover", alt: @product.name, loading: "lazy" %>
+                </div>
+              <% end %>
+
+              <% if video_id %>
+                <div class="relative aspect-square bg-warm-900 rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-warm-500 transition-colors"
+                     data-image-gallery-target="thumb"
+                     data-gallery-type="video"
+                     data-gallery-video-id="<%= video_id %>"
+                     data-gallery-index="<%= images.size %>"
+                     data-action="click->image-gallery#select">
+                  <img src="https://img.youtube.com/vi/<%= video_id %>/hqdefault.jpg"
+                       alt="Product video"
+                       class="w-full h-full object-cover opacity-70">
+                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center">
+                      <svg class="w-4 h-4 text-warm-900 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               <% end %>
             </div>
@@ -253,6 +287,29 @@
           <% else %>
             <p class="text-warm-600 leading-relaxed text-sm"><%= @product.short_description %></p>
           <% end %>
+        </div>
+      <% end %>
+
+      <!-- Documents -->
+      <% if (documents = payload&.dig("documents")).present? %>
+        <div class="border-t border-warm-200 pt-6 mt-6">
+          <h2 class="text-sm font-semibold text-warm-900 mb-3">Documents</h2>
+          <div class="space-y-2">
+            <% documents.each do |doc| %>
+              <%= link_to doc["url"], target: "_blank", rel: "noopener",
+                    class: "flex items-center gap-2.5 text-sm text-warm-700 hover:text-warm-950 transition-colors group" do %>
+                <div class="w-8 h-8 bg-warm-100 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-warm-200 transition-colors">
+                  <svg class="w-4 h-4 text-warm-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <span class="underline underline-offset-2"><%= doc["type"] %></span>
+                <svg class="w-3.5 h-3.5 text-warm-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              <% end %>
+            <% end %>
+          </div>
         </div>
       <% end %>
     </div>

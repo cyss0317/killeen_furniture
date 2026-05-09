@@ -152,27 +152,45 @@ class Admin::PurchaseOrdersController < Admin::BaseController
     authorize PurchaseOrder, :import_screenshot?
     return if request.get?
 
-    unless params[:file].present?
-      flash.now[:alert] = "Please select an image file."
+    files = Array(params[:files]).compact.select(&:present?)
+    files = [ params[:file] ].compact if files.empty? && params[:file].present?
+
+    if files.empty?
+      flash.now[:alert] = "Please select at least one image file."
       return render :import_screenshot, status: :unprocessable_entity
     end
 
-    result = PurchaseOrders::ImportScreenshot.call(
-      file:             params[:file],
+    common_params = {
       reference_number: params[:reference_number].presence,
       ordered_at:       params[:ordered_at].presence,
       notes:            params[:notes].presence,
       created_by:       current_user
-    )
+    }
+
+    result = if files.size == 1
+      PurchaseOrders::ImportScreenshot.call(file: files.first, **common_params)
+    else
+      PurchaseOrders::ImportMultipleScreenshots.call(files: files, **common_params)
+    end
 
     if result.success?
       parts = []
-      parts << "#{result.created_products.size} new product(s) created as draft" if result.created_products.any?
-      parts << "#{result.updated_products.size} product(s) updated"               if result.updated_products.any?
-      parts << "#{result.skipped_rows.size} row(s) skipped"                       if result.skipped_rows.any?
+      parts << "#{result.created_products.size} new #{"product".pluralize(result.created_products.size)} created as draft" if result.created_products.any?
+      parts << "#{result.updated_products.size} #{"product".pluralize(result.updated_products.size)} updated"               if result.updated_products.any?
+      parts << "#{result.skipped_rows.size} #{"row".pluralize(result.skipped_rows.size)} skipped"                           if result.skipped_rows.any?
 
-      notice = "PO #{result.purchase_order.reference_number} from #{result.supplier_name} imported — #{result.purchase_order.purchase_order_items.size} items. #{parts.join(', ')}."
-      redirect_to admin_purchase_order_path(result.purchase_order), notice: notice
+      all_pos = result.purchase_orders.presence || [ result.purchase_order ]
+
+      if all_pos.size == 1
+        po      = all_pos.first
+        file_note = files.size > 1 ? " (from #{files.size} screenshots)" : ""
+        notice = "PO #{po.reference_number} from #{result.supplier_name} imported#{file_note} — #{po.purchase_order_items.size} items. #{parts.join(', ')}."
+        redirect_to admin_purchase_order_path(po), notice: notice
+      else
+        po_numbers = all_pos.map(&:reference_number).join(", ")
+        notice = "#{all_pos.size} purchase orders created from #{result.supplier_name}: #{po_numbers}. #{parts.join(', ')}."
+        redirect_to admin_purchase_orders_path, notice: notice
+      end
     else
       flash.now[:alert] = result.error
       render :import_screenshot, status: :unprocessable_entity

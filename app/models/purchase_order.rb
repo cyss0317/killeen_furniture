@@ -15,8 +15,12 @@ class PurchaseOrder < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
 
-  def total_cost
+  def items_cost
     purchase_order_items.sum { |i| i.unit_cost * i.quantity_ordered }
+  end
+
+  def total_cost
+    items_cost + freight_cost.to_d - discount.to_d
   end
 
   def fully_received?
