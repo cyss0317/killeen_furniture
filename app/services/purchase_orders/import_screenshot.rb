@@ -250,17 +250,19 @@ module PurchaseOrders
 
         raise "No valid line items found in the image." if line_items.empty?
 
-        po = PurchaseOrder.create!(
+        po_attrs = {
           reference_number: ref,
           status:           :submitted,
           ordered_at:       order_date || @ordered_at,
-          invoice_date:     invoice_date,
           notes:            @notes,
           created_by:       @created_by,
-          brand:            supplier_category_name,
-          freight_cost:     freight_cost > 0 ? freight_cost : nil,
-          discount:         discount > 0 ? discount : nil
-        )
+          brand:            supplier_category_name
+        }
+        po_attrs[:invoice_date] = invoice_date    if PurchaseOrder.column_names.include?("invoice_date")
+        po_attrs[:freight_cost] = freight_cost    if PurchaseOrder.column_names.include?("freight_cost") && freight_cost > 0
+        po_attrs[:discount]     = discount        if PurchaseOrder.column_names.include?("discount")     && discount > 0
+
+        po = PurchaseOrder.create!(po_attrs)
 
         line_items.each { |attrs| po.purchase_order_items.create!(attrs) }
       end
