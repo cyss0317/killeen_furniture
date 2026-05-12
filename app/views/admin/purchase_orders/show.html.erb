@@ -414,3 +414,28 @@
   </div>
 <% end %>
 
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Purchase Order Detail</p>
+    <p class="text-gray-500 text-xs">View and receive a supplier order — update quantities as inventory arrives.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Record Receipt</p>
+      <p class="text-gray-500 text-xs mt-0.5">When inventory arrives, enter the quantities received in the Record Receipt table. You can also adjust the selling price and markup at this point. Click "Record Receipt" to update stock immediately.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Partially Received</p>
+      <p class="text-gray-500 text-xs mt-0.5">You can receive part of an order — the PO status changes to Partially Received. Come back when the rest arrives and record the remaining quantity.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Cost Summary</p>
+      <p class="text-gray-500 text-xs mt-0.5">Items Subtotal, Freight, and Discount (if any) are listed at the bottom with a Grand Total. These flow into the Analytics page as cost of goods.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Dates</p>
+      <p class="text-gray-500 text-xs mt-0.5">Invoice Date is the date on the supplier's invoice. Order Date is when you placed the order — both are auto-extracted from imported screenshots.</p>
+    </div>
+  </div>
+<% end %>

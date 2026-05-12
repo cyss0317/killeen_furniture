@@ -279,6 +279,10 @@ module PurchaseOrders
         item.update_columns(product_name: real_name) if real_name.present? && real_name != item.product_name
       end
 
+      # Keep track of the latest invoice/order date across all import methods
+      # (screenshot, PDF, and auto-sync) so the UI always shows how current the data is.
+      track_latest_invoice_date(invoice_date || order_date || (po.ordered_at&.to_date))
+
       Result.new(
         purchase_order:   po,
         created_products: created_products,
@@ -297,6 +301,17 @@ module PurchaseOrders
       Date.parse(value.to_s)
     rescue ArgumentError, TypeError
       nil
+    end
+
+    def track_latest_invoice_date(date)
+      return unless date.is_a?(Date)
+      current = GlobalSetting["ashley_last_synced_invoice_date"]
+      current_date = current.present? ? Date.parse(current) : nil
+      if current_date.nil? || date > current_date
+        GlobalSetting.set("ashley_last_synced_invoice_date", date.to_s)
+      end
+    rescue => e
+      Rails.logger.warn "[ImportScreenshot] Could not update last synced date: #{e.message}"
     end
 
     def supplier_category_name

@@ -76,7 +76,7 @@
           Quality furniture,<br>delivered to your door.
         </h1>
         <p class="text-warm-700 text-base sm:text-lg mb-8 leading-relaxed">
-          Local Ashley Furniture Store & Other Trusted Furniture Brands
+          We carry <strong class="text-warm-900">Ashley Furniture</strong> and <strong>other trusted brands </strong>, quality pieces for every room, with local delivery to Killeen and surrounding areas.
         </p>
         <div class="flex items-center justify-center md:justify-start gap-4 flex-wrap">
           <%= link_to "See Collection", products_path,
@@ -154,6 +154,44 @@
     </div>
   </div>
 </section>
+
+<%#
+  Brand strip — commented out until logo assets are ready
+  <section class="bg-white border-b border-warm-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <p class="text-center text-xs font-semibold tracking-[0.2em] uppercase text-warm-400 mb-6">Brands We Carry</p>
+      <div class="flex items-center justify-center gap-12 flex-wrap">
+        Ashley Furniture | Generation Trade
+      </div>
+    </div>
+  </section>
+%>
+
+<!-- ── Ashley Products by Group ──────────────────────────────── -->
+<% if @ashley_groups.any? %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-10">
+      <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-400 mb-2">Browse Ashley Furniture</p>
+      <h2 class="text-2xl font-bold text-warm-950">Shop by Category</h2>
+    </div>
+    <div class="space-y-14">
+      <% @ashley_groups.each do |group, products| %>
+        <div data-controller="reveal">
+          <div class="flex items-end justify-between mb-5">
+            <h3 class="text-lg font-semibold text-warm-900"><%= group %></h3>
+            <%= link_to "See all #{group} →", brand_path("Ashley Furniture"),
+                  class: "text-sm text-warm-600 hover:text-warm-950 transition-colors" %>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <% products.first(4).each_with_index do |product, i| %>
+              <%= render "products/product_card", product: product, reveal_delay: i * 80 %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+<% end %>
 
 <!-- ── Shop by Room ──────────────────────────────────────────── -->
 <% if @categories.any? %>

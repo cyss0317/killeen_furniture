@@ -76,12 +76,12 @@
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
       <% [
-        ["Ashley Living Room Sofas", "Sectionals, sofas & loveseats", categories_path],
-        ["Ashley Bedroom Sets",      "Beds, dressers & nightstands",  categories_path],
-        ["Ashley Dining Tables",     "Tables, chairs & buffets",      categories_path],
-        ["Ashley Recliners",         "Power & manual recliners",      categories_path],
-        ["Ashley Mattresses",        "Memory foam & innerspring",     categories_path],
-        ["Ashley Accent Furniture",  "Accent chairs & ottomans",      categories_path],
+        ["Ashley Living Room Sofas", "Sectionals, sofas & loveseats", products_path],
+        ["Ashley Bedroom Sets",      "Beds, dressers & nightstands",  products_path],
+        ["Ashley Dining Tables",     "Tables, chairs & buffets",      products_path],
+        ["Ashley Recliners",         "Power & manual recliners",      products_path],
+        ["Ashley Mattresses",        "Memory foam & innerspring",     products_path],
+        ["Ashley Accent Furniture",  "Accent chairs & ottomans",      products_path],
       ].each do |title, subtitle, path| %>
         <%= link_to path,
             class: "group bg-warm-100 hover:bg-warm-200 rounded-2xl p-5 transition-colors border border-warm-300" do %>

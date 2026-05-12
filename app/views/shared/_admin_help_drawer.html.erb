@@ -1,0 +1,46 @@
+<div data-controller="help-drawer">
+  <%# Floating help button %>
+  <button type="button"
+          data-action="click->help-drawer#open"
+          class="fixed bottom-6 right-6 z-40 w-11 h-11 bg-amber-800 hover:bg-amber-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+          title="Page guide">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+  </button>
+
+  <%# Backdrop %>
+  <div data-help-drawer-target="backdrop"
+       data-action="click->help-drawer#close"
+       class="fixed inset-0 z-40 bg-gray-900/40 opacity-0 pointer-events-none transition-opacity duration-200">
+  </div>
+
+  <%# Drawer panel %>
+  <div data-help-drawer-target="panel"
+       class="fixed top-0 right-0 z-50 h-full w-96 bg-white shadow-2xl translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+
+    <%# Header %>
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-amber-800 flex-shrink-0">
+      <div class="flex items-center gap-2.5">
+        <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+        </svg>
+        <h2 class="text-white font-semibold text-sm">Page Guide</h2>
+      </div>
+      <button type="button"
+              data-action="click->help-drawer#close"
+              class="text-amber-200 hover:text-white transition-colors p-1 rounded cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <%# Content %>
+    <div class="flex-1 overflow-y-auto px-6 py-5 text-sm text-gray-700 space-y-5">
+      <%= yield :help_content %>
+    </div>
+  </div>
+</div>

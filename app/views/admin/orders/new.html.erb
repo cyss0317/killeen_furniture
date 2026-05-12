@@ -487,3 +487,28 @@
     </td>
   </tr>
 </template>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">New Manual Order</p>
+    <p class="text-gray-500 text-xs">Create an order on behalf of a customer — for phone, in-store, or admin-managed sales.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Customer Type</p>
+      <p class="text-gray-500 text-xs mt-0.5">Choose an existing registered user (auto-fills their details) or enter guest info manually.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Product Browser</p>
+      <p class="text-gray-500 text-xs mt-0.5">Search and filter products in the browser panel, then click + Add to include them. You can also add custom line items for special orders.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Pricing & Discount</p>
+      <p class="text-gray-500 text-xs mt-0.5">Delivery amount and discount are editable in the Order Summary. Grand Total updates live.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">External Payment</p>
+      <p class="text-gray-500 text-xs mt-0.5">Expand "External Payment" at the bottom to record a cash or card-reader payment. The order will be marked Paid without going through Stripe.</p>
+    </div>
+  </div>
+<% end %>

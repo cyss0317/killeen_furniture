@@ -138,3 +138,28 @@
 <% if @pagy.pages > 1 %>
   <div class="mt-6 flex justify-center"><%== @pagy.series_nav %></div>
 <% end %>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Orders</p>
+    <p class="text-gray-500 text-xs">View and manage all customer orders.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Search & Filter</p>
+      <p class="text-gray-500 text-xs mt-0.5">Search by order number, customer name, or email. Filter by status using the pill buttons at the top.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Sort Columns</p>
+      <p class="text-gray-500 text-xs mt-0.5">Click any column header (Name, Total, Status, Date) to sort the list ascending or descending.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Order Status Flow</p>
+      <p class="text-gray-500 text-xs mt-0.5">Pending → Paid → Scheduled for Delivery → Out for Delivery → Delivered. Update status from the order detail page.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Creating Orders</p>
+      <p class="text-gray-500 text-xs mt-0.5">Use "Create Manual Order" to place an order for phone or in-store customers. Stripe checkout is optional.</p>
+    </div>
+  </div>
+<% end %>

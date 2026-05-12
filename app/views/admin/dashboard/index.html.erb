@@ -110,3 +110,28 @@
     <% end %>
   </div>
 </div>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Dashboard</p>
+    <p class="text-gray-500 text-xs">A snapshot of store performance at a glance.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Revenue Cards</p>
+      <p class="text-gray-500 text-xs mt-0.5">Today, this week, this month, and all-time revenue. Click "Analytics" in the nav for detailed breakdowns.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Recent Orders</p>
+      <p class="text-gray-500 text-xs mt-0.5">The latest customer orders. Filter by status using the pill buttons. Click any order to view its full details.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Low Stock</p>
+      <p class="text-gray-500 text-xs mt-0.5">Products with stock at or below 2 units. Click a product name to adjust inventory.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Quick Links</p>
+      <p class="text-gray-500 text-xs mt-0.5">Create a manual order, add a product, or import a purchase order directly from this page.</p>
+    </div>
+  </div>
+<% end %>

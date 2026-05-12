@@ -95,8 +95,10 @@
             </div>
           </div>
 
-          <%= link_to "Proceed to Checkout", checkout_path,
-              class: "w-full block text-center bg-amber-800 text-white font-semibold py-3 px-6 rounded-md hover:bg-amber-900 transition-colors" %>
+          <button type="button" disabled
+                  class="w-full block text-center bg-amber-200 text-amber-400 font-semibold py-3 px-6 rounded-md cursor-not-allowed">
+            Checkout Coming Soon
+          </button>
           <%= link_to "Continue Shopping", products_path,
               class: "w-full block text-center text-sm text-gray-600 hover:text-gray-900 mt-3 transition-colors" %>
         </div>

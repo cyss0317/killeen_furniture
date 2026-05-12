@@ -513,3 +513,32 @@
 
   </div>
 </div>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Order Detail</p>
+    <p class="text-gray-500 text-xs">Full view of a single order — items, customer, address, and delivery.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Update Status</p>
+      <p class="text-gray-500 text-xs mt-0.5">Use the dropdown at the top to advance the order through the workflow. Each status change is logged.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Margin (Eye Icon)</p>
+      <p class="text-gray-500 text-xs mt-0.5">Click the eye icon in the Margin column to reveal profit per item. The gross profit total is hidden at the bottom for privacy.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Edit Customer & Address</p>
+      <p class="text-gray-500 text-xs mt-0.5">Click the Edit button next to Customer or Delivery Address to correct details without cancelling the order.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Assign Delivery</p>
+      <p class="text-gray-500 text-xs mt-0.5">Super admins can assign the order to a delivery staff member. The staff member then sees it in the Delivery Portal.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Resend Confirmation</p>
+      <p class="text-gray-500 text-xs mt-0.5">Resends the order confirmation email to the customer. Useful if the original was missed or went to spam.</p>
+    </div>
+  </div>
+<% end %>

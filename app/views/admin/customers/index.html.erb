@@ -139,3 +139,28 @@
 <% if @pagy.pages > 1 %>
   <div class="mt-6 flex justify-center"><%== @pagy.series_nav %></div>
 <% end %>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Customers</p>
+    <p class="text-gray-500 text-xs">All registered customer accounts with order history and spend.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Search</p>
+      <p class="text-gray-500 text-xs mt-0.5">Search by name, email, or phone. Matches update as you type.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Confirmation Status</p>
+      <p class="text-gray-500 text-xs mt-0.5">Unconfirmed customers signed up but never verified their email — they cannot place orders. Filter to see them using the Account pill.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Delete Stale Unconfirmed</p>
+      <p class="text-gray-500 text-xs mt-0.5">Removes unconfirmed accounts older than 1 week. These are typically bot signups and safe to delete.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Orders Count</p>
+      <p class="text-gray-500 text-xs mt-0.5">Click a customer's order count to jump to their orders filtered in the Orders list. Total Spent only counts paid/delivered orders.</p>
+    </div>
+  </div>
+<% end %>

@@ -145,3 +145,28 @@
 <% if @pagy.pages > 1 %>
   <div class="mt-6 flex justify-center"><%== @pagy.series_nav %></div>
 <% end %>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Products</p>
+    <p class="text-gray-500 text-xs">Your full product catalog — manage everything in one place.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Status Filter</p>
+      <p class="text-gray-500 text-xs mt-0.5">Draft products are hidden from customers. Published products are live in the store. Archived products are retired but preserved for records.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Thumbnail Hover</p>
+      <p class="text-gray-500 text-xs mt-0.5">Hover over any product image to see a full-size preview without opening the product.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Quick Actions</p>
+      <p class="text-gray-500 text-xs mt-0.5">Edit, Publish, or Archive directly from the list — no need to open each product individually.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Adding Products</p>
+      <p class="text-gray-500 text-xs mt-0.5">Use "Add Product" to create manually, or import products automatically via the Purchase Order screenshot import.</p>
+    </div>
+  </div>
+<% end %>

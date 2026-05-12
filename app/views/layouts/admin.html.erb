@@ -397,5 +397,8 @@
     </div>
 
     <%= render "shared/confirm_modal" %>
+    <% if content_for?(:help_content) %>
+      <%= render "shared/admin_help_drawer" %>
+    <% end %>
   </body>
 </html>

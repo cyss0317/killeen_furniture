@@ -337,3 +337,28 @@
   </table>
   </div>
 </div>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Analytics</p>
+    <p class="text-gray-500 text-xs">Revenue, cost, and profitability broken down over time.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Period & Navigation</p>
+      <p class="text-gray-500 text-xs mt-0.5">Choose Week, Month, or Year. Use the arrows to go back in time. The comparison shows % change vs the previous period.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Revenue Cards</p>
+      <p class="text-gray-500 text-xs mt-0.5">Sales = customer revenue. Cost = what you paid for goods (COGS from purchase orders). Gross Profit = Sales minus Cost. Margin % = profit as a percentage of sales.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Labor Cost & Net Profit</p>
+      <p class="text-gray-500 text-xs mt-0.5">These appear when you've logged pay in Employee Pay. Net Profit = Gross Profit minus Labor Cost.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Revenue Chart</p>
+      <p class="text-gray-500 text-xs mt-0.5">Visual trend of sales vs cost. Wider gap = higher margin. Useful for spotting seasonal patterns or slowdowns.</p>
+    </div>
+  </div>
+<% end %>

@@ -138,10 +138,13 @@ module Ashley
                            json["friendlyDescription"].to_s.strip.presence
       data[:sku]         = json["sku"]
       data[:status_text] = json["statusDescription"]
-      data[:color]       = json["color"].to_s.strip.presence
-      data[:style]       = json["style"].to_s.strip.presence
-      data[:showroom]    = json["seriesShowroom"].to_s.strip.presence
-      data[:division]    = json["divisionName"].to_s.strip.presence
+      data[:color]                      = json["color"].to_s.strip.presence
+      data[:style]                      = json["style"].to_s.strip.presence
+      data[:showroom]                   = json["seriesShowroom"].to_s.strip.presence
+      data[:division]                   = json["divisionName"].to_s.strip.presence
+      data[:group_description]          = json["groupDescription"].to_s.strip.presence
+      data[:default_navigable_category] = json["defaultNavigableCategory"].to_s.strip.presence
+      data[:intended_room]              = Array(json["itemIntendedRoom"]).first.to_s.strip.presence
 
       data[:weight] = json["standardShippingWeight"].to_f if json["standardShippingWeight"].present?
 
@@ -184,7 +187,6 @@ module Ashley
 
       data[:series_name]     = json["seriesName"].to_s.strip.presence
       data[:series_features] = json["seriesFeatures"].to_s.strip.presence
-      data[:intended_room]   = Array(json["itemIntendedRoom"]).first.to_s.strip.presence
 
       # Videos — two API formats:
       #   videoInfo: series-level [{sheetName, videoLink (full URL)}]

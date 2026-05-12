@@ -204,3 +204,28 @@
     </div>
   <% end %>
 </div>
+
+<% content_for :help_content do %>
+  <div>
+    <p class="font-semibold text-gray-900 mb-1">Employee Pay</p>
+    <p class="text-gray-500 text-xs">Log wage payments to track labor costs and calculate true net profit.</p>
+  </div>
+  <div class="space-y-3">
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Adding a Payment</p>
+      <p class="text-gray-500 text-xs mt-0.5">Enter the employee name, amount paid, payment date, and a description (e.g. "Weekly wages — May 5"). Click Save to record it.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Period Navigation</p>
+      <p class="text-gray-500 text-xs mt-0.5">Switch between Week, Month, and Year to review historical pay records. The total for the selected period is shown at the top.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Analytics Integration</p>
+      <p class="text-gray-500 text-xs mt-0.5">All entries flow into the Analytics page as Labor Cost. Net Profit (Revenue minus Cost of Goods minus Labor) appears automatically once you have pay records.</p>
+    </div>
+    <div class="border-l-2 border-amber-400 pl-3">
+      <p class="font-medium text-gray-800">Delete</p>
+      <p class="text-gray-500 text-xs mt-0.5">Use the trash icon to remove an entry if it was entered in error. This also removes it from the Analytics totals.</p>
+    </div>
+  </div>
+<% end %>

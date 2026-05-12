@@ -2,6 +2,15 @@ class PagesController < ApplicationController
   def home
     @featured_products = Product.published.featured.includes(:images_attachments, :category).limit(8)
     @categories        = Category.root_categories.includes(:subcategories)
+
+    # Group published Ashley products by their ashley_payload group_description
+    ashley_products = Product.published
+                             .where("brand ILIKE ?", "%ashley%")
+                             .where("ashley_payload->>'group_description' IS NOT NULL")
+                             .includes(:images_attachments)
+    @ashley_groups = ashley_products
+                       .group_by { |p| p.ashley_payload["group_description"] }
+                       .sort_by { |_, prods| -prods.size }
   end
 
   def killeen_furniture_store

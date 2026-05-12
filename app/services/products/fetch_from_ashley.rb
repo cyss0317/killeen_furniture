@@ -56,7 +56,9 @@ module Products
       ashley_meta["extra_dimensions"] = data[:extra_dimensions] if data[:extra_dimensions].present?
       ashley_meta["series_name"]      = data[:series_name]      if data[:series_name].present?
       ashley_meta["series_features"]  = data[:series_features]  if data[:series_features].present?
-      ashley_meta["intended_room"]    = data[:intended_room]    if data[:intended_room].present?
+      ashley_meta["intended_room"]              = data[:intended_room]              if data[:intended_room].present?
+      ashley_meta["group_description"]          = data[:group_description]          if data[:group_description].present?
+      ashley_meta["default_navigable_category"] = data[:default_navigable_category] if data[:default_navigable_category].present?
       ashley_meta["videos"]           = data[:videos]           if data[:videos].present?
       ashley_meta["documents"]        = data[:documents]        if data[:documents].present?
 

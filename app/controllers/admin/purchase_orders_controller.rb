@@ -30,10 +30,23 @@ class Admin::PurchaseOrdersController < Admin::BaseController
                       else              anchor.strftime("%B %Y")
                       end
 
+    @q = params[:q].to_s.strip
+
     scope = policy_scope(PurchaseOrder)
               .includes(:created_by, purchase_order_items: :product)
-              .where(ordered_at: @period_range)
-              .recent
+
+    # Period filter is bypassed when a search query is active
+    if @q.present?
+      q = "%#{@q}%"
+      scope = scope.where(
+        "purchase_orders.reference_number ILIKE :q OR purchase_orders.brand ILIKE :q OR purchase_orders.notes ILIKE :q",
+        q: q
+      )
+    else
+      scope = scope.where(ordered_at: @period_range)
+    end
+
+    scope = scope.recent
 
     if params[:status].present? && PurchaseOrder.statuses.key?(params[:status])
       scope = scope.where(status: params[:status])
@@ -44,7 +57,16 @@ class Admin::PurchaseOrdersController < Admin::BaseController
     scope      = scope.reorder("purchase_orders.#{@sort} #{@direction}")
 
     @pagy, @purchase_orders = pagy(:offset, scope, limit: 25)
-    @status_counts = PurchaseOrder.where(ordered_at: @period_range).group(:status).count
+
+    # Build status counts from a clean scope (no ORDER BY) to avoid PG grouping errors
+    if @q.present?
+      q = "%#{@q}%"
+      @status_counts = PurchaseOrder.where(
+        "reference_number ILIKE :q OR brand ILIKE :q OR notes ILIKE :q", q: q
+      ).group(:status).count
+    else
+      @status_counts = PurchaseOrder.where(ordered_at: @period_range).group(:status).count
+    end
   end
 
   def show
@@ -109,42 +131,6 @@ class Admin::PurchaseOrdersController < Admin::BaseController
       redirect_to admin_purchase_order_path(@po), notice: "Receipt recorded. Stock and costs updated."
     else
       redirect_to admin_purchase_order_path(@po), alert: "Could not record receipt: #{result.error}"
-    end
-  end
-
-  def import_csv
-    authorize PurchaseOrder, :import_csv?
-    return if request.get?
-
-    unless params[:file].present?
-      flash.now[:alert] = "Please select a CSV/TSV file to import."
-      return render :import_csv, status: :unprocessable_entity
-    end
-
-    unless params[:reference_number].present?
-      flash.now[:alert] = "Reference number is required."
-      return render :import_csv, status: :unprocessable_entity
-    end
-
-    result = PurchaseOrders::ImportCsv.call(
-      file:             params[:file],
-      reference_number: params[:reference_number],
-      ordered_at:       params[:ordered_at].presence,
-      notes:            params[:notes].presence,
-      created_by:       current_user
-    )
-
-    if result.success?
-      parts = []
-      parts << "#{result.created_products.size} new product(s) created as draft" if result.created_products.any?
-      parts << "#{result.updated_products.size} product(s) updated"               if result.updated_products.any?
-      parts << "#{result.skipped_rows.size} row(s) skipped"                       if result.skipped_rows.any?
-
-      notice = "PO #{result.purchase_order.reference_number} imported — #{result.purchase_order.purchase_order_items.size} items. #{parts.join(', ')}."
-      redirect_to admin_purchase_order_path(result.purchase_order), notice: notice
-    else
-      flash.now[:alert] = result.error
-      render :import_csv, status: :unprocessable_entity
     end
   end
 
