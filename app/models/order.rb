@@ -3,6 +3,7 @@ class Order < ApplicationRecord
   belongs_to :delivery_zone, optional: true
   belongs_to :assigned_to,  class_name: "User", optional: true
   belongs_to :delivered_by, class_name: "User", optional: true
+  belongs_to :salesperson,  class_name: "User", optional: true
   has_many   :order_items,    dependent: :destroy
   has_many   :delivery_events, dependent: :destroy
 

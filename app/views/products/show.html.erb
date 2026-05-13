@@ -182,7 +182,10 @@
     <!-- Product Info -->
     <div class="flex flex-col">
       <% if @product.brand.present? %>
-        <p class="text-xs font-semibold tracking-[0.15em] uppercase text-warm-600 mb-3"><%= @product.brand %></p>
+        <%= link_to brand_path(@product.brand),
+              class: "inline-block text-xs font-semibold tracking-[0.15em] uppercase text-warm-600 hover:text-warm-900 mb-3 transition-colors" do %>
+          Brand: <%= @product.brand %>
+        <% end %>
       <% end %>
 
       <h1 class="text-3xl font-bold text-warm-950 leading-tight mb-2"><%= @product.name %></h1>
@@ -237,6 +240,7 @@
       <div class="border-t border-warm-200 pt-6 space-y-3 mt-2">
         <% payload = @product.ashley_payload.presence %>
         <% [
+          ["Brand",      @product.brand],
           ["Style",      payload&.dig("style")],
           ["Material",   @product.material],
           ["Color",      @product.color],

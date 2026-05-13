@@ -75,6 +75,9 @@ module Admin
       authorize Order, :create?
       @order          = Order.new
       @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
+      @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                           .where.not(admin_kind: User.admin_kinds[:delivery])
+                           .order(:first_name, :last_name)
       @products       = Product.published.includes(:category).order(:name)
       @delivery_zones = DeliveryZone.active.order(:name)
       @categories     = Category.order(:name)
@@ -91,6 +94,9 @@ module Admin
       else
         @order          = Order.new
         @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
+        @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                             .where.not(admin_kind: User.admin_kinds[:delivery])
+                             .order(:first_name, :last_name)
         @products       = Product.published.includes(:category).order(:name)
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
@@ -102,7 +108,7 @@ module Admin
         # Preserve submitted form values so the form re-renders pre-filled.
         # Shipping address is submitted as "[shipping_address][...]" by the
         # fieldless form builder (no model scope), hence the bracket key.
-        sa = params["[shipping_address]"].to_h
+        sa = params["[shipping_address]"]&.permit(:full_name, :street_address, :city, :state, :zip_code)&.to_h || {}
         @form_defaults = {
           source:                  params[:source],
           customer_type:           params[:customer_type],
@@ -113,6 +119,7 @@ module Admin
           notes:                   params[:notes],
           shipping_amount:         params[:shipping_amount],
           discount_amount:         params[:discount_amount],
+          salesperson_id:          params[:salesperson_id],
           shipping_full_name:      sa[:full_name],
           shipping_street_address: sa[:street_address],
           shipping_city:           sa[:city],
@@ -255,7 +262,7 @@ module Admin
       #   :source, :user_id, :guest_name, :guest_email, :guest_phone,
       #   :notes, :shipping_amount, :discount_amount, :delivery_zone_id
       # )
-      base = params.permit(:source, :customer_type, :user_id, :guest_name, :guest_email, :guest_phone)
+      base = params.permit(:source, :customer_type, :user_id, :guest_name, :guest_email, :guest_phone, :salesperson_id)
       base.merge(line_items: line_items, shipping_address: shipping_address)
     end
 

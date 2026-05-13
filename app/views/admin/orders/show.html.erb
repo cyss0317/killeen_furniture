@@ -299,6 +299,12 @@
           <dt class="text-gray-500">Source</dt>
           <dd><%= @order.source.humanize %></dd>
         </div>
+        <% if @order.salesperson.present? %>
+          <div>
+            <dt class="text-gray-500">Salesperson</dt>
+            <dd class="font-medium"><%= @order.salesperson.full_name %></dd>
+          </div>
+        <% end %>
         <% if @order.stripe_payment_intent_id.present? %>
           <div>
             <dt class="text-gray-500">Stripe ID</dt>
