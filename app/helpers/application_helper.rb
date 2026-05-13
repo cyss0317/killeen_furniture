@@ -4,6 +4,19 @@ module ApplicationHelper
 
   STORE_EMAIL = "info@warehouse-furniture.com"
 
+  # Inlines an SVG from app/assets/images directly into the HTML.
+  # No HTTP request — guaranteed to render on first paint, even in Turbo snapshots.
+  def inline_svg(filename, **html_attrs)
+    path = Rails.root.join("app/assets/images/#{filename}")
+    return "".html_safe unless path.exist?
+    svg = path.read.sub(/\s+width="[^"]*"/, "").sub(/\s+height="[^"]*"/, "")
+    if html_attrs.any?
+      attrs = html_attrs.map { |k, v| "#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ")
+      svg = svg.sub(/<svg\b/, "<svg #{attrs}")
+    end
+    svg.html_safe
+  end
+
   # Renders a click-to-email link where the address is ROT13-encoded in the HTML.
   # The real email never appears in the source — a bot scraping href/text finds nothing useful.
   def obfuscated_email_link(email = STORE_EMAIL, display: nil, **html_options)
@@ -12,6 +25,37 @@ module ApplicationHelper
 
     defaults = { href: "#", data: { controller: "email-reveal", action: "click->email-reveal#open", r: rot13 } }
     content_tag(:a, display_text, defaults.deep_merge(html_options))
+  end
+
+  # Renders a product description that may contain "• bullet" lines.
+  # Each bullet becomes a proper <li>; the intro paragraph(s) stay as <p>.
+  def render_description(text)
+    return "" if text.blank?
+
+    lines  = text.to_s.split("\n").map(&:strip).reject(&:blank?)
+    html   = "".html_safe
+    bullets = []
+
+    flush_bullets = -> {
+      return if bullets.empty?
+      html << content_tag(:ul, class: "list-none space-y-1 mt-2") {
+        bullets.map { |b| content_tag(:li, b, class: "flex items-start gap-2 text-warm-600 text-sm leading-relaxed") {
+          content_tag(:span, "•", class: "shrink-0 text-warm-400 mt-0.5") + content_tag(:span, b)
+        }}.reduce(:+)
+      }
+      bullets.clear
+    }
+
+    lines.each do |line|
+      if line.start_with?("•")
+        bullets << line.sub(/\A•\s*/, "")
+      else
+        flush_bullets.call
+        html << content_tag(:p, line, class: "text-warm-600 text-sm leading-relaxed mb-2")
+      end
+    end
+    flush_bullets.call
+    html
   end
 
   def meta_title

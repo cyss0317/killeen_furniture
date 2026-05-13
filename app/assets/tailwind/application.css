@@ -106,8 +106,8 @@ nav.pagy a[aria-disabled="true"][aria-label] {
 }
 
 @keyframes kf-fade-up {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0);   }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* Smooth link + button color transitions (always on, fast) */

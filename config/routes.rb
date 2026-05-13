@@ -113,6 +113,7 @@ Rails.application.routes.draw do
         patch :update_customer
         patch :update_address
         patch :assign_delivery
+        patch :assign_commission
         post  :resend_confirmation
         get   :print_receipt
       end

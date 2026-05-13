@@ -110,7 +110,7 @@
         <!-- Logo — center on mobile, left on desktop -->
         <%= link_to root_path, class: "absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0 flex items-center gap-2" do %>
           <span class="text-lg font-bold text-warm-900 tracking-tight whitespace-nowrap">Warehouse Furniture</span>
-          <%= image_tag "armchair-lamp.svg", class: "h-[40px] w-[40px]", alt: "" %>
+          <%= inline_svg "armchair-lamp.svg", class: "h-[40px] w-[40px]" %>
         <% end %>
 
         <!-- Desktop nav links -->
@@ -120,7 +120,7 @@
             <%= link_to category.name, category_path(category), class: "nav-bubble text-sm text-warm-700 hover:text-warm-950" %>
           <% end %>
           <div class="relative" data-controller="dropdown">
-            <button data-action="click->dropdown#toggle" class="nav-bubble flex items-center gap-1 text-sm text-warm-700 hover:text-warm-950">
+            <button data-action="click->dropdown#toggle" class="nav-bubble flex items-center gap-1 text-sm text-warm-700 hover:text-warm-950 cursor-pointer">
               Brands
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -157,7 +157,7 @@
           <div class="hidden xl:block">
             <% if user_signed_in? %>
               <div class="relative" data-controller="dropdown">
-                <button data-action="click->dropdown#toggle" class="nav-bubble flex items-center gap-1 text-sm text-warm-700 hover:text-warm-950">
+                <button data-action="click->dropdown#toggle" class="nav-bubble flex items-center gap-1 text-sm text-warm-700 hover:text-warm-950 cursor-pointer">
                   <%= current_user.first_name %>
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>

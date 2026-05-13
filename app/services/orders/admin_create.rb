@@ -14,6 +14,7 @@ module Orders
     def call
       validate_stock!
       ActiveRecord::Base.transaction do
+        find_or_create_guest_user
         build_order
         build_order_items
         @order.save!
@@ -26,6 +27,60 @@ module Orders
     end
 
     private
+
+    def find_or_create_guest_user
+      # Only applies to guest orders (no existing user_id)
+      return if @params[:user_id].present?
+
+      email = @params[:guest_email].to_s.strip.downcase
+      return if email.blank?
+
+      name  = @params[:guest_name].to_s.strip
+      phone = @params[:guest_phone].to_s.strip
+      first, *rest = name.split(" ")
+
+      addr  = (@params[:shipping_address] || {}).to_h.transform_keys(&:to_s)
+
+      user = User.find_by(email: email)
+
+      if user
+        user.update_columns(phone: phone) if phone.present? && user.phone.blank?
+      else
+        user = User.new(
+          email:      email,
+          first_name: first.presence || "Guest",
+          last_name:  rest.join(" ").presence || "",
+          phone:      phone.presence,
+          password:   SecureRandom.hex(16),
+          role:       :customer
+        )
+        user.skip_confirmation!
+        user.save!
+        Rails.logger.info "[AdminCreate] Created new customer: #{email}"
+      end
+
+      # Save delivery address if provided and user has none with this street
+      if addr["street_address"].present?
+        already_saved = user.addresses.any? do |a|
+          a.street_address.downcase == addr["street_address"].downcase &&
+          a.zip_code == addr["zip_code"].to_s
+        end
+
+        unless already_saved
+          user.addresses.create!(
+            full_name:      addr["full_name"].presence || name,
+            street_address: addr["street_address"],
+            city:           addr["city"].to_s,
+            state:          addr["state"].to_s,
+            zip_code:       addr["zip_code"].to_s,
+            is_default:     user.addresses.none?
+          )
+          Rails.logger.info "[AdminCreate] Saved address for #{email}"
+        end
+      end
+
+      @params = @params.merge(user_id: user.id.to_s)
+    end
 
     def validate_stock!
       @line_items_with_products = @params[:line_items]&.to_h.map do |_idx, item|
@@ -66,7 +121,8 @@ module Orders
         tax_amount:       tax,
         grand_total:      [subtotal + shipping + tax - discount, 0].max,
         notes:            @params[:notes].presence,
-        delivery_zone_id: @params[:delivery_zone_id].presence
+        delivery_zone_id: @params[:delivery_zone_id].presence,
+        salesperson_id:   @params[:salesperson_id].presence
       )
     end
 

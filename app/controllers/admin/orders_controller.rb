@@ -1,6 +1,6 @@
 module Admin
   class OrdersController < BaseController
-    before_action :set_order, only: [ :show, :update_status, :update_customer, :update_address, :assign_delivery, :resend_confirmation, :print_receipt ]
+    before_action :set_order, only: [ :show, :update_status, :update_customer, :update_address, :assign_delivery, :assign_commission, :resend_confirmation, :print_receipt ]
 
     SORTABLE_COLUMNS = %w[order_number created_at grand_total status].freeze
 
@@ -69,12 +69,18 @@ module Admin
       @order_items     = @order.order_items.includes(:product)
       @delivery_admins = User.where(role: :admin, admin_kind: :delivery).order(:first_name)
       @delivery_events = @order.delivery_events.includes(:created_by).order(created_at: :asc)
+      @salespeople     = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                            .where.not(admin_kind: User.admin_kinds[:delivery])
+                            .order(:first_name, :last_name)
     end
 
     def new
       authorize Order, :create?
       @order          = Order.new
       @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
+      @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                           .where.not(admin_kind: User.admin_kinds[:delivery])
+                           .order(:first_name, :last_name)
       @products       = Product.published.includes(:category).order(:name)
       @delivery_zones = DeliveryZone.active.order(:name)
       @categories     = Category.order(:name)
@@ -91,6 +97,9 @@ module Admin
       else
         @order          = Order.new
         @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
+        @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                             .where.not(admin_kind: User.admin_kinds[:delivery])
+                             .order(:first_name, :last_name)
         @products       = Product.published.includes(:category).order(:name)
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
@@ -102,17 +111,19 @@ module Admin
         # Preserve submitted form values so the form re-renders pre-filled.
         # Shipping address is submitted as "[shipping_address][...]" by the
         # fieldless form builder (no model scope), hence the bracket key.
-        sa = params["[shipping_address]"].to_h
+        sa = params["[shipping_address]"]&.permit(:full_name, :street_address, :city, :state, :zip_code)&.to_h || {}
         @form_defaults = {
           source:                  params[:source],
           customer_type:           params[:customer_type],
           user_id:                 params[:user_id],
-          guest_name:              params[:guest_name],
+          guest_first_name:        params[:guest_first_name],
+          guest_last_name:         params[:guest_last_name],
           guest_email:             params[:guest_email],
           guest_phone:             params[:guest_phone],
           notes:                   params[:notes],
           shipping_amount:         params[:shipping_amount],
           discount_amount:         params[:discount_amount],
+          salesperson_id:          params[:salesperson_id],
           shipping_full_name:      sa[:full_name],
           shipping_street_address: sa[:street_address],
           shipping_city:           sa[:city],
@@ -208,6 +219,17 @@ module Admin
       render layout: "print"
     end
 
+    def assign_commission
+      authorize @order, :assign_commission?
+      salesperson_id = params[:salesperson_id].presence
+      salesperson    = salesperson_id ? User.find(salesperson_id) : nil
+      @order.update!(salesperson: salesperson)
+      name = salesperson ? salesperson.full_name : "none"
+      redirect_to admin_order_path(@order), notice: "Commission assigned to #{name}."
+    rescue ActiveRecord::RecordNotFound
+      redirect_to admin_order_path(@order), alert: "Salesperson not found."
+    end
+
     def assign_delivery
       authorize @order, :assign?
       assigned_to = User.find(params[:assigned_to_id])
@@ -255,7 +277,12 @@ module Admin
       #   :source, :user_id, :guest_name, :guest_email, :guest_phone,
       #   :notes, :shipping_amount, :discount_amount, :delivery_zone_id
       # )
-      base = params.permit(:source, :customer_type, :user_id, :guest_name, :guest_email, :guest_phone)
+      base = params.permit(:source, :customer_type, :user_id, :guest_first_name, :guest_last_name,
+                           :guest_email, :guest_phone, :salesperson_id, :notes, :shipping_amount,
+                           :discount_amount, :delivery_zone_id)
+      first = base.delete(:guest_first_name).to_s.strip
+      last  = base.delete(:guest_last_name).to_s.strip
+      base  = base.merge(guest_name: [first, last].reject(&:blank?).join(" ").presence)
       base.merge(line_items: line_items, shipping_address: shipping_address)
     end
 

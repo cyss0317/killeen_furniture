@@ -6,7 +6,7 @@ export default class extends Controller {
     "subtotal", "tax", "grandTotal", "discount", "shippingAmount",
     "customerType", "userSection", "guestSection",
     "userSelect", "userSearch", "userDropdown",
-    "addressFullName", "addressStreet", "addressCity", "addressState", "addressZip",
+    "addressStreet", "addressCity", "addressState", "addressZip",
     "browserPanel", "browserToggle", "browserSearch", "browserCategory",
     "browserColor", "browserInStock", "browserRow", "browserEmpty"
   ]
@@ -138,17 +138,61 @@ export default class extends Controller {
     }
   }
 
+  // Known brand keywords → canonical brand substring to match against data-brand
+  #BRANDS = { "ashley": "ashley", "generation trade": "generation trade", "generation": "generation trade" }
+
+  // Furniture synonym groups — searching any term matches all in the group
+  #SYNONYMS = [
+    ["couch", "sofa", "sectional", "loveseat", "chaise", "recliner"],
+    ["bed", "headboard", "footboard", "rails", "bedroom set"],
+    ["dresser", "chest", "nightstand", "night stand"],
+    ["table", "dining table", "desk"],
+    ["chair", "accent chair", "office chair"],
+  ]
+
+  #parseBrandAndTerms(raw) {
+    let query = raw.toLowerCase().trim()
+    let brand = ""
+
+    for (const [keyword, canonical] of Object.entries(this.#BRANDS)) {
+      if (query.startsWith(keyword + " ") || query.endsWith(" " + keyword) || query === keyword) {
+        brand = canonical
+        query = query.replace(new RegExp(`\\b${keyword}\\b`, "g"), "").trim()
+        break
+      }
+    }
+
+    // Expand search terms with synonyms
+    const terms = query ? query.split(/\s+/).filter(Boolean) : []
+    const expandedTerms = []
+    terms.forEach(term => {
+      const group = this.#SYNONYMS.find(g => g.includes(term))
+      expandedTerms.push(group ? group : [term])
+    })
+
+    return { brand, expandedTerms }
+  }
+
   filterBrowser() {
-    const search      = this.hasBrowserSearchTarget   ? this.browserSearchTarget.value.toLowerCase().trim() : ""
+    const rawSearch   = this.hasBrowserSearchTarget   ? this.browserSearchTarget.value : ""
     const categoryId  = this.hasBrowserCategoryTarget ? this.browserCategoryTarget.value : ""
     const color       = this.hasBrowserColorTarget    ? this.browserColorTarget.value.toLowerCase() : ""
     const inStockOnly = this.hasBrowserInStockTarget  ? this.browserInStockTarget.checked : false
 
+    const { brand, expandedTerms } = this.#parseBrandAndTerms(rawSearch)
+
     const rows = this.browserRowTargets
 
-    const baseMatch = row =>
-      (!search     || row.dataset.searchText.includes(search)) &&
-      (!inStockOnly || row.dataset.inStock === "true")
+    const baseMatch = row => {
+      const text = row.dataset.searchText || ""
+      const rowBrand = row.dataset.brand || ""
+
+      if (brand && !rowBrand.includes(brand)) return false
+      if (inStockOnly && row.dataset.inStock !== "true") return false
+
+      // Every term group must have at least one synonym match
+      return expandedTerms.every(group => group.some(syn => text.includes(syn)))
+    }
 
     if (this.hasBrowserCategoryTarget) {
       const validCatIds = new Set(
@@ -372,13 +416,17 @@ export default class extends Controller {
     // 1. Customer
     const isGuest = [...this.customerTypeTargets].find(r => r.checked)?.value === "guest"
     if (isGuest) {
-      const nameEl  = this.element.querySelector("input[name='guest_name']")
-      const emailEl = this.element.querySelector("input[name='guest_email']")
+      const firstNameEl = this.element.querySelector("input[name='guest_first_name']")
+      const lastNameEl  = this.element.querySelector("input[name='guest_last_name']")
+      const emailEl     = this.element.querySelector("input[name='guest_email']")
+      const phoneEl     = this.element.querySelector("input[name='guest_phone']")
 
-      const phoneEl = this.element.querySelector("input[name='guest_phone']")
-
-      if (!nameEl?.value?.trim()) {
-        this._addFieldError(nameEl, "Full name is required")
+      if (!firstNameEl?.value?.trim()) {
+        this._addFieldError(firstNameEl, "First name is required")
+        hasErrors = true
+      }
+      if (!lastNameEl?.value?.trim()) {
+        this._addFieldError(lastNameEl, "Last name is required")
         hasErrors = true
       }
       if (!emailEl?.value?.trim()) {
@@ -391,9 +439,13 @@ export default class extends Controller {
       if (!phoneEl?.value?.trim()) {
         this._addFieldError(phoneEl, "Phone number is required")
         hasErrors = true
-      } else if (!/^[\d\s()\-+.]{7,}$/.test(phoneEl.value.trim())) {
-        this._addFieldError(phoneEl, "Enter a valid phone number")
-        hasErrors = true
+      } else {
+        const digits = phoneEl.value.replace(/\D/g, "")
+        const valid = digits.length === 10 || (digits.length === 11 && digits[0] === "1")
+        if (!valid) {
+          this._addFieldError(phoneEl, "Enter a valid 10-digit US phone number (e.g. 254-628-9088)")
+          hasErrors = true
+        }
       }
     } else {
       if (!this.userSelectTarget?.value) {
@@ -404,10 +456,9 @@ export default class extends Controller {
 
     // 2. Shipping address
     const addrChecks = [
-      [this.addressFullNameTarget, "Recipient name is required"],
-      [this.addressStreetTarget,   "Street address is required"],
-      [this.addressCityTarget,     "City is required"],
-      [this.addressStateTarget,    "State is required"],
+      [this.addressStreetTarget, "Street address is required"],
+      [this.addressCityTarget,   "City is required"],
+      [this.addressStateTarget,  "State is required"],
     ]
     addrChecks.forEach(([el, msg]) => {
       if (!el?.value?.trim()) {
@@ -468,6 +519,17 @@ export default class extends Controller {
     errEl.className = "field-error text-red-600 text-xs mt-1"
     errEl.textContent = message
     inputEl.insertAdjacentElement("afterend", errEl)
+
+    // Clear this field's error as soon as the user starts correcting it
+    const clearOnInput = () => {
+      errEl.remove()
+      inputEl.classList.remove("border-red-400")
+      inputEl.classList.add("border-gray-300")
+      inputEl.removeEventListener("input", clearOnInput)
+      inputEl.removeEventListener("change", clearOnInput)
+    }
+    inputEl.addEventListener("input", clearOnInput, { once: true })
+    inputEl.addEventListener("change", clearOnInput, { once: true })
   }
 
   _clearValidationErrors() {

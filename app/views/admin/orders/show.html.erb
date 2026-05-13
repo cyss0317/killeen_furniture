@@ -299,6 +299,10 @@
           <dt class="text-gray-500">Source</dt>
           <dd><%= @order.source.humanize %></dd>
         </div>
+        <div>
+          <dt class="text-gray-500">Salesperson</dt>
+          <dd class="font-medium"><%= @order.salesperson&.full_name || "—" %></dd>
+        </div>
         <% if @order.stripe_payment_intent_id.present? %>
           <div>
             <dt class="text-gray-500">Stripe ID</dt>
@@ -470,6 +474,29 @@
         <% end %>
       </div>
     </div>
+
+    <%# Commission Assignment (admin+, not shown for canceled/refunded orders) %>
+    <% if policy(@order).assign_commission? && !@order.canceled? && !@order.refunded? %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">Assign Commission</h3>
+        <% if @order.salesperson.present? %>
+          <p class="text-sm text-gray-600 mb-3">
+            Currently assigned to:
+            <strong class="text-gray-900"><%= @order.salesperson.full_name %></strong>
+          </p>
+        <% end %>
+        <%= form_with url: assign_commission_admin_order_path(@order), method: :patch, class: "space-y-3" do |f| %>
+          <%= f.select :salesperson_id,
+              options_for_select(
+                [["— None —", ""]] + @salespeople.map { |u| [u.full_name, u.id] },
+                @order.salesperson_id
+              ),
+              {},
+              class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+          <%= f.submit "Save", class: "w-full bg-amber-800 text-white text-sm py-2 px-4 rounded-md hover:bg-amber-900 cursor-pointer" %>
+        <% end %>
+      </div>
+    <% end %>
 
     <%# Delivery Assignment (super_admin only, not shown for canceled/refunded orders) %>
     <% if policy(@order).assign? && !@order.canceled? && !@order.refunded? %>

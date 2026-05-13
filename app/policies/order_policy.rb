@@ -11,6 +11,10 @@ class OrderPolicy < ApplicationPolicy
     super_admin?
   end
 
+  def assign_commission?
+    admin_or_above?
+  end
+
   def mark_delivered?
     return false if record.delivered?
     admin_or_above? && (user&.super_admin? || record.assigned_to == user)
