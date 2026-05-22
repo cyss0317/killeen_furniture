@@ -55,8 +55,10 @@ module Admin
     end
 
     def update
-      if @customer.update(customer_params)
-        redirect_to admin_customers_path, notice: "Customer updated."
+      attrs = customer_params
+      attrs[:admin_kind] = nil if attrs[:role] == "customer"
+      if @customer.update(attrs)
+        redirect_to admin_customers_path, notice: "#{@customer.full_name} updated."
       else
         render :edit, status: :unprocessable_entity
       end
@@ -70,11 +72,13 @@ module Admin
     private
 
     def set_customer
-      @customer = User.customer.find(params[:id])
+      @customer = current_user.super_admin? ? User.find(params[:id]) : User.customer.find(params[:id])
     end
 
     def customer_params
-      params.require(:user).permit(:first_name, :last_name, :email, :phone)
+      permitted = [ :first_name, :last_name, :email, :phone ]
+      permitted += [ :role, :admin_kind ] if current_user.super_admin?
+      params.require(:user).permit(*permitted)
     end
   end
 end

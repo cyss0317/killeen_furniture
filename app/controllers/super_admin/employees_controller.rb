@@ -7,7 +7,9 @@ module SuperAdmin
 
     def update
       @user = User.find(params[:id])
-      if @user.update(employee_params)
+      attrs = employee_params
+      attrs[:admin_kind] = nil if attrs[:role] == "customer"
+      if @user.update(attrs)
         respond_to do |format|
           format.turbo_stream { head :no_content }
           format.html { redirect_to super_admin_employees_path, notice: "#{@user.full_name} updated." }

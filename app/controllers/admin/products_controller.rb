@@ -62,6 +62,21 @@ module Admin
     def update
       attrs = product_params
 
+      # If selling_price was explicitly submitted, store it as-is and back-calculate
+      # markup. The skip_price_calculation flag prevents before_save from
+      # re-deriving the price from the rounded markup (which would introduce error).
+      sp_str = params.dig(:product, :selling_price)
+      if sp_str.present?
+        base = (attrs[:base_cost]&.to_f || @product.base_cost.to_f)
+        if base > 0
+          @product.skip_price_calculation = true
+          attrs = attrs.merge(
+            selling_price:     sp_str.to_f.round(2),
+            markup_percentage: (((sp_str.to_f / base) - 1) * 100).round(2)
+          )
+        end
+      end
+
       # Merge manually entered image URLs (one per line) into the existing array.
       # When vendor_image_urls[] wasn't submitted (e.g. from the show-page quick form),
       # fall back to the product's current URLs so nothing gets wiped.

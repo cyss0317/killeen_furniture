@@ -84,10 +84,15 @@ class Product < ApplicationRecord
     parts.any? ? parts.join(" × ") : nil
   end
 
+  # When true, before_save skips recalculating selling_price from markup.
+  # Set this before saving whenever a selling price is entered directly.
+  attr_accessor :skip_price_calculation
+
   def update_selling_price(new_price)
     new_price = new_price.to_f
     return false if new_price <= 0 || base_cost.to_f <= 0
 
+    self.skip_price_calculation = true
     self.selling_price = new_price.round(2)
     self.markup_percentage = (((selling_price / base_cost.to_f) - 1) * 100).round(2)
     save
@@ -100,6 +105,7 @@ class Product < ApplicationRecord
   end
 
   def calculate_selling_price
+    return if skip_price_calculation
     return unless base_cost.present? && markup_percentage.present?
     self.selling_price = (base_cost * (1 + markup_percentage / 100.0)).round(2)
   end

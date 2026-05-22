@@ -41,7 +41,7 @@
 
           <td class="px-4 py-3">
             <%= select_tag "user[role]",
-                  options_for_select([["Admin", "admin"], ["Super Admin", "super_admin"]], employee.role),
+                  options_for_select([["Customer", "customer"], ["Admin", "admin"], ["Super Admin", "super_admin"]], employee.role),
                   form: form_id,
                   class: "text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" %>
           </td>

@@ -1,6 +1,6 @@
 module Admin
   class OrdersController < BaseController
-    before_action :set_order, only: [ :show, :update_status, :update_customer, :update_address, :assign_delivery, :assign_commission, :resend_confirmation, :print_receipt ]
+    before_action :set_order, only: [ :show, :edit, :update, :update_status, :update_customer, :update_address, :assign_delivery, :assign_commission, :resend_confirmation, :print_receipt ]
 
     SORTABLE_COLUMNS = %w[order_number created_at grand_total status].freeze
 
@@ -85,6 +85,7 @@ module Admin
       @delivery_zones = DeliveryZone.active.order(:name)
       @categories     = Category.order(:name)
       @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+      @form_defaults  = { salesperson_id: current_user.id }
     end
 
     def create
@@ -133,6 +134,87 @@ module Admin
 
         flash.now[:alert] = result.error
         render :new, status: :unprocessable_entity
+      end
+    end
+
+    def edit
+      authorize @order, :update?
+      unless @order.pending?
+        redirect_to admin_order_path(@order), alert: "Only pending orders can be edited."
+        return
+      end
+      @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
+      @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                           .where.not(admin_kind: User.admin_kinds[:delivery])
+                           .order(:first_name, :last_name)
+      @products       = Product.published.includes(:category).order(:name)
+      @delivery_zones = DeliveryZone.active.order(:name)
+      @categories     = Category.order(:name)
+      @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+      addr            = @order.shipping_address || {}
+      @form_defaults  = {
+        source:                  @order.source,
+        salesperson_id:          @order.salesperson_id,
+        customer_type:           @order.user_id? ? "existing" : "guest",
+        user_id:                 @order.user_id,
+        guest_first_name:        @order.guest_name.to_s.split(" ").first,
+        guest_last_name:         @order.guest_name.to_s.split(" ")[1..].join(" ").presence,
+        guest_email:             @order.guest_email,
+        guest_phone:             @order.guest_phone,
+        notes:                   @order.notes,
+        shipping_amount:         @order.shipping_amount,
+        discount_amount:         @order.discount_amount,
+        shipping_street_address: addr["street_address"],
+        shipping_city:           addr["city"],
+        shipping_state:          addr["state"],
+        shipping_zip_code:       addr["zip_code"]
+      }
+      @submitted_line_items = @order.order_items.map { |i| { product_id: i.product_id.to_s, quantity: i.quantity } }
+    end
+
+    def update
+      authorize @order, :update?
+      unless @order.pending?
+        redirect_to admin_order_path(@order), alert: "Only pending orders can be edited."
+        return
+      end
+
+      result = Orders::AdminUpdate.call(order: @order, params: order_create_params, admin: current_user)
+
+      if result.success?
+        redirect_to admin_order_path(result.order), notice: "Order #{result.order.order_number} updated."
+      else
+        @users          = User.where.not(confirmed_at: nil).order(:first_name, :last_name)
+        @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                             .where.not(admin_kind: User.admin_kinds[:delivery])
+                             .order(:first_name, :last_name)
+        @products       = Product.published.includes(:category).order(:name)
+        @delivery_zones = DeliveryZone.active.order(:name)
+        @categories     = Category.order(:name)
+        @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+        @submitted_line_items = (params.dig(:order, :line_items) || {}).values
+                                  .select { |i| i[:product_id].present? }
+                                  .map { |i| { product_id: i[:product_id], quantity: i[:quantity].to_i } }
+        sa = params["[shipping_address]"]&.permit(:full_name, :street_address, :city, :state, :zip_code)&.to_h || {}
+        @form_defaults = {
+          source:                  params[:source],
+          customer_type:           params[:customer_type],
+          user_id:                 params[:user_id],
+          guest_first_name:        params[:guest_first_name],
+          guest_last_name:         params[:guest_last_name],
+          guest_email:             params[:guest_email],
+          guest_phone:             params[:guest_phone],
+          notes:                   params[:notes],
+          shipping_amount:         params[:shipping_amount],
+          discount_amount:         params[:discount_amount],
+          salesperson_id:          params[:salesperson_id],
+          shipping_street_address: sa[:street_address],
+          shipping_city:           sa[:city],
+          shipping_state:          sa[:state],
+          shipping_zip_code:       sa[:zip_code]
+        }
+        flash.now[:alert] = result.error
+        render :edit, status: :unprocessable_entity
       end
     end
 

@@ -145,6 +145,14 @@
 
   <!-- Sidebar -->
   <div class="space-y-6">
+    <!-- Pricing -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="font-semibold text-gray-900 mb-4">Pricing</h3>
+      <dl class="space-y-3 text-sm">
+        <%= render "admin/products/price_section", product: @product %>
+      </dl>
+    </div>
+
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 class="font-semibold text-gray-900 mb-4">Product Details</h3>
       <dl class="space-y-3 text-sm">
@@ -156,7 +164,6 @@
           <dt class="text-gray-500">Category</dt>
           <dd><%= @product.category.name %></dd>
         </div>
-        <%= render "admin/products/price_section", product: @product %>
         <div>
           <dt class="text-gray-500">Current Stock</dt>
           <dd id="stock-display-<%= @product.id %>"><%= render "admin/products/stock_display", product: @product %></dd>
