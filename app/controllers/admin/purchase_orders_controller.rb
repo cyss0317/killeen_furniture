@@ -39,7 +39,9 @@ class Admin::PurchaseOrdersController < Admin::BaseController
     if @q.present?
       q = "%#{@q}%"
       scope = scope.where(
-        "purchase_orders.reference_number ILIKE :q OR purchase_orders.brand ILIKE :q OR purchase_orders.notes ILIKE :q",
+        "purchase_orders.reference_number ILIKE :q OR purchase_orders.brand ILIKE :q " \
+        "OR purchase_orders.notes ILIKE :q " \
+        "OR purchase_orders.id IN (SELECT purchase_order_id FROM purchase_order_items WHERE product_sku ILIKE :q OR product_name ILIKE :q)",
         q: q
       )
     else
@@ -62,8 +64,12 @@ class Admin::PurchaseOrdersController < Admin::BaseController
     if @q.present?
       q = "%#{@q}%"
       @status_counts = PurchaseOrder.where(
-        "reference_number ILIKE :q OR brand ILIKE :q OR notes ILIKE :q", q: q
-      ).group(:status).count
+                                      "reference_number ILIKE :q OR brand ILIKE :q OR notes ILIKE :q " \
+                                      "OR id IN (SELECT purchase_order_id FROM purchase_order_items WHERE product_sku ILIKE :q OR product_name ILIKE :q)",
+                                      q: q
+                                    )
+                                    .group(:status)
+                                    .count
     else
       @status_counts = PurchaseOrder.where(ordered_at: @period_range).group(:status).count
     end

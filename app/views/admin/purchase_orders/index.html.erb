@@ -18,18 +18,22 @@
 
 <%# Search %>
 <div class="mb-4">
-  <%= form_with url: admin_purchase_orders_path, method: :get, data: { turbo: false } do |f| %>
+  <form action="<%= admin_purchase_orders_path %>" method="get" accept-charset="UTF-8">
     <div class="flex gap-2">
-      <%= f.search_field :q, value: params[:q],
-            placeholder: "Search invoice #, brand, or notes…",
-            class: "flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
-      <%= f.submit "Search", class: "bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 transition-colors cursor-pointer" %>
+      <input type="search" name="q" value="<%= params[:q] %>"
+             placeholder="Invoice #, brand, product name, SKU, or notes…"
+             class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+      <button type="submit" class="bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 transition-colors cursor-pointer">
+        Search
+      </button>
       <% if params[:q].present? %>
-        <%= link_to "Clear", admin_purchase_orders_path,
-              class: "px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors" %>
+        <a href="<%= admin_purchase_orders_path %>"
+           class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+          Clear
+        </a>
       <% end %>
     </div>
-  <% end %>
+  </form>
 </div>
 
 <%# Period navigation — hidden when searching %>
@@ -71,7 +75,7 @@
                   "canceled" => "Canceled" } %>
   <% statuses.each do |s| %>
     <% count = s ? (@status_counts[s] || 0) : @status_counts.values.sum %>
-    <%= link_to admin_purchase_orders_path(status: s),
+    <%= link_to admin_purchase_orders_path(status: s, q: @q.presence),
           class: "px-3 py-1.5 rounded-full font-medium #{params[:status].to_s == s.to_s ? 'bg-amber-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
       <%= labels[s] %> (<%= count %>)
     <% end %>
@@ -188,7 +192,7 @@
     </div>
     <div class="border-l-2 border-amber-400 pl-3">
       <p class="font-medium text-gray-800">Search</p>
-      <p class="text-gray-500 text-xs mt-0.5">Search by invoice number, brand, or notes. When searching, the period filter is bypassed and all matching POs are shown.</p>
+      <p class="text-gray-500 text-xs mt-0.5">Search by invoice number, brand, notes, or SKU. When searching, the period filter is bypassed and all matching POs are shown.</p>
     </div>
     <div class="border-l-2 border-amber-400 pl-3">
       <p class="font-medium text-gray-800">Period Navigation</p>

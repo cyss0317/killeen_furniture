@@ -51,7 +51,7 @@
 <script type="application/json" id="tax-rate-data"><%= GlobalSetting.tax_rate %></script>
 
 <%= form_with url: admin_orders_path, method: :post,
-    data: { controller: "admin-order", action: "submit->admin-order#validate" },
+    data: { controller: "admin-order", action: "submit->admin-order#validate", turbo: false },
     class: "space-y-6" do |f| %>
 
   <%# Flash errors %>
