@@ -31,7 +31,7 @@ class Order < ApplicationRecord
 
   before_create :generate_order_number
 
-  validates :shipping_address, presence: true
+  validates :shipping_address, presence: true, unless: :pickup?
   validates :grand_total, numericality: { greater_than_or_equal_to: 0 }
   validate  :guest_or_user_present
 

@@ -108,15 +108,30 @@
           </div>
         </div>
 
-        <div data-admin-order-target="pickupEmailField"
-             class="mt-4 <%= 'hidden' unless @form_defaults&.dig(:pickup) == '1' %>">
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Customer Email <span class="text-gray-400 font-normal text-xs">(optional)</span>
-          </label>
-          <input type="email" name="guest_email"
-                 value="<%= @form_defaults&.dig(:guest_email) %>"
-                 placeholder="customer@example.com"
-                 class="w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        <div data-admin-order-target="pickupFields"
+             class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 <%= 'hidden' unless @form_defaults&.dig(:pickup) == '1' %>">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Customer Name <span class="text-gray-400 font-normal text-xs">(optional)</span>
+            </label>
+            <input type="text" name="guest_first_name"
+                   data-pickup-field="name"
+                   value="<%= @form_defaults&.dig(:guest_first_name) %>"
+                   placeholder="Full name"
+                   <%= 'disabled' unless @form_defaults&.dig(:pickup) == '1' %>
+                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Customer Email <span class="text-gray-400 font-normal text-xs">(optional)</span>
+            </label>
+            <input type="email" name="guest_email"
+                   data-pickup-field="email"
+                   value="<%= @form_defaults&.dig(:guest_email) %>"
+                   placeholder="customer@example.com"
+                   <%= 'disabled' unless @form_defaults&.dig(:pickup) == '1' %>
+                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
         </div>
       </div>
 

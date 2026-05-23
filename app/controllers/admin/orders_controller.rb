@@ -364,7 +364,7 @@ module Admin
       #   shipping_address: [:full_name, :street_address, :city, :state, :zip_code]
       # )[:shipping_address]
 
-      shipping_address = params.require("[shipping_address]").permit(:full_name, :street_address, :city, :state, :zip_code)
+      shipping_address = (params["[shipping_address]"]&.permit(:full_name, :street_address, :city, :state, :zip_code) || {}).to_h
       # base = params.require(:order).permit(
       #   :source, :user_id, :guest_name, :guest_email, :guest_phone,
       #   :notes, :shipping_amount, :discount_amount, :delivery_zone_id
@@ -375,7 +375,7 @@ module Admin
       first = base.delete(:guest_first_name).to_s.strip
       last  = base.delete(:guest_last_name).to_s.strip
       base  = base.merge(guest_name: [first, last].reject(&:blank?).join(" ").presence)
-      base.merge(line_items: line_items, shipping_address: shipping_address)
+      base.to_unsafe_h.merge(line_items: line_items, shipping_address: shipping_address).with_indifferent_access
     end
 
     # Lightweight proxies so ShippingCalculator works with manual order data

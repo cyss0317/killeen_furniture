@@ -9,7 +9,7 @@ export default class extends Controller {
     "addressStreet", "addressCity", "addressState", "addressZip",
     "browserPanel", "browserToggle", "browserSearch", "browserCategory",
     "browserColor", "browserInStock", "browserRow", "browserEmpty",
-    "pickupToggle", "customerCard", "addressCard", "pickupEmailField"
+    "pickupToggle", "customerCard", "addressCard", "pickupFields"
   ]
 
   connect() {
@@ -50,6 +50,10 @@ export default class extends Controller {
       }
     }
 
+    // If pickup is already toggled (edit page), apply disabled state so hidden
+    // customer/address fields don't accidentally submit stale values
+    if (this.isPickup) this._setPickupDisabled(true)
+
     this.recalculate()
   }
 
@@ -61,13 +65,67 @@ export default class extends Controller {
 
   togglePickup() {
     const pickup = this.isPickup
-    if (this.hasCustomerCardTarget)    this.customerCardTarget.classList.toggle("hidden", pickup)
-    if (this.hasAddressCardTarget)     this.addressCardTarget.classList.toggle("hidden", pickup)
-    if (this.hasPickupEmailFieldTarget) this.pickupEmailFieldTarget.classList.toggle("hidden", !pickup)
-    if (pickup && this.hasShippingAmountTarget) {
-      this.shippingAmountTarget.value = "0"
-      this.shippingCost = 0
-      this.recalculate()
+    if (this.hasCustomerCardTarget) this.customerCardTarget.classList.toggle("hidden", pickup)
+    if (this.hasAddressCardTarget)  this.addressCardTarget.classList.toggle("hidden", pickup)
+    if (this.hasPickupFieldsTarget) this.pickupFieldsTarget.classList.toggle("hidden", !pickup)
+
+    this._setPickupDisabled(pickup)
+
+    if (pickup) {
+      this._prefillPickupFields()
+      if (this.hasShippingAmountTarget) {
+        this.shippingAmountTarget.value = "0"
+        this.shippingCost = 0
+        this.recalculate()
+      }
+    }
+  }
+
+  _setPickupDisabled(pickup) {
+    // Disable hidden sections so their inputs don't submit
+    if (this.hasCustomerCardTarget) {
+      this.customerCardTarget.querySelectorAll("input, select, textarea").forEach(el => {
+        el.disabled = pickup
+      })
+    }
+    if (this.hasAddressCardTarget) {
+      this.addressCardTarget.querySelectorAll("input, select, textarea").forEach(el => {
+        el.disabled = pickup
+      })
+    }
+    // Disable pickup fields when hidden so they don't submit empty values
+    if (this.hasPickupFieldsTarget) {
+      this.pickupFieldsTarget.querySelectorAll("input").forEach(el => {
+        el.disabled = !pickup
+      })
+    }
+  }
+
+  _prefillPickupFields() {
+    if (!this.hasPickupFieldsTarget) return
+    const nameInput  = this.pickupFieldsTarget.querySelector("input[data-pickup-field='name']")
+    const emailInput = this.pickupFieldsTarget.querySelector("input[data-pickup-field='email']")
+
+    // Already has values — don't overwrite
+    if ((nameInput?.value || "").trim() && (emailInput?.value || "").trim()) return
+
+    const isGuest = [...this.customerTypeTargets].find(r => r.checked)?.value === "guest"
+
+    if (isGuest) {
+      const fn = this.element.querySelector("input[name='guest_first_name']")?.value?.trim() || ""
+      const ln = this.element.querySelector("input[name='guest_last_name']")?.value?.trim()  || ""
+      const em = this.element.querySelector("input[name='guest_email']")?.value?.trim()      || ""
+      if (nameInput  && !nameInput.value.trim())  nameInput.value  = [fn, ln].filter(Boolean).join(" ")
+      if (emailInput && !emailInput.value.trim()) emailInput.value = em
+    } else {
+      const userId = this.hasUserSelectTarget ? this.userSelectTarget.value : ""
+      if (!userId) return
+      const usersEl = document.getElementById("users-data")
+      if (!usersEl) return
+      const user = JSON.parse(usersEl.textContent)[userId]
+      if (!user) return
+      if (nameInput  && !nameInput.value.trim())  nameInput.value  = user.name  || ""
+      if (emailInput && !emailInput.value.trim()) emailInput.value = user.email || ""
     }
   }
 
