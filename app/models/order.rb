@@ -85,6 +85,7 @@ class Order < ApplicationRecord
   end
 
   def guest_or_user_present
+    return if pickup?
     if user.nil? && guest_email.blank?
       errors.add(:base, "Order must belong to a user or have a guest email")
     end

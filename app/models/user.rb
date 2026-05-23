@@ -93,7 +93,7 @@ class User < ApplicationRecord
   end
 
   def developer?
-    admin_or_above? && developer
+    admin_or_above? && self[:developer]
   end
 
   # Devise calls remember_expires_at to determine the cookie expiry.

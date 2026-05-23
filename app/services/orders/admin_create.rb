@@ -122,7 +122,8 @@ module Orders
         grand_total:      [subtotal + shipping + tax - discount, 0].max,
         notes:            @params[:notes].presence,
         delivery_zone_id: @params[:delivery_zone_id].presence,
-        salesperson_id:   @params[:salesperson_id].presence
+        salesperson_id:   @params[:salesperson_id].presence,
+        pickup:           @params[:pickup] == "1"
       )
     end
 

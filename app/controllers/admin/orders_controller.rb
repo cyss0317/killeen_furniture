@@ -93,7 +93,7 @@ module Admin
       result = Orders::AdminCreate.call(params: order_create_params, admin: current_user)
 
       if result.success?
-        OrderMailer.confirmation(result.order).deliver_now
+        OrderMailer.confirmation(result.order).deliver_now if result.order.customer_email.present?
         redirect_to admin_order_path(result.order), notice: "Order #{result.order.order_number} created successfully."
       else
         @order          = Order.new
@@ -129,6 +129,7 @@ module Admin
           shipping_amount:         params[:shipping_amount],
           discount_amount:         params[:discount_amount],
           salesperson_id:          params[:salesperson_id],
+          pickup:                  params[:pickup],
           shipping_full_name:      sa[:full_name],
           shipping_street_address: sa[:street_address],
           shipping_city:           sa[:city],
@@ -159,10 +160,11 @@ module Admin
       @form_defaults  = {
         source:                  @order.source,
         salesperson_id:          @order.salesperson_id,
+        pickup:                  @order.pickup? ? "1" : nil,
         customer_type:           @order.user_id? ? "existing" : "guest",
         user_id:                 @order.user_id,
-        guest_first_name:        @order.guest_name.to_s.split(" ").first,
-        guest_last_name:         @order.guest_name.to_s.split(" ")[1..].join(" ").presence,
+        guest_first_name:        @order.guest_name.to_s.split(" ", 2).first,
+        guest_last_name:         @order.guest_name.to_s.split(" ", 2)[1].presence,
         guest_email:             @order.guest_email,
         guest_phone:             @order.guest_phone,
         notes:                   @order.notes,
@@ -369,7 +371,7 @@ module Admin
       # )
       base = params.permit(:source, :customer_type, :user_id, :guest_first_name, :guest_last_name,
                            :guest_email, :guest_phone, :salesperson_id, :notes, :shipping_amount,
-                           :discount_amount, :delivery_zone_id)
+                           :discount_amount, :delivery_zone_id, :pickup)
       first = base.delete(:guest_first_name).to_s.strip
       last  = base.delete(:guest_last_name).to_s.strip
       base  = base.merge(guest_name: [first, last].reject(&:blank?).join(" ").presence)

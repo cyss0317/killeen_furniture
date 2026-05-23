@@ -55,6 +55,7 @@ module Orders
 
       @order.assign_attributes(
         source:           @params[:source].presence || @order.source,
+        pickup:           @params[:pickup] == "1",
         user_id:          @params[:user_id].presence,
         guest_name:       @params[:guest_name].presence,
         guest_email:      @params[:guest_email].presence,

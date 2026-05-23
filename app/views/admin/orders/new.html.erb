@@ -69,7 +69,7 @@
       <%# Order Source + Commission %>
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="font-semibold text-gray-900 mb-4">Order Details</h2>
-        <div class="flex flex-wrap gap-4">
+        <div class="flex flex-wrap gap-4 items-end">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Order Source</label>
             <%= f.select :source,
@@ -85,17 +85,44 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Commission / Salesperson</label>
             <%= f.select :salesperson_id,
                 options_for_select(
-                  [["— None —", ""]] + @salespeople.map { |u| [u.full_name, u.id] },
+                  [["— None —", ""],
+                   ["#{current_user.full_name} (me)", current_user.id]] +
+                  @salespeople.reject { |u| u.id == current_user.id }.map { |u| [u.full_name, u.id] },
                   @form_defaults&.dig(:salesperson_id)
                 ),
                 {},
                 class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
           </div>
+          <div class="flex items-center gap-2 pb-1">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" value="1" name="pickup"
+                     id="pickup_toggle"
+                     data-admin-order-target="pickupToggle"
+                     data-action="change->admin-order#togglePickup"
+                     <%= "checked" if @form_defaults&.dig(:pickup) == "1" %>
+                     class="sr-only peer">
+              <div class="w-10 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:bg-amber-700 transition-colors"></div>
+              <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></span>
+            </label>
+            <label for="pickup_toggle" class="text-sm font-medium text-gray-700 cursor-pointer select-none">Pickup Order</label>
+          </div>
+        </div>
+
+        <div data-admin-order-target="pickupEmailField"
+             class="mt-4 <%= 'hidden' unless @form_defaults&.dig(:pickup) == '1' %>">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Customer Email <span class="text-gray-400 font-normal text-xs">(optional)</span>
+          </label>
+          <input type="email" name="guest_email"
+                 value="<%= @form_defaults&.dig(:guest_email) %>"
+                 placeholder="customer@example.com"
+                 class="w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
         </div>
       </div>
 
       <%# Customer Section %>
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div data-admin-order-target="customerCard"
+           class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 <%= 'hidden' if @form_defaults&.dig(:pickup) == '1' %>">
         <h2 class="font-semibold text-gray-900 mb-4">Customer</h2>
 
         <div class="mb-4">
@@ -159,7 +186,8 @@
       </div>
 
       <%# Delivery Address %>
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div data-admin-order-target="addressCard"
+           class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 <%= 'hidden' if @form_defaults&.dig(:pickup) == '1' %>">
         <h2 class="font-semibold text-gray-900 mb-4">Delivery Address</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"
              data-controller="address-autocomplete"

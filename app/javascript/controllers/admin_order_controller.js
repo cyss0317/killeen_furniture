@@ -8,7 +8,8 @@ export default class extends Controller {
     "userSelect", "userSearch", "userDropdown",
     "addressStreet", "addressCity", "addressState", "addressZip",
     "browserPanel", "browserToggle", "browserSearch", "browserCategory",
-    "browserColor", "browserInStock", "browserRow", "browserEmpty"
+    "browserColor", "browserInStock", "browserRow", "browserEmpty",
+    "pickupToggle", "customerCard", "addressCard", "pickupEmailField"
   ]
 
   connect() {
@@ -53,6 +54,22 @@ export default class extends Controller {
   }
 
   // ── Customer ─────────────────────────────────────────────────────────────
+
+  get isPickup() {
+    return this.hasPickupToggleTarget && this.pickupToggleTarget.checked
+  }
+
+  togglePickup() {
+    const pickup = this.isPickup
+    if (this.hasCustomerCardTarget)    this.customerCardTarget.classList.toggle("hidden", pickup)
+    if (this.hasAddressCardTarget)     this.addressCardTarget.classList.toggle("hidden", pickup)
+    if (this.hasPickupEmailFieldTarget) this.pickupEmailFieldTarget.classList.toggle("hidden", !pickup)
+    if (pickup && this.hasShippingAmountTarget) {
+      this.shippingAmountTarget.value = "0"
+      this.shippingCost = 0
+      this.recalculate()
+    }
+  }
 
   customerTypeChanged(event) {
     const isGuest = event.target.value === "guest"
@@ -446,9 +463,9 @@ export default class extends Controller {
     this._clearValidationErrors()
     let hasErrors = false
 
-    // 1. Customer
-    const isGuest = [...this.customerTypeTargets].find(r => r.checked)?.value === "guest"
-    if (isGuest) {
+    // 1. Customer (skipped for pickup orders)
+    const isGuest = !this.isPickup && [...this.customerTypeTargets].find(r => r.checked)?.value === "guest"
+    if (!this.isPickup && isGuest) {
       const firstNameEl = this.element.querySelector("input[name='guest_first_name']")
       const lastNameEl  = this.element.querySelector("input[name='guest_last_name']")
       const emailEl     = this.element.querySelector("input[name='guest_email']")
@@ -480,34 +497,36 @@ export default class extends Controller {
           hasErrors = true
         }
       }
-    } else {
+    } else if (!this.isPickup) {
       if (!this.userSelectTarget?.value) {
         this._addFieldError(this.userSelectTarget, "Please select a customer")
         hasErrors = true
       }
     }
 
-    // 2. Shipping address
-    const addrChecks = [
-      [this.addressStreetTarget, "Street address is required"],
-      [this.addressCityTarget,   "City is required"],
-      [this.addressStateTarget,  "State is required"],
-    ]
-    addrChecks.forEach(([el, msg]) => {
-      if (!el?.value?.trim()) {
-        this._addFieldError(el, msg)
+    // 2. Shipping address (skipped for pickup orders)
+    if (!this.isPickup) {
+      const addrChecks = [
+        [this.addressStreetTarget, "Street address is required"],
+        [this.addressCityTarget,   "City is required"],
+        [this.addressStateTarget,  "State is required"],
+      ]
+      addrChecks.forEach(([el, msg]) => {
+        if (!el?.value?.trim()) {
+          this._addFieldError(el, msg)
+          hasErrors = true
+        }
+      })
+
+      const zipEl = this.addressZipTarget
+      const zip   = zipEl?.value?.trim()
+      if (!zip) {
+        this._addFieldError(zipEl, "ZIP code is required")
+        hasErrors = true
+      } else if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+        this._addFieldError(zipEl, "Enter a valid 5-digit ZIP code")
         hasErrors = true
       }
-    })
-
-    const zipEl = this.addressZipTarget
-    const zip   = zipEl?.value?.trim()
-    if (!zip) {
-      this._addFieldError(zipEl, "ZIP code is required")
-      hasErrors = true
-    } else if (!/^\d{5}(-\d{4})?$/.test(zip)) {
-      this._addFieldError(zipEl, "Enter a valid 5-digit ZIP code")
-      hasErrors = true
     }
 
     // 3. At least one valid line item
