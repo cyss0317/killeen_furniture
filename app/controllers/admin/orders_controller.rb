@@ -105,9 +105,13 @@ module Admin
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
         @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
-        @submitted_line_items = (params.dig(:order, :line_items) || {}).values
-                                  .select { |i| i[:product_id].present? }
-                                  .map { |i| { product_id: i[:product_id], quantity: i[:quantity].to_i } }
+        @submitted_line_items = (params.dig(:order, :line_items) || {}).values.filter_map do |i|
+          if i[:product_id].present?
+            { product_id: i[:product_id], quantity: i[:quantity].to_i }
+          elsif i[:custom_name].present?
+            { custom: true, custom_name: i[:custom_name], unit_price: i[:unit_price].to_f, quantity: i[:quantity].to_i }
+          end
+        end
 
         # Preserve submitted form values so the form re-renders pre-filled.
         # Shipping address is submitted as "[shipping_address][...]" by the
@@ -192,9 +196,13 @@ module Admin
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
         @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
-        @submitted_line_items = (params.dig(:order, :line_items) || {}).values
-                                  .select { |i| i[:product_id].present? }
-                                  .map { |i| { product_id: i[:product_id], quantity: i[:quantity].to_i } }
+        @submitted_line_items = (params.dig(:order, :line_items) || {}).values.filter_map do |i|
+          if i[:product_id].present?
+            { product_id: i[:product_id], quantity: i[:quantity].to_i }
+          elsif i[:custom_name].present?
+            { custom: true, custom_name: i[:custom_name], unit_price: i[:unit_price].to_f, quantity: i[:quantity].to_i }
+          end
+        end
         sa = params["[shipping_address]"]&.permit(:full_name, :street_address, :city, :state, :zip_code)&.to_h || {}
         @form_defaults = {
           source:                  params[:source],

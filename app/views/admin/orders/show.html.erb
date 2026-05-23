@@ -222,6 +222,12 @@
             <span><%= number_to_currency(@order.tax_amount) %></span>
           </div>
         <% end %>
+        <% if @order.discount_amount.to_d > 0 %>
+          <div class="flex justify-between text-sm text-green-600">
+            <span>Discount</span>
+            <span>−<%= number_to_currency(@order.discount_amount) %></span>
+          </div>
+        <% end %>
         <div class="flex justify-between text-base font-bold border-t border-gray-200 pt-2 mt-2">
           <span>Grand Total</span>
           <span><%= number_to_currency(@order.grand_total) %></span>

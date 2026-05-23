@@ -21,13 +21,17 @@ export default class extends Controller {
     this.rowIndex = this.lineItemRowTargets.length
     this.shippingCost = this.hasShippingAmountTarget ? (parseFloat(this.shippingAmountTarget.value) || 85) : 85
 
-    // Restore products submitted before a validation failure
+    // Restore line items submitted before a validation failure
     const submittedEl = document.getElementById("submitted-items-data")
     if (submittedEl) {
       const items = JSON.parse(submittedEl.textContent)
       if (items && items.length > 0) {
         items.forEach(item => {
-          if (item.product_id) this._addRow(item.product_id, item.quantity || 1)
+          if (item.product_id) {
+            this._addRow(item.product_id, item.quantity || 1)
+          } else if (item.custom) {
+            this._restoreCustomRow(item.custom_name, item.unit_price, item.quantity || 1)
+          }
         })
       }
     }
@@ -304,6 +308,35 @@ export default class extends Controller {
     }
 
     this.updateEmptyState()
+  }
+
+  _restoreCustomRow(name, price, qty) {
+    const template = document.getElementById("custom-item-template")
+    if (!template) return
+
+    const clone = template.content.cloneNode(true)
+    const idx = this.rowIndex++
+
+    clone.querySelectorAll("[data-idx]").forEach(el => {
+      const field = el.dataset.idx
+      el.name = `order[line_items][${idx}][${field}]`
+      el.id   = `line_item_${idx}_${field}`
+    })
+
+    this.lineItemsTarget.appendChild(clone)
+
+    const newRow = this.lineItemsTarget.lastElementChild
+    if (newRow) {
+      const nameInput  = newRow.querySelector("input[data-idx='custom_name']")
+      const priceInput = newRow.querySelector("input[data-custom-price]")
+      const qtyInput   = newRow.querySelector("input[data-idx='quantity']")
+      if (nameInput)  nameInput.value  = name  || ""
+      if (priceInput) priceInput.value = price || 0
+      if (qtyInput)   qtyInput.value   = qty   || 1
+    }
+
+    this.updateEmptyState()
+    this.recalculate()
   }
 
   removeItem(event) {
