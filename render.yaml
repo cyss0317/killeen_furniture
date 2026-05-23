@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: killeen-furniture
+    env: docker
+    releaseCommand: bundle exec rails db:migrate
+    autoDeploy: true

@@ -1,4 +1,6 @@
 class OrderMailer < ApplicationMailer
+  before_action :set_tracking_headers
+
   def confirmation(order)
     @order       = order
     @order_items = order.order_items
@@ -63,5 +65,12 @@ class OrderMailer < ApplicationMailer
       to:      order.customer_email,
       subject: "Your Order Has Been Delivered: #{order.order_number}"
     )
+  end
+
+  private
+
+  def set_tracking_headers
+    headers["X-Order-Id"]      = @order.id.to_s if @order
+    headers["X-Mailer-Action"] = action_name
   end
 end

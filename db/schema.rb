@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_22_023845) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_23_182858) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -120,6 +120,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_22_023845) do
     t.datetime "updated_at", null: false
     t.index ["active"], name: "index_delivery_zones_on_active"
     t.index ["zip_codes"], name: "index_delivery_zones_on_zip_codes", using: :gin
+  end
+
+  create_table "email_logs", force: :cascade do |t|
+    t.bigint "order_id"
+    t.string "to", null: false
+    t.string "subject", null: false
+    t.string "action_name"
+    t.datetime "sent_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_email_logs_on_order_id"
+    t.index ["sent_at"], name: "index_email_logs_on_sent_at"
   end
 
   create_table "employee_pay_entries", force: :cascade do |t|
@@ -414,6 +426,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_22_023845) do
     t.string "unconfirmed_email"
     t.string "provider"
     t.string "uid"
+    t.boolean "developer", default: false, null: false
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
@@ -428,6 +441,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_22_023845) do
   add_foreign_key "carts", "users"
   add_foreign_key "delivery_events", "orders"
   add_foreign_key "delivery_events", "users", column: "created_by_id"
+  add_foreign_key "email_logs", "orders"
   add_foreign_key "employee_pay_entries", "users"
   add_foreign_key "employee_pay_entries", "users", column: "created_by_id"
   add_foreign_key "order_items", "orders"

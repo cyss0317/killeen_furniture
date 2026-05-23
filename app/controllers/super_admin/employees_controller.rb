@@ -1,7 +1,7 @@
 module SuperAdmin
   class EmployeesController < BaseController
     def index
-      @employees = User.where(role: [:admin, :super_admin])
+      @employees = User.where(role: [ :admin, :super_admin ])
                        .order(:first_name, :last_name)
     end
 
@@ -25,7 +25,7 @@ module SuperAdmin
     private
 
     def employee_params
-      params.require(:user).permit(:role, :admin_kind, :pay_type, :pay_rate)
+      params.require(:user).permit(:role, :admin_kind, :pay_type, :pay_rate, :developer)
     end
   end
 end

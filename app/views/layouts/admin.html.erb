@@ -108,6 +108,16 @@
               </svg>
               Delivery Queue
             <% end %>
+            <% if current_user.developer? %>
+              <%= link_to admin_email_logs_path,
+                  class: admin_nav_link_class("email_logs"),
+                  data: { action: "click->drawer#close" } do %>
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Email Logs
+              <% end %>
+            <% end %>
 
             <div class="border-t border-gray-700 my-2 mx-4"></div>
 
@@ -283,6 +293,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
               Delivery Queue
+            <% end %>
+            <%= link_to admin_email_logs_path,
+                class: admin_nav_link_class("email_logs") do %>
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              Email Logs
             <% end %>
 
             <div class="border-t border-gray-700 my-2 mx-4"></div>

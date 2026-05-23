@@ -92,6 +92,10 @@ class User < ApplicationRecord
     admin? && kind_delivery?
   end
 
+  def developer?
+    admin_or_above? && developer
+  end
+
   # Devise calls remember_expires_at to determine the cookie expiry.
   # Returns 48 h for admin/super_admin, 2 weeks (Devise default) for customers.
   def remember_expires_at

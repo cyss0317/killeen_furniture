@@ -16,6 +16,7 @@
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Kind</th>
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Pay Type</th>
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Pay Rate</th>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Developer</th>
         <th class="px-4 py-3"></th>
       </tr>
     </thead>
@@ -70,6 +71,12 @@
                     placeholder: "0.00",
                     class: "w-full text-sm border border-gray-300 rounded-md pl-6 pr-2 py-1.5 text-right focus:outline-none focus:ring-2 focus:ring-amber-500" %>
             </div>
+          </td>
+
+          <td class="px-4 py-3 text-center">
+            <%= check_box_tag "user[developer]", "1", employee.developer?,
+                form: form_id,
+                class: "w-4 h-4 rounded border-gray-300 text-amber-700 focus:ring-amber-500 cursor-pointer" %>
           </td>
 
           <td class="px-4 py-3 whitespace-nowrap">

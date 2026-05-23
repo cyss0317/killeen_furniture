@@ -19,5 +19,11 @@ module Admin
         redirect_to delivery_orders_path, alert: "Delivery admins access the delivery portal."
       end
     end
+
+    def require_developer!
+      unless current_user.developer?
+        redirect_to admin_dashboard_path, alert: "Access restricted to developer accounts."
+      end
+    end
   end
 end
