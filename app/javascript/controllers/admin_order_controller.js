@@ -529,25 +529,11 @@ export default class extends Controller {
       const emailEl     = this.element.querySelector("input[name='guest_email']")
       const phoneEl     = this.element.querySelector("input[name='guest_phone']")
 
-      if (!firstNameEl?.value?.trim()) {
-        this._addFieldError(firstNameEl, "First name is required")
-        hasErrors = true
-      }
-      if (!lastNameEl?.value?.trim()) {
-        this._addFieldError(lastNameEl, "Last name is required")
-        hasErrors = true
-      }
-      if (!emailEl?.value?.trim()) {
-        this._addFieldError(emailEl, "Email address is required")
-        hasErrors = true
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
+      if (emailEl?.value?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
         this._addFieldError(emailEl, "Enter a valid email address")
         hasErrors = true
       }
-      if (!phoneEl?.value?.trim()) {
-        this._addFieldError(phoneEl, "Phone number is required")
-        hasErrors = true
-      } else {
+      if (phoneEl?.value?.trim()) {
         const digits = phoneEl.value.replace(/\D/g, "")
         const valid = digits.length === 10 || (digits.length === 11 && digits[0] === "1")
         if (!valid) {

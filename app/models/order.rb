@@ -33,7 +33,6 @@ class Order < ApplicationRecord
 
   validates :shipping_address, presence: true, unless: :pickup?
   validates :grand_total, numericality: { greater_than_or_equal_to: 0 }
-  validate  :guest_or_user_present
 
   scope :recent,      -> { order(created_at: :desc) }
   scope :today,       -> { where(created_at: Time.current.beginning_of_day..) }
@@ -84,10 +83,4 @@ class Order < ApplicationRecord
     end
   end
 
-  def guest_or_user_present
-    return if pickup?
-    if user.nil? && guest_email.blank?
-      errors.add(:base, "Order must belong to a user or have a guest email")
-    end
-  end
 end
