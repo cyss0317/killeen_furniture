@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
-  helper_method :current_cart, :navbar_categories
+  helper_method :current_cart, :navbar_categories, :active_announcements
 
   protected
 
@@ -18,6 +18,10 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def active_announcements
+    @active_announcements ||= SiteAnnouncement.active_now
+  end
 
   def current_cart
     @current_cart ||= find_or_create_cart

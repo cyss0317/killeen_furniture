@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_23_201458) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_30_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -271,6 +271,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_23_201458) do
     t.index ["created_by_id"], name: "index_purchase_orders_on_created_by_id"
     t.index ["reference_number"], name: "index_purchase_orders_on_reference_number", unique: true
     t.index ["status"], name: "index_purchase_orders_on_status"
+  end
+
+  create_table "site_announcements", force: :cascade do |t|
+    t.text "message", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|

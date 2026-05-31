@@ -128,8 +128,9 @@ Rails.application.routes.draw do
       end
     end
     resource  :settings,     only: [:show, :update]
-    resources :employee_pay, only: [:index, :create, :destroy]
-    resources :email_logs,   only: [:index]
+    resources :employee_pay,   only: [:index, :create, :destroy]
+    resources :email_logs,     only: [:index]
+    resources :announcements,  only: [:index, :new, :create, :edit, :update, :destroy]
 
     resources :purchase_orders, only: [:index, :show, :new, :create] do
       member { patch :receive }
