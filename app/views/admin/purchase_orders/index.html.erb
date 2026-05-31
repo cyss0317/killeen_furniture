@@ -92,7 +92,7 @@
             <%= sort_link("Invoice #", "reference_number", current_sort: @sort, current_direction: @direction) %>
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-            <%= sort_link("Date Ordered", "ordered_at", current_sort: @sort, current_direction: @direction) %>
+            <%= sort_link("Invoice Date", "invoice_date", current_sort: @sort, current_direction: @direction) %>
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
           <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Items</th>
@@ -112,7 +112,7 @@
                     class: "font-mono text-sm font-medium text-amber-800 hover:underline" %>
             </td>
             <td class="px-6 py-4 text-sm text-gray-600">
-              <%= po.ordered_at&.strftime("%b %d, %Y") || "—" %>
+              <%= po.invoice_date&.strftime("%b %d, %Y") || "—" %>
             </td>
             <td class="px-6 py-4 text-sm font-medium text-gray-900">
               <%= po.brand.presence || "—" %>

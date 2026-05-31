@@ -1,7 +1,7 @@
 class Admin::PurchaseOrdersController < Admin::BaseController
   include Pagy::Method
 
-  SORTABLE_COLUMNS = %w[reference_number ordered_at created_at status].freeze
+  SORTABLE_COLUMNS = %w[reference_number invoice_date ordered_at created_at status].freeze
 
   before_action :set_purchase_order, only: [:show, :receive]
 
@@ -45,7 +45,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
         q: q
       )
     else
-      scope = scope.where(ordered_at: @period_range)
+      scope = scope.where(invoice_date: @period_range)
     end
 
     scope = scope.recent
@@ -54,7 +54,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
       scope = scope.where(status: params[:status])
     end
 
-    @sort      = params[:sort].in?(SORTABLE_COLUMNS) ? params[:sort] : "ordered_at"
+    @sort      = params[:sort].in?(SORTABLE_COLUMNS) ? params[:sort] : "invoice_date"
     @direction = params[:direction] == "asc" ? "asc" : "desc"
     scope      = scope.reorder("purchase_orders.#{@sort} #{@direction}")
 
@@ -71,7 +71,7 @@ class Admin::PurchaseOrdersController < Admin::BaseController
                                     .group(:status)
                                     .count
     else
-      @status_counts = PurchaseOrder.where(ordered_at: @period_range).group(:status).count
+      @status_counts = PurchaseOrder.where(invoice_date: @period_range).group(:status).count
     end
   end
 
