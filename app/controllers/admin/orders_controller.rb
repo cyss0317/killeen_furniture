@@ -81,10 +81,10 @@ module Admin
       @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
                            .where.not(admin_kind: User.admin_kinds[:delivery])
                            .order(:first_name, :last_name)
-      @products       = Product.published.includes(:category).order(:name)
+      @products       = Product.includes(:category).order(:name)
       @delivery_zones = DeliveryZone.active.order(:name)
       @categories     = Category.order(:name)
-      @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+      @colors         = Product.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
       @form_defaults  = { salesperson_id: current_user.id }
     end
 
@@ -101,10 +101,10 @@ module Admin
         @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
                              .where.not(admin_kind: User.admin_kinds[:delivery])
                              .order(:first_name, :last_name)
-        @products       = Product.published.includes(:category).order(:name)
+        @products       = Product.includes(:category).order(:name)
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
-        @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+        @colors         = Product.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
         @submitted_line_items = (params.dig(:order, :line_items) || {}).values.filter_map do |i|
           if i[:product_id].present?
             { product_id: i[:product_id], quantity: i[:quantity].to_i }
@@ -152,10 +152,10 @@ module Admin
       @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
                            .where.not(admin_kind: User.admin_kinds[:delivery])
                            .order(:first_name, :last_name)
-      @products       = Product.published.includes(:category).order(:name)
+      @products       = Product.includes(:category).order(:name)
       @delivery_zones = DeliveryZone.active.order(:name)
       @categories     = Category.order(:name)
-      @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+      @colors         = Product.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
       addr            = @order.shipping_address || {}
       @form_defaults  = {
         source:                  @order.source,
@@ -194,10 +194,10 @@ module Admin
         @salespeople    = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
                              .where.not(admin_kind: User.admin_kinds[:delivery])
                              .order(:first_name, :last_name)
-        @products       = Product.published.includes(:category).order(:name)
+        @products       = Product.includes(:category).order(:name)
         @delivery_zones = DeliveryZone.active.order(:name)
         @categories     = Category.order(:name)
-        @colors         = Product.published.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
+        @colors         = Product.where.not(color: [ nil, "" ]).distinct.pluck(:color).sort
         @submitted_line_items = (params.dig(:order, :line_items) || {}).values.filter_map do |i|
           if i[:product_id].present?
             { product_id: i[:product_id], quantity: i[:quantity].to_i }

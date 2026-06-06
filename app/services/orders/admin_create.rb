@@ -87,10 +87,11 @@ module Orders
         qty = item[:quantity].to_i
 
         if item[:product_id].present?
-          product = Product.find(item[:product_id])
+          product    = Product.find(item[:product_id])
           raise "#{product.name}: insufficient stock (#{product.stock_quantity} available, #{qty} requested)" if qty > product.stock_quantity
           raise "#{product.name}: quantity must be at least 1" if qty < 1
-          { product: product, quantity: qty }
+          unit_price = item[:unit_price].present? ? item[:unit_price].to_f : product.selling_price
+          { product: product, quantity: qty, unit_price: unit_price }
         else
           name  = item[:custom_name].to_s.strip
           price = item[:unit_price].to_f
@@ -143,7 +144,7 @@ module Orders
           @order.order_items.build(
             product:           product,
             quantity:          item[:quantity],
-            unit_price:        product.selling_price,
+            unit_price:        item[:unit_price],
             unit_cost:         product.base_cost,
             markup_percentage: product.markup_percentage,
             product_name:      product.name,
@@ -155,11 +156,7 @@ module Orders
 
     def calculated_subtotal
       @line_items_with_products.sum do |item|
-        if item[:custom]
-          item[:unit_price] * item[:quantity]
-        else
-          item[:product].selling_price * item[:quantity]
-        end
+        item[:unit_price] * item[:quantity]
       end
     end
   end

@@ -443,16 +443,16 @@ export default class extends Controller {
   // ── Row population ────────────────────────────────────────────────────────
 
   _populateRow(row, productId) {
-    const product       = this.products[productId]
-    const sellPriceCell = row.querySelector("[data-cell='sell-price']")
-    const stockCell     = row.querySelector("[data-cell='stock']")
-    const qtyInput      = row.querySelector("[data-qty]")
-    const imageEl       = row.querySelector("[data-cell='product-image']")
+    const product      = this.products[productId]
+    const priceInput   = row.querySelector("input[data-product-price]")
+    const stockCell    = row.querySelector("[data-cell='stock']")
+    const qtyInput     = row.querySelector("[data-qty]")
+    const imageEl      = row.querySelector("[data-cell='product-image']")
 
     if (product) {
-      if (sellPriceCell) sellPriceCell.textContent = this.formatCurrency(product.selling_price)
-      if (stockCell)     stockCell.textContent     = product.stock_quantity + " in stock"
-      if (qtyInput)      qtyInput.max = product.stock_quantity
+      if (priceInput)    priceInput.value           = product.selling_price.toFixed(2)
+      if (stockCell)     stockCell.textContent      = product.stock_quantity + " in stock"
+      if (qtyInput)      qtyInput.max               = product.stock_quantity
       if (imageEl) {
         if (product.image_url) {
           imageEl.src = product.image_url
@@ -463,8 +463,8 @@ export default class extends Controller {
         }
       }
     } else {
-      if (sellPriceCell) sellPriceCell.textContent = "—"
-      if (stockCell)     stockCell.textContent     = ""
+      if (priceInput)    priceInput.value           = "0"
+      if (stockCell)     stockCell.textContent      = ""
       if (imageEl)       imageEl.classList.add("hidden")
     }
   }
@@ -492,13 +492,14 @@ export default class extends Controller {
         return
       }
 
-      const select  = row.querySelector("select[data-idx='product_id']")
+      const select     = row.querySelector("select[data-idx='product_id']")
       if (!select || !qtyInput) return
 
-      const product = this.products[select.value]
+      const priceInput = row.querySelector("input[data-product-price]")
+      const price      = parseFloat(priceInput?.value) || 0
 
-      if (product && qty > 0) {
-        const lineTotal = product.selling_price * qty
+      if (price > 0 && qty > 0) {
+        const lineTotal = price * qty
         subtotal += lineTotal
         if (lineTotalCell) lineTotalCell.textContent = this.formatCurrency(lineTotal)
       } else {
