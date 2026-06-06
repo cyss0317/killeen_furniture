@@ -4,8 +4,9 @@ class Order < ApplicationRecord
   belongs_to :assigned_to,  class_name: "User", optional: true
   belongs_to :delivered_by, class_name: "User", optional: true
   belongs_to :salesperson,  class_name: "User", optional: true
-  has_many   :order_items,    dependent: :destroy
-  has_many   :delivery_events, dependent: :destroy
+  has_many   :order_items,      dependent: :destroy
+  has_many   :delivery_events,  dependent: :destroy
+  has_many   :layaway_payments, dependent: :destroy
 
   enum :status, {
     pending:                0,
@@ -26,7 +27,8 @@ class Order < ApplicationRecord
 
   enum :payment_method, {
     stripe:   0,
-    external: 1
+    external: 1,
+    layaway:  2
   }, default: :stripe, prefix: :payment
 
   before_create :generate_order_number
@@ -67,6 +69,18 @@ class Order < ApplicationRecord
 
   def allowed_next_statuses
     STATUS_TRANSITIONS[status.to_sym] || []
+  end
+
+  def total_paid
+    layaway_payments.sum(:amount)
+  end
+
+  def balance_due
+    [grand_total - total_paid, 0].max
+  end
+
+  def layaway_paid_in_full?
+    total_paid >= grand_total
   end
 
   def shipping_address_line

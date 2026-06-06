@@ -111,6 +111,7 @@ module Orders
 
       @order = Order.new(
         source:           (@params[:source].presence || "admin_manual"),
+        payment_method:   (@params[:payment_method].presence || "external"),
         user_id:          @params[:user_id].presence,
         guest_name:       @params[:guest_name].presence,
         guest_email:      @params[:guest_email].presence,

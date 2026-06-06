@@ -66,12 +66,13 @@ module Admin
     end
 
     def show
-      @order_items     = @order.order_items.includes(:product)
-      @delivery_admins = User.where(role: :admin, admin_kind: :delivery).order(:first_name)
-      @delivery_events = @order.delivery_events.includes(:created_by).order(created_at: :asc)
-      @salespeople     = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
-                            .where.not(admin_kind: User.admin_kinds[:delivery])
-                            .order(:first_name, :last_name)
+      @order_items      = @order.order_items.includes(:product)
+      @delivery_admins  = User.where(role: :admin, admin_kind: :delivery).order(:first_name)
+      @delivery_events  = @order.delivery_events.includes(:created_by).order(created_at: :asc)
+      @layaway_payments = @order.layaway_payments.includes(:collected_by).order(paid_at: :asc)
+      @salespeople      = User.where(role: [ User.roles[:admin], User.roles[:super_admin] ])
+                             .where.not(admin_kind: User.admin_kinds[:delivery])
+                             .order(:first_name, :last_name)
     end
 
     def new
@@ -119,6 +120,7 @@ module Admin
         sa = params["[shipping_address]"]&.permit(:full_name, :street_address, :city, :state, :zip_code)&.to_h || {}
         @form_defaults = {
           source:                  params[:source],
+          payment_method:          params[:payment_method],
           customer_type:           params[:customer_type],
           user_id:                 params[:user_id],
           guest_first_name:        params[:guest_first_name],
@@ -269,7 +271,8 @@ module Admin
         "zip_code"       => params[:zip_code].to_s.strip
       }
 
-      missing = addr.select { |_, v| v.blank? }.keys
+      required_fields = %w[street_address city state zip_code]
+      missing = addr.slice(*required_fields).select { |_, v| v.blank? }.keys
       if missing.any?
         redirect_to admin_order_path(@order), alert: "#{missing.map(&:humanize).to_sentence} can't be blank."
         return
@@ -283,21 +286,34 @@ module Admin
     end
 
     def update_customer
-      attrs = {
-        guest_name:  params[:guest_name].presence,
-        guest_email: params[:guest_email].presence,
-        guest_phone: params[:guest_phone].presence
-      }
+      new_email = params[:guest_email].to_s.strip.presence
+      new_name  = params[:guest_name].presence
+      new_phone = params[:guest_phone].presence
 
-      if @order.user.nil? && attrs[:guest_email].blank?
-        redirect_to admin_order_path(@order), alert: "Email is required for guest orders."
-        return
-      end
+      if @order.user
+        google_user = @order.user.provider == "google_oauth2"
 
-      if @order.update(attrs)
-        redirect_to admin_order_path(@order), notice: "Customer info updated."
+        unless google_user
+          if new_email.present?
+            @order.user.update_columns(email: new_email, updated_at: Time.current)
+          elsif new_email.nil?
+            # blank submitted — email comes from user account, can't clear it
+          end
+        end
+
+        if @order.update(guest_name: new_name, guest_phone: new_phone)
+          msg = google_user ? "Customer info updated. Email is managed by Google and cannot be changed here." : "Customer info updated."
+          redirect_to admin_order_path(@order), notice: msg
+        else
+          redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence
+        end
       else
-        redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence
+        # Guest order — email column is owned by this order, nil is allowed
+        if @order.update(guest_name: new_name, guest_email: new_email, guest_phone: new_phone)
+          redirect_to admin_order_path(@order), notice: "Customer info updated."
+        else
+          redirect_to admin_order_path(@order), alert: @order.errors.full_messages.to_sentence
+        end
       end
     end
 
@@ -371,7 +387,7 @@ module Admin
       # )
       base = params.permit(:source, :customer_type, :user_id, :guest_first_name, :guest_last_name,
                            :guest_email, :guest_phone, :salesperson_id, :notes, :shipping_amount,
-                           :discount_amount, :delivery_zone_id, :pickup)
+                           :discount_amount, :delivery_zone_id, :pickup, :payment_method)
       first = base.delete(:guest_first_name).to_s.strip
       last  = base.delete(:guest_last_name).to_s.strip
       base  = base.merge(guest_name: [first, last].reject(&:blank?).join(" ").presence)

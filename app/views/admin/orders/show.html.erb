@@ -12,6 +12,11 @@
         <%= @order.source.humanize %>
       </span>
     <% end %>
+    <% if @order.payment_layaway? %>
+      <span class="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
+        Layaway
+      </span>
+    <% end %>
     <% if @order.pickup? %>
       <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,6 +321,96 @@
         </ol>
       </div>
     <% end %>
+
+    <%# Layaway Payments %>
+    <% if @order.payment_layaway? %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">Layaway Payments</h2>
+
+        <%# Summary cards %>
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <p class="text-xs text-gray-500 mb-1">Grand Total</p>
+            <p class="text-base font-bold text-gray-900"><%= number_to_currency(@order.grand_total) %></p>
+          </div>
+          <div class="bg-green-50 rounded-lg p-3 text-center">
+            <p class="text-xs text-gray-500 mb-1">Total Paid</p>
+            <p class="text-base font-bold text-green-700"><%= number_to_currency(@order.total_paid) %></p>
+          </div>
+          <div class="<%= @order.balance_due > 0 ? 'bg-amber-50' : 'bg-green-50' %> rounded-lg p-3 text-center">
+            <p class="text-xs text-gray-500 mb-1">Balance Due</p>
+            <p class="text-base font-bold <%= @order.balance_due > 0 ? 'text-amber-700' : 'text-green-700' %>">
+              <%= number_to_currency(@order.balance_due) %>
+            </p>
+          </div>
+        </div>
+
+        <%# Payment history %>
+        <% if @layaway_payments.any? %>
+          <table class="w-full text-sm mb-6">
+            <thead>
+              <tr class="border-b border-gray-100">
+                <th class="text-left text-xs font-medium text-gray-500 pb-2">Date</th>
+                <th class="text-left text-xs font-medium text-gray-500 pb-2">Note</th>
+                <th class="text-left text-xs font-medium text-gray-500 pb-2">Collected By</th>
+                <th class="text-right text-xs font-medium text-gray-500 pb-2">Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <% @layaway_payments.each do |payment| %>
+                <tr>
+                  <td class="py-2.5 text-gray-700 whitespace-nowrap"><%= payment.paid_at.strftime("%b %d, %Y") %></td>
+                  <td class="py-2.5 text-gray-500 px-2"><%= payment.note.presence || "—" %></td>
+                  <td class="py-2.5 text-gray-500 whitespace-nowrap"><%= payment.collected_by.full_name %></td>
+                  <td class="py-2.5 text-right font-semibold text-green-700 whitespace-nowrap"><%= number_to_currency(payment.amount) %></td>
+                  <td class="py-2.5 pl-2">
+                    <%= button_to admin_order_layaway_payment_path(@order, payment), method: :delete,
+                        data: { turbo_confirm: "Remove this payment of #{number_to_currency(payment.amount)}?" },
+                        form: { class: "contents" },
+                        class: "text-gray-300 hover:text-red-500 transition-colors cursor-pointer leading-none" do %>
+                      ✕
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p class="text-sm text-gray-400 mb-6">No payments recorded yet.</p>
+        <% end %>
+
+        <%# Add payment form %>
+        <div class="border-t border-gray-100 pt-4">
+          <p class="text-sm font-medium text-gray-700 mb-3">Record Payment</p>
+          <%= form_with url: admin_order_layaway_payments_path(@order), scope: :layaway_payment,
+                        method: :post, class: "space-y-3" do |f| %>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Amount</label>
+                <div class="flex items-center gap-1">
+                  <span class="text-gray-400 text-sm">$</span>
+                  <%= f.number_field :amount, min: 0.01, step: 0.01, placeholder: "0.00",
+                      class: "w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Date</label>
+                <%= f.date_field :paid_at, value: Date.today,
+                    class: "w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Note <span class="text-gray-400">(optional)</span></label>
+              <%= f.text_field :note, placeholder: "Cash, card, check, etc.",
+                  class: "w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+            </div>
+            <%= f.submit "Add Payment",
+                class: "w-full bg-amber-800 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-amber-900 transition-colors cursor-pointer" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   </div>
 
   <!-- Sidebar Info -->
@@ -350,10 +445,10 @@
       </dl>
     </div>
     
-    <% if @order.customer_name.present? || @order.customer_email.present? %>
+    <% has_customer = @order.customer_name.present? || @order.customer_email.present? || @order.customer_phone.present? %>
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6" id="customer-card-<%= @order.id %>">
-      <%# ── View mode ── %>
-      <div id="customer-view-<%= @order.id %>">
+      <%# ── View mode (only shown when customer info exists) ── %>
+      <div id="customer-view-<%= @order.id %>" class="<%= 'hidden' unless has_customer %>">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-gray-900">Customer</h3>
           <button type="button"
@@ -391,20 +486,28 @@
         </dl>
       </div>
 
-      <%# ── Edit mode ── %>
-      <div id="customer-edit-<%= @order.id %>" class="hidden">
+      <%# ── Edit / Add mode ── %>
+      <div id="customer-edit-<%= @order.id %>" class="<%= 'hidden' if has_customer %>">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-gray-900">Edit Customer</h3>
-          <button type="button"
-                  onclick="document.getElementById('customer-view-<%= @order.id %>').classList.remove('hidden'); document.getElementById('customer-edit-<%= @order.id %>').classList.add('hidden')"
-                  class="text-xs text-gray-400 hover:text-gray-600 font-medium">
-            Cancel
-          </button>
+          <h3 class="font-semibold text-gray-900"><%= has_customer ? "Edit Customer" : "Add Customer" %></h3>
+          <% if has_customer %>
+            <button type="button"
+                    onclick="document.getElementById('customer-view-<%= @order.id %>').classList.remove('hidden'); document.getElementById('customer-edit-<%= @order.id %>').classList.add('hidden')"
+                    class="text-xs text-gray-400 hover:text-gray-600 font-medium">
+              Cancel
+            </button>
+          <% end %>
         </div>
 
+        <% google_account = @order.user&.provider == "google_oauth2" %>
         <% if @order.user %>
           <p class="text-xs text-gray-400 bg-gray-50 rounded px-2 py-1.5 mb-3">
-            Registered user account. Filling these fields overrides contact info for this order only.
+            Registered user account. Name and phone changes update this order only.
+            <% if google_account %>
+              Email is managed by Google and cannot be changed here.
+            <% else %>
+              Email changes update the user's account directly.
+            <% end %>
           </p>
         <% end %>
 
@@ -416,10 +519,17 @@
                 placeholder: "Full name" %>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Email <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">
+              Email
+              <% if google_account %>
+                <span class="text-gray-400 font-normal">(Google — read only)</span>
+              <% end %>
+            </label>
             <%= email_field_tag :guest_email, @order.customer_email,
-                class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
-                placeholder: "email@example.com" %>
+                class: ["w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
+                        ("bg-gray-50 text-gray-400 cursor-not-allowed" if google_account)].compact.join(" "),
+                placeholder: "email@example.com",
+                disabled: google_account %>
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
@@ -434,7 +544,6 @@
         <% end %>
       </div>
     </div>
-    <% end %>
 
     <% unless @order.pickup? %>
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -474,7 +583,7 @@
         </div>
         <%= form_with url: update_address_admin_order_path(@order), method: :patch, class: "space-y-3" do |f| %>
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Full Name <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Full Name</label>
             <%= text_field_tag :full_name, @order.shipping_address["full_name"],
                 class: "w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500",
                 placeholder: "Recipient name" %>

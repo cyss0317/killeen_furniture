@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_30_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_06_221129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -155,6 +155,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_global_settings_on_key", unique: true
+  end
+
+  create_table "layaway_payments", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.text "note"
+    t.bigint "collected_by_id", null: false
+    t.datetime "paid_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collected_by_id"], name: "index_layaway_payments_on_collected_by_id"
+    t.index ["order_id"], name: "index_layaway_payments_on_order_id"
   end
 
   create_table "order_items", force: :cascade do |t|
@@ -454,6 +466,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_120000) do
   add_foreign_key "email_logs", "orders"
   add_foreign_key "employee_pay_entries", "users"
   add_foreign_key "employee_pay_entries", "users", column: "created_by_id"
+  add_foreign_key "layaway_payments", "orders"
+  add_foreign_key "layaway_payments", "users", column: "collected_by_id"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "delivery_zones"

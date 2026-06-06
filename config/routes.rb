@@ -120,6 +120,7 @@ Rails.application.routes.draw do
       collection do
         post :calculate_shipping
       end
+      resources :layaway_payments, only: [:create, :destroy]
     end
 
     resources :customers,    only: [ :index, :edit, :update, :destroy ] do
