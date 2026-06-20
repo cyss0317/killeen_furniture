@@ -77,7 +77,7 @@ Rails.application.routes.draw do
   # === Super Admin panel ===
   namespace :super_admin do
     resources :ashley_syncs, only: [:new, :create]
-    resources :employees,    only: [:index, :update]
+    resources :employees,    only: [:index, :new, :create, :update, :destroy]
   end
 
   # === Admin panel ===

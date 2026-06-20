@@ -57,7 +57,6 @@ module PurchaseOrders
             updates[:brand] = series       if series.present? && product.brand != series
             updates[:color] = color        if color.present? && product.color != color
             product.update!(updates) if updates.any?
-            product.increment!(:stock_quantity, qty)
             updated_products << product unless updated_products.include?(product)
           else
             ashley_category ||= Category.find_or_create_by!(name: "Ashley Furniture")
@@ -68,7 +67,6 @@ module PurchaseOrders
               brand:          series.presence,
               color:          color.presence,
               base_cost:      price,
-              stock_quantity: qty,
               status:         :draft,
               category:       ashley_category
             )

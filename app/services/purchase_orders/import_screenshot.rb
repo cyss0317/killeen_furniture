@@ -218,7 +218,6 @@ module PurchaseOrders
             updates[:brand] = brand_name if product.brand != brand_name
             updates[:color] = color      if color.present? && product.color != color
             product.update!(updates) if updates.any?
-            product.increment!(:stock_quantity, qty)
             updated_products << product unless updated_products.include?(product)
           else
             target_category_name = category_name.presence || supplier_category_name
@@ -230,7 +229,6 @@ module PurchaseOrders
               brand:          brand_name,
               color:          color.presence,
               base_cost:      price,
-              stock_quantity: qty,
               status:         :draft,
               category:       supplier_category
             )
