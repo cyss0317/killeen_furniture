@@ -1,4 +1,5 @@
 <% content_for :title, "Employee Pay" %>
+<div data-controller="employee-pay-edit">
 
 <%
   # Build a JSON map of employees for the Stimulus controller
@@ -74,12 +75,22 @@
       <%# Employee dropdown %>
       <div class="flex-1 min-w-48">
         <label class="block text-xs font-medium text-gray-500 mb-1">Employee</label>
-        <% employee_options = @employees.map { |u| [u.full_name + (u.pay_type ? " (#{u.pay_type})" : ""), u.id] } %>
+        <% employee_options = @employees.map do |u|
+             label = u.full_name
+             if u.pay_type == "hourly" && u.pay_rate
+               label += " (hourly – $#{format('%.2f', u.pay_rate)}/hr)"
+             elsif u.pay_type
+               label += " (#{u.pay_type})"
+             end
+             [label, u.id]
+           end %>
         <%= f.select :user_id,
               options_for_select([["Select employee", ""]] + employee_options),
               {},
               class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white",
             data: { "employee-pay-target": "employeeSelect", action: "change->employee-pay#refresh" } %>
+        <span class="hidden mt-1 text-xs text-amber-700 font-medium"
+              data-employee-pay-target="rateHint"></span>
       </div>
 
       <%# Date paid — always visible %>
@@ -140,6 +151,11 @@
               data: { "employee-pay-target": "amountInput" } %>
         </div>
       </div>
+      <div class="w-28">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Hours (optional)</label>
+        <%= f.number_field :hours_worked, step: 0.25, min: 0, placeholder: "0",
+            class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" %>
+      </div>
       <%= f.submit "Add Entry",
           class: "self-end bg-amber-800 text-white text-sm px-4 py-2 rounded-md hover:bg-amber-900 cursor-pointer transition-colors" %>
     </div>
@@ -158,6 +174,7 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Paid</th>
           <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hours</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Rate</th>
           <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Added By</th>
           <th class="px-6 py-3"></th>
@@ -174,23 +191,42 @@
             </td>
             <td class="px-6 py-4 text-sm text-gray-500"><%= entry.description.presence || "—" %></td>
             <td class="px-6 py-4 text-sm text-gray-600"><%= entry.paid_on.strftime("%b %d, %Y") %></td>
+            <% entry_rate = entry.hours_worked.to_f > 0 ? (entry.amount.to_f / entry.hours_worked.to_f).round(2) : nil %>
             <td class="px-6 py-4 text-sm text-right text-gray-500">
               <%= entry.hours_worked ? number_with_precision(entry.hours_worked, precision: 2).gsub(/\.?0+$/, '') + " hrs" : "—" %>
+            </td>
+            <td class="px-6 py-4 text-sm text-right text-gray-500">
+              <%= entry_rate ? number_to_currency(entry_rate) + "/hr" : "—" %>
             </td>
             <td class="px-6 py-4 text-sm font-semibold text-right text-gray-900"><%= number_to_currency(entry.amount) %></td>
             <td class="px-6 py-4 text-xs text-gray-400"><%= entry.created_by&.full_name || "—" %></td>
             <td class="px-6 py-4 text-right">
-              <%= button_to "Delete",
-                  admin_employee_pay_path(entry, period: @period, offset: @offset),
-                  method: :delete,
-                  form: { class: "contents" },
-                  class: "text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer",
-                  data: { turbo_confirm: "Delete this pay entry for #{entry.employee_name}?" } %>
+              <div class="flex items-center justify-end gap-3">
+                <button type="button"
+                        data-action="click->employee-pay-edit#open"
+                        data-employee-pay-edit-url-param="<%= admin_employee_pay_path(entry, period: @period, offset: @offset) %>"
+                        data-employee-pay-edit-employee-name-param="<%= entry.employee_name %>"
+                        data-employee-pay-edit-amount-param="<%= entry.amount %>"
+                        data-employee-pay-edit-hours-param="<%= entry.hours_worked %>"
+                        data-employee-pay-edit-rate-param="<%= entry_rate || entry.user&.pay_rate %>"
+                        data-employee-pay-edit-description-param="<%= entry.description %>"
+                        data-employee-pay-edit-paid-on-param="<%= entry.paid_on %>"
+                        class="text-xs text-amber-700 hover:text-amber-900 font-medium cursor-pointer">
+                  Edit
+                </button>
+                <%= button_to "Delete",
+                    admin_employee_pay_path(entry, period: @period, offset: @offset),
+                    method: :delete,
+                    form: { class: "contents" },
+                    class: "text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer",
+                    data: { turbo_confirm: "Delete this pay entry for #{entry.employee_name}?" } %>
+              </div>
             </td>
           </tr>
         <% end %>
         <tr class="bg-amber-50">
           <td colspan="4" class="px-6 py-3 text-sm font-semibold text-gray-700">Period Total</td>
+          <td class="px-6 py-3"></td>
           <td class="px-6 py-3 text-sm font-bold text-right text-gray-900"><%= number_to_currency(@period_total) %></td>
           <td colspan="2"></td>
         </tr>
@@ -204,6 +240,92 @@
     </div>
   <% end %>
 </div>
+
+<%# ── Edit pay entry modal ── %>
+<dialog data-employee-pay-edit-target="dialog"
+        data-action="click->employee-pay-edit#backdropClick"
+        class="rounded-xl shadow-2xl border border-gray-200 p-0 backdrop:bg-black/40 w-full max-w-md m-auto">
+  <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+    <h3 class="text-base font-semibold text-gray-900">Edit Pay Entry</h3>
+    <button type="button" data-action="click->employee-pay-edit#close"
+            class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <form data-employee-pay-edit-target="form" method="post" class="px-6 py-5 space-y-4">
+    <input type="hidden" name="_method" value="patch">
+    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+    <input type="hidden" name="period" value="<%= @period %>">
+    <input type="hidden" name="offset" value="<%= @offset %>">
+
+    <div>
+      <p class="text-xs font-medium text-gray-500 mb-0.5">Employee</p>
+      <p class="text-sm font-semibold text-gray-900" data-employee-pay-edit-target="employeeName"></p>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Hours</label>
+        <input type="number" name="employee_pay_entry[hours_worked]"
+               step="0.25" min="0" placeholder="—"
+               data-employee-pay-edit-target="hours"
+               data-action="input->employee-pay-edit#updateTotal"
+               class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Rate / hr</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm pointer-events-none">$</span>
+          <input type="number" name="rate"
+                 step="0.01" min="0" placeholder="0.00"
+                 data-employee-pay-edit-target="rate"
+                 data-action="input->employee-pay-edit#updateTotal"
+                 class="w-full border border-gray-300 rounded-md pl-6 pr-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Amount</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm pointer-events-none">$</span>
+          <input type="number" name="employee_pay_entry[amount]"
+                 step="0.01" min="0.01" required
+                 data-employee-pay-edit-target="amount"
+                 class="w-full border border-gray-300 rounded-md pl-6 pr-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Date Paid</label>
+      <input type="date" name="employee_pay_entry[paid_on]" required
+             data-employee-pay-edit-target="paidOn"
+             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
+      <input type="text" name="employee_pay_entry[description]" placeholder="e.g. Weekly wages, delivery bonus…"
+             data-employee-pay-edit-target="description"
+             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+    </div>
+
+    <div class="flex justify-end gap-3 pt-1 border-t border-gray-100">
+      <button type="button" data-action="click->employee-pay-edit#close"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
+        Cancel
+      </button>
+      <button type="submit"
+              class="px-4 py-2 text-sm font-medium text-white bg-amber-700 rounded-md hover:bg-amber-800 transition-colors cursor-pointer">
+        Save Changes
+      </button>
+    </div>
+  </form>
+</dialog>
+
+</div><%# /employee-pay-edit controller %>
 
 <% content_for :help_content do %>
   <div>

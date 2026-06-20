@@ -25,6 +25,7 @@ export default class extends Controller {
     "amountOutput",
     "amountInput",
     "amountPreview",
+    "rateHint",
   ]
   static values = { employees: Object }
 
@@ -48,21 +49,25 @@ export default class extends Controller {
     if (emp.pay_type === "hourly") {
       this.salarySectionTarget.classList.add("hidden")
       this.hourlySectionTarget.classList.remove("hidden")
-      // Pre-fill rate from the employee's stored pay_rate
       if (this.hasRateInputTarget && emp.pay_rate) {
         this.rateInputTarget.value = this.rateInputTarget.value || emp.pay_rate
       }
+      if (this.hasRateHintTarget && emp.pay_rate) {
+        this.rateHintTarget.textContent = `Configured rate: $${emp.pay_rate.toFixed(2)}/hr`
+        this.rateHintTarget.classList.remove("hidden")
+      }
       this.calculateHourly()
     } else {
-      // monthly / salary
       this.hourlySectionTarget.classList.add("hidden")
       this.salarySectionTarget.classList.remove("hidden")
+      if (this.hasRateHintTarget) this.rateHintTarget.classList.add("hidden")
     }
   }
 
   hideAll() {
     this.salarySectionTarget.classList.add("hidden")
     this.hourlySectionTarget.classList.add("hidden")
+    if (this.hasRateHintTarget) this.rateHintTarget.classList.add("hidden")
   }
 
   calculateHourly() {

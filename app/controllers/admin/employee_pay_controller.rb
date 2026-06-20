@@ -49,6 +49,10 @@ module Admin
         rate   = params[:rate].to_f
         amount = (hours * rate).round(2)
         entry_params = entry_params.merge(amount: amount, hours_worked: hours)
+
+        if user && user.pay_rate.to_f != rate
+          user.update(pay_rate: rate)
+        end
       end
 
       # Set employee_name from the selected user (fallback to whatever was supplied)
@@ -65,6 +69,30 @@ module Admin
         @period = params[:period].presence_in(%w[week month year]) || "month"
         @offset = params[:offset].to_i
         redirect_to admin_employee_pay_index_path(period: @period, offset: @offset),
+                    alert: @entry.errors.full_messages.to_sentence
+      end
+    end
+
+    def update
+      @entry = EmployeePayEntry.find(params[:id])
+
+      entry_params = pay_params
+      entry_params = entry_params.merge(hours_worked: entry_params[:hours_worked].presence)
+
+      if params[:rate].present? && entry_params[:hours_worked].to_f > 0
+        rate   = params[:rate].to_f
+        hours  = entry_params[:hours_worked].to_f
+        entry_params = entry_params.merge(amount: (hours * rate).round(2))
+        if @entry.user && @entry.user.pay_rate.to_f != rate
+          @entry.user.update(pay_rate: rate)
+        end
+      end
+
+      if @entry.update(entry_params)
+        redirect_to admin_employee_pay_index_path(period: params[:period], offset: params[:offset]),
+                    notice: "Pay entry updated."
+      else
+        redirect_to admin_employee_pay_index_path(period: params[:period], offset: params[:offset]),
                     alert: @entry.errors.full_messages.to_sentence
       end
     end
