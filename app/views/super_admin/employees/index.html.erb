@@ -30,11 +30,11 @@
     <tbody class="divide-y divide-gray-100">
       <% @employees.each do |employee| %>
         <% form_id = "employee_form_#{employee.id}" %>
-        <tr class="hover:bg-gray-50 align-middle">
+        <tr class="hover:bg-gray-50 align-middle" data-controller="save-button">
           <td class="hidden">
             <%= form_with model: employee, url: super_admin_employee_path(employee),
                  method: :patch, id: form_id,
-                 data: { controller: "save-button", action: "turbo:submit-start->save-button#onStart turbo:submit-end->save-button#onEnd" } do %><% end %>
+                 data: { action: "turbo:submit-start->save-button#onStart turbo:submit-end->save-button#onEnd" } do %><% end %>
           </td>
 
           <%# First name %>
@@ -52,7 +52,7 @@
           <%# Last name %>
           <td class="px-4 py-3">
             <%= text_field_tag "user[last_name]", employee.last_name,
-                  form: form_id, required: true, placeholder: "Last",
+                  form: form_id, placeholder: "Last",
                   class: "w-32 text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
           </td>
 
@@ -67,7 +67,7 @@
           <%# Phone %>
           <td class="px-4 py-3">
             <%= telephone_field_tag "user[phone]", employee.phone,
-                  form: form_id, placeholder: "(254) 555-0100",
+                  form: form_id,
                   class: "w-36 text-sm border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500" %>
           </td>
 

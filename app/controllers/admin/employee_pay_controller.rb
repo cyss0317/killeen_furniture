@@ -44,15 +44,15 @@ module Admin
 
       # For hourly employees, compute amount from hours × rate
       entry_params = pay_params
-      if params[:pay_type_hint] == "hourly" && params[:hours_worked].present? && params[:rate].present?
-        hours  = params[:hours_worked].to_f
-        rate   = params[:rate].to_f
-        amount = (hours * rate).round(2)
-        entry_params = entry_params.merge(amount: amount, hours_worked: hours)
+      rate  = params[:rate].to_f
+      hours = entry_params[:hours_worked].to_f
 
-        if user && user.pay_rate.to_f != rate
-          user.update(pay_rate: rate)
-        end
+      if rate > 0 && hours > 0
+        entry_params = entry_params.merge(amount: (rate * hours).round(2))
+      end
+
+      if user && rate > 0 && user.pay_rate.to_f != rate
+        user.update(pay_rate: rate)
       end
 
       # Set employee_name from the selected user (fallback to whatever was supplied)

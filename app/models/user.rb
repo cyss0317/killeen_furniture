@@ -77,7 +77,7 @@ class User < ApplicationRecord
   has_one  :cart,             dependent: :destroy
   has_many :stock_adjustments, foreign_key: :admin_user_id, dependent: :nullify
 
-  validates :first_name, :last_name, presence: true
+  validates :first_name, presence: true
   validates :phone, format: { with: /\A[\d\s\-\(\)\+]+\z/, message: "must be a valid phone number" }, allow_blank: true
 
   def full_name

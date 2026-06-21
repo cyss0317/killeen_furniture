@@ -9,22 +9,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["btn"]
 
-  connect() {
-    // Listen for Turbo's submit lifecycle on this form
-    this.element.addEventListener("turbo:submit-start",  this.onStart.bind(this))
-    this.element.addEventListener("turbo:submit-end",    this.onEnd.bind(this))
-  }
-
-  disconnect() {
-    this.element.removeEventListener("turbo:submit-start",  this.onStart)
-    this.element.removeEventListener("turbo:submit-end",    this.onEnd)
-  }
-
-  // Called when user clicks submit (before Turbo sends the request)
-  submit(event) {
-    this.showLoading()
-  }
-
   onStart() {
     this.showLoading()
   }
@@ -32,9 +16,10 @@ export default class extends Controller {
   onEnd(event) {
     if (event.detail.success) {
       this.showCompleted()
-      setTimeout(() => this.resetBtn(), 1500)
+      setTimeout(() => this.resetBtn(), 4000)
     } else {
-      this.resetBtn()
+      this.showError()
+      setTimeout(() => this.resetBtn(), 2000)
     }
   }
 
@@ -65,11 +50,26 @@ export default class extends Controller {
     btn.classList.add("bg-green-600")
   }
 
+  showError() {
+    if (!this.hasBtnTarget) return
+    const btn = this.btnTarget
+    btn.disabled = true
+    btn.innerHTML = `
+      <span class="flex items-center gap-1">
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        Failed
+      </span>`
+    btn.classList.remove("opacity-75")
+    btn.classList.add("bg-red-600")
+  }
+
   resetBtn() {
     if (!this.hasBtnTarget) return
     const btn = this.btnTarget
     btn.disabled = false
     btn.textContent = "Save"
-    btn.classList.remove("bg-green-600", "opacity-75")
+    btn.classList.remove("bg-green-600", "bg-red-600", "opacity-75")
   }
 }
