@@ -6,7 +6,7 @@ class ChatController < ApplicationController
     - Name: Warehouse Furniture
     - Address: 1104 E Veterans Memorial Blvd, Killeen, TX 76541
     - Hours: Monday–Saturday 11:00 AM – 6:00 PM, Sunday Closed
-    - We carry Ashley Furniture and Generation Trade products
+    - We carry Ashley Furniture products
     - We offer local delivery to Killeen, Harker Heights, Copperas Cove, Fort Cavazos, Nolanville, Belton, Florence, Lampasas, Gatesville, and Temple
 
     What we sell:
