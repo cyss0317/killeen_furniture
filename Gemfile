@@ -58,7 +58,7 @@ gem "pagy", "~> 43.2"
 gem "friendly_id", "~> 5.5"
 
 # QR code generation
-gem "rqrcode", "~> 2.2"
+gem "rqrcode", "~> 3.2"
 
 group :development, :test do
   # Testing
